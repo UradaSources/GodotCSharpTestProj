@@ -1,21 +1,14 @@
-[gd_scene load_steps=4 format=3 uid="uid://b5s1hari5f4ew"]
+[gd_scene load_steps=3 format=3 uid="uid://b5s1hari5f4ew"]
 
-[ext_resource type="Script" path="res://scripts/World.cs" id="1_mksel"]
+[ext_resource type="Script" path="res://scripts/model/EcsModelMain.cs" id="1_ebunn"]
 [ext_resource type="Texture2D" uid="uid://bp2c8sp6qeq05" path="res://art/soft-thick-dark.png" id="2_0bc6j"]
-[ext_resource type="Script" path="res://scripts/Character.cs" id="3_vj2cm"]
 
 [node name="Root" type="Node"]
 
-[node name="World" type="Node2D" parent="."]
+[node name="Main" type="Node2D" parent="."]
 texture_filter = 1
-script = ExtResource("1_mksel")
+script = ExtResource("1_ebunn")
 m_width = 10
 m_height = 10
 m_tex = ExtResource("2_0bc6j")
 m_tileSize = 20.0
-
-[node name="Player" type="Node2D" parent="." node_paths=PackedStringArray("m_world")]
-texture_filter = 1
-script = ExtResource("3_vj2cm")
-m_world = NodePath("../World")
-m_moveSpeed = 40.0

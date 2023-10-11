@@ -4,6 +4,9 @@
     <EnableDynamicLoading>true</EnableDynamicLoading>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Common\Common.csproj" />
+    <PackageReference Include="Arch" Version="1.2.6" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="scripts\basic\" />
   </ItemGroup>
 </Project>

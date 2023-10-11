@@ -1,16 +1,12 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using Godot;
 
 namespace urd
 {
 	public class Pathfind
 	{
-		private static float MDist(Tile a, Tile b)
-		{
-			return mathf.abs(b.x - a.x) + mathf.abs(b.y - a.y);
-		}
-
 		private class Node
 		{
 			public Node parent = null;
@@ -32,6 +28,14 @@ namespace urd
 				h = 0;
 			}
 		}
+
+		private static float ManhattanDistance(Tile a, Tile b)
+		{
+			return Mathf.Abs(b.x - a.x) + Mathf.Abs(b.y - a.y);
+		}
+
+		private readonly static Vector2I[] NearDirect = new Vector2I[] { 
+			Vector2I.Up, Vector2I.Down, Vector2I.Left, Vector2I.Right };
 
 		private WorldGrid m_grid;
 
@@ -58,6 +62,24 @@ namespace urd
 			}
 			result = null;
 			return false;
+		}
+
+		private IEnumerable<Node> getNearNode(Node node)
+		{
+			foreach (var dir in NearDirect)
+			{
+				int x = node.tile.x + dir.X;
+				int y = node.tile.y + dir.Y;
+
+				// 获取对应方向上的临近节点, 该节点需要存在且可用
+				// 且不在close列表中
+				// 若满足全部条件则将其暂存到列表中
+				if (this.getOrBuildNode(x, y, out var nearNode)
+					&& !m_close.ContainsKey(nearNode.id))
+				{
+					yield return nearNode;
+				}
+			}
 		}
 
 		public IEnumerable<Tile> getPath(Tile start, Tile target)
@@ -90,28 +112,11 @@ namespace urd
 
 				if (fMinNode.tile != target)
 				{
-					var curTile = fMinNode.tile;
-
-					List<Node> vaildNrarNodes = new List<Node>(4);
-					foreach (var dir in new vec2i[] { vec2i.up, vec2i.down, vec2i.left, vec2i.right })
+					// 处理全部有效的临近节点
+					foreach (Node nearNode in this.getNearNode(fMinNode))
 					{
-						int x = curTile.x + dir.x;
-						int y = curTile.y + dir.y;
+						if (!nearNode.tile.pass) continue;
 
-						// 获取对应方向上的临近节点, 该节点需要存在且可用
-						// 且不在close列表中
-						// 若满足全部条件则将其暂存到列表中
-						if (this.getOrBuildNode(x, y, out var nearNode)
-							&& nearNode.tile.pass
-							&& !m_close.ContainsKey(nearNode.id))
-						{
-							vaildNrarNodes.Add(nearNode);
-						}
-					}
-
-					// 处理全部的临近节点
-					foreach (Node nearNode in vaildNrarNodes)
-					{
 						// 检查当前临近节点是否在开放列表中
 						if (m_open.ContainsKey(nearNode.id))
 						{
@@ -131,7 +136,7 @@ namespace urd
 
 							// 计算当前节点到目标的距离h值,
 							// 在整个算法过程中, h总是不变
-							nearNode.h = MDist(target, nearNode.tile);
+							nearNode.h = ManhattanDistance(target, nearNode.tile);
 
 							m_open.Add(nearNode.id, nearNode);
 						}
@@ -157,7 +162,7 @@ namespace urd
 			Debug.WriteLine("pathfind faild.");
 
 			Debug.WriteLine("open:");
-			foreach(var node in m_open.Values)
+			foreach (var node in m_open.Values)
 			{
 				Debug.WriteLine($"{node.id}:({node.tile.x},{node.tile.y})-> {node.parent?.id}");
 			}
@@ -172,7 +177,7 @@ namespace urd
 		}
 
 		public Pathfind(WorldGrid grid)
-		{ 
+		{
 			m_grid = grid;
 		}
 	}

@@ -27,6 +27,8 @@ namespace urd
 		public int width() { return m_width; }
 		public int height() { return m_height; }
 
+		public int tileCount() { return m_width * m_height; }
+
 		public bool vaildCoord(int x, int y)
 		{
 			return x >= 0 && x < m_width && y >= 0 && y < m_height;
