@@ -4,9 +4,6 @@
     <EnableDynamicLoading>true</EnableDynamicLoading>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Arch" Version="1.2.6" />
-  </ItemGroup>
-  <ItemGroup>
     <Folder Include="scripts\basic\" />
   </ItemGroup>
 </Project>
