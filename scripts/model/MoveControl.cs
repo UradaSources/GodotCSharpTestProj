@@ -1,10 +1,12 @@
-﻿using Godot;
+﻿using System.Collections;
+using System.Collections.Generic;
+using Godot;
 
 namespace urd
 {
-	public class CharacterMoveControlInput: IComponent
+	public class MoveControl : IComponent
 	{
-		[Export] private Character m_character;
+		private Character m_character;
 
 		private vec2i m_cacheMoveDirect;
 
@@ -26,6 +28,11 @@ namespace urd
 			{
 				m_character.moveDirect = m_cacheMoveDirect;
 			}
+		}
+
+		public MoveControl(Character character)
+		{
+			m_character = character;
 		}
 	}
 }

@@ -58,7 +58,7 @@ namespace urd
 			var rng = new RandomNumberGenerator();
 
 			m_grid = new WorldGrid(m_width, m_height);
-			for (int i = 0; i < m_grid.width() * m_grid.height(); i++)
+			for (int i = 0; i < m_grid.width * m_grid.height; i++)
 			{
 				m_grid.rawGetTile(i).pass = rng.Randf() > 0.1f;
 			}
@@ -71,7 +71,7 @@ namespace urd
 
 		public override void _Draw()
 		{
-			for (int i = 0; i < m_grid.width() * m_grid.height(); i++)
+			for (int i = 0; i < m_grid.width * m_grid.height; i++)
 			{
 				var tile = m_grid.rawGetTile(i);
 				this.DrawSprite(tile.x, tile.y, tile.pass ? '.' : '#', this);

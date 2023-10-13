@@ -34,6 +34,7 @@ namespace urd
 			return Mathf.Abs(b.x - a.x) + Mathf.Abs(b.y - a.y);
 		}
 
+		
 		private readonly static Vector2I[] NearDirect = new Vector2I[] { 
 			Vector2I.Up, Vector2I.Down, Vector2I.Left, Vector2I.Right };
 
@@ -64,6 +65,8 @@ namespace urd
 			return false;
 		}
 
+		
+		
 		private IEnumerable<Node> getNearNode(Node node)
 		{
 			foreach (var dir in NearDirect)
@@ -87,7 +90,9 @@ namespace urd
 			m_open.Clear();
 			m_close.Clear();
 
+			// 检查起点和终点是否可到达
 			Debug.Assert(this.getOrBuildNode(start.x, start.y, out Node firstNode));
+			Debug.Assert(this.getOrBuildNode(target.x, target.y, out _));
 
 			m_open.Add(firstNode.id, firstNode);
 
@@ -144,38 +149,46 @@ namespace urd
 				}
 				else
 				{
-					Debug.WriteLine("pathfind done.");
+					// Debug.WriteLine("pathfind done.");
+
+					List<Tile> buf = new List<Tile>();
 
 					Node link = fMinNode;
 					while (link.parent != null)
 					{
-						Debug.WriteLine($"{link.id}:({link.tile.x},{link.tile.y})-> {link.parent?.id}");
+						// Debug.WriteLine($"{link.id}:({link.tile.x},{link.tile.y})-> {link.parent?.id}");
 
-						yield return link.tile;
+						// yield return link.tile;
+						buf.Add(link.tile);
 						link = link.parent;
 					}
+
+					buf.Reverse();
+
+					foreach(var kk in buf)
+						yield return kk;
 
 					yield break;
 				}
 			}
 
-			Debug.WriteLine("pathfind faild.");
+			//Debug.WriteLine("pathfind faild.");
 
-			Debug.WriteLine("open:");
-			foreach (var node in m_open.Values)
-			{
-				Debug.WriteLine($"{node.id}:({node.tile.x},{node.tile.y})-> {node.parent?.id}");
-			}
+			//Debug.WriteLine("open:");
+			//foreach (var node in m_open.Values)
+			//{
+			//	Debug.WriteLine($"{node.id}:({node.tile.x},{node.tile.y})-> {node.parent?.id}");
+			//}
 
-			Debug.WriteLine("close:");
-			foreach (var node in m_close.Values)
-			{
-				Debug.WriteLine($"{node.id}:({node.tile.x},{node.tile.y})-> {node.parent?.id}");
-			}
+			//Debug.WriteLine("close:");
+			//foreach (var node in m_close.Values)
+			//{
+			//	Debug.WriteLine($"{node.id}:({node.tile.x},{node.tile.y})-> {node.parent?.id}");
+			//}
 
 			yield break;
 		}
-
+		
 		public Pathfind(WorldGrid grid)
 		{
 			m_grid = grid;

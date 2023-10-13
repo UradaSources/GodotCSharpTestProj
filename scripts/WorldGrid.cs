@@ -24,10 +24,10 @@ namespace urd
 
 		private Tile[] m_tileArray;
 
-		public int width() { return m_width; }
-		public int height() { return m_height; }
+		public int width => m_width;
+		public int height => m_height;
 
-		public int tileCount() { return m_width * m_height; }
+		public int tileCount => m_width * m_height;
 
 		public bool vaildCoord(int x, int y)
 		{

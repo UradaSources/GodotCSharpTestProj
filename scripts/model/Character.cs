@@ -7,33 +7,34 @@ namespace urd
 {
 	public class Character: IComponent
 	{
-		[Export] private WorldGrid m_world;
-
-		[Export] private vec2i m_initCoord;
-		[Export] private float m_moveSpeed;
+		private WorldGrid m_world;
 
 		private vec2i m_coord;
-
 		private vec2 m_position;
+
+		private float m_moveSpeed;
 		private vec2i m_moveDirect;
 
 		private bool m_moveProcessing;
 
 		public WorldGrid world => m_world;
+		
 		public vec2i coord => m_coord;
+		public vec2 position => m_position;
 
+		public float moveSpeed
+		{ 
+			set => m_moveSpeed = value;
+			get => m_moveSpeed;
+		}
 		public vec2i moveDirect
 		{
 			set => m_moveDirect = value;
 			get => m_moveDirect;
 		}
+
 		public bool moveProcessing => m_moveProcessing;
 
-		public void _init()
-		{
-			Debug.Assert(m_world.vaildCoord(m_initCoord.x, m_initCoord.y));
-			m_coord = m_initCoord;
-		}
 		public void _update(float delta)
 		{
 			// 若当前正在移动中, 则更新位置
@@ -66,6 +67,19 @@ namespace urd
 					}
 				}
 			}
+		}
+
+		public Character(WorldGrid world, vec2i coord, float moveSpeed, vec2i moveDirect)
+		{
+			m_world = world;
+
+			Debug.Assert(m_world.vaildCoord(coord.x, coord.y));
+			m_coord = coord;
+			m_position = new vec2(m_coord.x, m_coord.y);
+
+			Debug.Assert(moveSpeed >= 0);
+			m_moveSpeed = moveSpeed;
+			m_moveDirect = moveDirect;
 		}
 	}
 }
