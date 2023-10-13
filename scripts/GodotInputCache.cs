@@ -1,4 +1,4 @@
-﻿#if false && GODOT4_1_OR_GREATER
+#if false && GODOT4_1_OR_GREATER
 using System.Collections;
 using System.Collections.Generic;
 using Godot;

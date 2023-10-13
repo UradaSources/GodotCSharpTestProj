@@ -1,14 +1,6 @@
-[gd_scene load_steps=3 format=3 uid="uid://b5s1hari5f4ew"]
+[gd_scene load_steps=2 format=3 uid="uid://7posjxtu4xrq"]
 
-[ext_resource type="Script" path="res://scripts/model/EcsModelMain.cs" id="1_ebunn"]
-[ext_resource type="Texture2D" uid="uid://bp2c8sp6qeq05" path="res://art/soft-thick-dark.png" id="2_0bc6j"]
+[ext_resource type="Script" path="res://scripts/DiTest.cs" id="1_6bkqb"]
 
 [node name="Root" type="Node"]
-
-[node name="Main" type="Node2D" parent="."]
-texture_filter = 1
-script = ExtResource("1_ebunn")
-m_width = 10
-m_height = 10
-m_tex = ExtResource("2_0bc6j")
-m_tileSize = 20.0
+script = ExtResource("1_6bkqb")
