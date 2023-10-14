@@ -1,0 +1,16 @@
+{
+  "profiles": {
+    "Main": {
+      "commandName": "Project",
+      "workingDirectory": "C:\\Project\\Godot\\GodotCSharpTestProj",
+      "nativeDebugging": true
+    },
+    "Godot 附加调试": {
+      "commandName": "Executable",
+      "executablePath": "C:\\bin\\godot\\Godot_v4.1.2-stable_mono_win64\\Godot_v4.1.2-stable_mono_win64_console.exe",
+      "commandLineArgs": "--path . --verbose",
+      "workingDirectory": ".",
+      "nativeDebugging": false
+    }
+  }
+}

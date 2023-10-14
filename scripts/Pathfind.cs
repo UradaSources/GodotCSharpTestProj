@@ -64,8 +64,6 @@ namespace urd
 			result = null;
 			return false;
 		}
-
-		
 		
 		private IEnumerable<Node> getNearNode(Node node)
 		{
@@ -154,14 +152,14 @@ namespace urd
 					List<Tile> buf = new List<Tile>();
 
 					Node link = fMinNode;
-					while (link.parent != null)
+					do
 					{
 						// Debug.WriteLine($"{link.id}:({link.tile.x},{link.tile.y})-> {link.parent?.id}");
 
-						// yield return link.tile;
 						buf.Add(link.tile);
 						link = link.parent;
 					}
+					while (link.parent != null);
 
 					buf.Reverse();
 

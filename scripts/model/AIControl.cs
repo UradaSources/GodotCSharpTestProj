@@ -1,54 +1,83 @@
 ﻿using System.Collections.Generic;
 using System.Collections;
+using Godot;
 
 namespace urd
 {
-	public class AIControl : IComponent
+	public class AIControl : BasicMoveControl
 	{
-		private Character m_character;
 		private Pathfind m_pathfind;
 
 		private vec2i? m_target;
-		private IEnumerator<Tile> m_process;
+		private IEnumerator<Tile> m_pathfindProcess = null;
+
+		public vec2i? target => m_target;
 
 		public void setTarget(vec2i target)
 		{
 			if (m_target != target)
 			{
-				var curTile = m_character.world.getTile(m_character.coord.x, m_character.coord.y);
-				var targetTile = m_character.world.getTile(target.x, target.y);
-				
-				m_target = target;
+				GD.Print($"set target {target}");
 
-				m_process?.Dispose();
-				m_process = m_pathfind.getPath(curTile, targetTile).GetEnumerator();
+				var entity = this.motion.entity;
+				var world = entity.world;
+
+				var curTile = world.getTile(entity.coord.x, entity.coord.y);
+				var targetTile = world.getTile(target.x, target.y);
+
+				// 清除旧目标
+				this.clearTaget();
+
+				m_target = target;
+				m_pathfindProcess = m_pathfind.getPath(curTile, targetTile).GetEnumerator();
 			}
 		}
 		public void clearTaget()
 		{
 			m_target = null;
-			m_process?.Dispose();
+
+			m_pathfindProcess?.Dispose();
+			m_pathfindProcess = null;
 		}
 
-		public void _update(float dt)
+		public override void _update(float dt)
 		{
-			if (m_character.moveProcessing) return;
+			if (this.motion.moveProcessing) return;
 
-			m_process.MoveNext();
-			var t = m_process.Current;
+			if (m_pathfindProcess != null && m_pathfindProcess.MoveNext())
+			{
+				var t = m_pathfindProcess.Current;
 
-			var dir = new vec2i(t.x, t.y) - m_character.coord;
-			m_character.moveDirect = dir;
+				var dir = new vec2i(t.x, t.y) - this.motion.entity.coord;
+				this.motion.moveDirect = dir;
+			}
+			else 
+			{
+				var rnd = new RandomNumberGenerator();
+
+				var world = this.motion.entity.world;
+
+				Tile tile;
+				do
+				{
+					int i = rnd.RandiRange(0, world.tileCount - 1);
+					tile = world.rawGetTile(i);
+				}
+				while (!tile.pass);
+
+				this.setTarget(new vec2i(tile.x, tile.y));
+			}
 		}
 
-		public AIControl(Character character, Pathfind pathfind)
+		public AIControl(EntityMotion motion)
+			:base(motion)
 		{
-			m_character = character;
-			m_pathfind = pathfind;
+			var world = motion.entity.world;
+			m_pathfind = new Pathfind(world);
 		}
 		~AIControl()
 		{
-			m_process?.Dispose();
+			m_pathfindProcess?.Dispose();
 		}
 	}
 }

@@ -4,13 +4,12 @@ using Godot;
 
 namespace urd
 {
-	public class MoveControl : IComponent
+	public class PlayerControlInput : BasicMoveControl
 	{
-		private Character m_character;
-
 		private vec2i m_cacheMoveDirect;
 
-		public void _update(float dt)
+		public override void _init() { }
+		public override void _update(float dt)
 		{
 			// 缓存移动方向的输入
 			if (Input.IsActionPressed("ui_up"))
@@ -23,16 +22,18 @@ namespace urd
 				m_cacheMoveDirect = vec2i.right;
 
 			// 尝试切换移动方向到目标移动方向
-			vec2i peekTargetCoord = m_character.coord + m_cacheMoveDirect;
-			if (m_character.world.tryGetTile(peekTargetCoord.x, peekTargetCoord.y, out var tile) && tile.pass)
+			vec2i targetCoord = this.motion.entity.coord + m_cacheMoveDirect;
+
+			var world = this.motion.entity.world;
+			if (world.tryGetTile(targetCoord.x, targetCoord.y, out var tile) && tile.pass)
 			{
-				m_character.moveDirect = m_cacheMoveDirect;
+				this.motion.moveDirect = m_cacheMoveDirect;
 			}
 		}
 
-		public MoveControl(Character character)
+		public PlayerControlInput(EntityMotion motion) :
+			base(motion)
 		{
-			m_character = character;
 		}
 	}
 }
