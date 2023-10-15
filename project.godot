@@ -16,6 +16,10 @@ config/features=PackedStringArray("4.1", "C#", "GL Compatibility")
 boot_splash/show_image=false
 config/icon="res://icon.svg"
 
+[autoload]
+
+InputCache_o="*res://scripts/InputCache.cs"
+
 [dotnet]
 
 project/assembly_name="Main"

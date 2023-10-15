@@ -1,26 +1,40 @@
-﻿//using Godot;
+﻿using Godot;
+using urd;
 
-//public partial class InputTest : Node2D
-//{
-//	[Export] private GodotInputCache m_inp;
+public partial class ServiceManager : Node 
+{
+	private IInputService _inputService;
+}
 
-//	public override void _Process(double delta)
-//	{
-//		if (m_inp.getKeyDown(urd.KeyCode.A))
-//			GD.Print("A down");
+public partial class InputTest : Node2D
+{
+	private IInputService m_inp;
 
-//		if (m_inp.getKeyUp(urd.KeyCode.A))
-//			GD.Print("A up");
+	public override void _Ready()
+	{
+		base._Ready();
 
-//		if (m_inp.getKey(urd.KeyCode.A))
-//			GD.Print("A ing");
-//	}
+		m_inp = this.GetNodeOrNull<InputCache>("/root/InputService");
+		if (m_inp == null)
+		{
+			var node = new InputCache();
+			node.Name = "InputService";
 
-//	public override void _Input(InputEvent @event)
-//	{
-//		if (@event is InputEventKey keyInp)
-//		{
-//			//GD.Print($"{keyInp.Keycode}, down: {keyInp.IsPressed()}, up: {keyInp.IsReleased()}, echo: {keyInp.IsEcho()}");
-//		}
-//	}
-//}
+			this.AddChild(node);
+
+			m_inp = node;
+		}
+	}
+
+	public override void _Process(double delta)
+	{
+		if (m_inp.getKeyDown(KeyCode.A))
+			GD.Print("A down");
+
+		if (m_inp.getKeyUp(KeyCode.A))
+			GD.Print("A up");
+
+		if (m_inp.getKey(KeyCode.A))
+			GD.Print("A ing");
+	}
+}

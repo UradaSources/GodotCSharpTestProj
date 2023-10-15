@@ -4,7 +4,7 @@ using Godot;
 
 namespace urd
 {
-	public class AIControl : BasicMoveControl
+	public class PathfindTestControl : BasicMoveControl
 	{
 		private Pathfind m_pathfind;
 
@@ -68,7 +68,7 @@ namespace urd
 			}
 		}
 
-		public AIControl(EntityMotion motion)
+		public PathfindTestControl(EntityMotion motion)
 			:base(motion)
 		{
 			var world = motion.entity.world;

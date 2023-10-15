@@ -1,12 +1,10 @@
-[gd_scene load_steps=3 format=3 uid="uid://7posjxtu4xrq"]
+[gd_scene load_steps=2 format=3 uid="uid://7posjxtu4xrq"]
 
-[ext_resource type="Script" path="res://scripts/Loop.cs" id="1_tvt3k"]
-[ext_resource type="Texture2D" uid="uid://bp2c8sp6qeq05" path="res://art/soft-thick-dark.png" id="2_rwg76"]
+[ext_resource type="Script" path="res://scripts/InputTest.cs" id="1_mbvvh"]
 
 [node name="Root" type="Node"]
 
 [node name="Node2D" type="Node2D" parent="."]
 texture_filter = 1
-position = Vector2(430, 236)
-script = ExtResource("1_tvt3k")
-m_tex = ExtResource("2_rwg76")
+position = Vector2(11, 3)
+script = ExtResource("1_mbvvh")

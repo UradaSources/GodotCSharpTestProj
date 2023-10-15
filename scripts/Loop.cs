@@ -32,8 +32,8 @@ public partial class Loop : Node2D
 
 	[ExportGroup("grid params")]
 	[Export] private ulong m_seed;
-	[Export] private int m_w = 10;
-	[Export] private int m_h = 10;
+	[Export] private int m_w = 100;
+	[Export] private int m_h = 100;
 
 	[ExportGroup("view params")]
 	[Export] private Texture2D m_tex;
@@ -44,7 +44,7 @@ public partial class Loop : Node2D
 	private Character m_character;
 
 	private PlayerControlInput m_player;
-	private AIControl m_ai;
+	private PathfindTestControl m_ai;
 
 	private Transform2D m_drawMat;
 
@@ -79,7 +79,7 @@ public partial class Loop : Node2D
 		m_character = new Character(m_world, vec2i.zero, 1.0f, vec2i.zero);
 
 		m_player = new PlayerControlInput(m_character.motion);
-		m_ai = new AIControl(m_character.motion);
+		m_ai = new PathfindTestControl(m_character.motion);
 
 		m_character.moveControl = m_ai;
 

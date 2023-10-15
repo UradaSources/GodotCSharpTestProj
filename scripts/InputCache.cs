@@ -1,10 +1,10 @@
-#if false && GODOT4_1_OR_GREATER
 using System.Collections;
 using System.Collections.Generic;
 using Godot;
+using urd;
 
 // 需要确保该对象位于节点树的较低层
-public partial class GodotInputCache : Node2D, urd.IInputCache
+public partial class InputCache : Node, IInputService
 {
 	private readonly static Key[] _KeycodeEnumMap = new Key[] {
 		Key.Apostrophe,   // Key: '
@@ -61,16 +61,16 @@ public partial class GodotInputCache : Node2D, urd.IInputCache
 		MouseButton.Middle
 	};
 
-	private static Key _GetGodotKeycode(urd.KeyCode key)
+	private static Key _GetGodotKeycode(KeyCode key)
 	{
 		return _KeycodeEnumMap[(int)key];
 	}
-	private static MouseButton _GetGodotMouseButton(urd.MouseButton key)
+	private static MouseButton _GetGodotMouseButton(MouseCode key)
 	{
 		return _MouseButtonEnumMap[(int)key];
 	}
 
-	private urd.vec2 m_mouseScreenPos = default;
+	private vec2 m_mouseScreenPos = new vec2();
 
 	private HashSet<Key> m_pressedKey = new HashSet<Key>();
 	private HashSet<Key> m_releasedKey = new HashSet<Key>();
@@ -78,40 +78,45 @@ public partial class GodotInputCache : Node2D, urd.IInputCache
 	private HashSet<MouseButton> m_pressedMouseButton = new HashSet<MouseButton>();
 	private HashSet<MouseButton> m_releasedMouseButton = new HashSet<MouseButton>();
 
-	public bool getKey(urd.KeyCode key)
+	public bool getKey(KeyCode key)
 	{
 		return Input.IsPhysicalKeyPressed(_GetGodotKeycode(key));
 	}
 
-	public bool getKeyDown(urd.KeyCode key)
+	public bool getKeyDown(KeyCode key)
 	{
 		return m_pressedKey.Contains(_GetGodotKeycode(key));
 	}
-	public bool getKeyUp(urd.KeyCode key)
+	public bool getKeyUp(KeyCode key)
 	{
 		return m_releasedKey.Contains(_GetGodotKeycode(key));
 	}
 
-	public bool getMouseKey(urd.MouseButton key)
+	public bool getMouseKey(MouseCode key)
 	{
 		return Input.IsMouseButtonPressed(_GetGodotMouseButton(key));
 	}
 
-	public bool getMouseKeyDown(urd.MouseButton key)
+	public bool getMouseKeyDown(MouseCode key)
 	{
 		return m_pressedMouseButton.Contains(_GetGodotMouseButton(key));
 	}
-	public bool getMouseKeyUp(urd.MouseButton key)
+	public bool getMouseKeyUp(MouseCode key)
 	{
 		return m_releasedMouseButton.Contains(_GetGodotMouseButton(key));
 	}
 
-	public urd.vec2 getMouseScreenPosition()
+	public vec2 getMouseScreenPosition()
 	{
 		var pos = this.GetViewport().GetMousePosition();
-		return new urd.vec2 { x = pos.X, y = pos.Y };
+		return new vec2 { x = pos.X, y = pos.Y };
 	}
 
+	public override void _Ready()
+	{
+		base._Ready();
+		this.ProcessPriority = 2;
+	}
 	public override void _Process(double _)
 	{
 		m_pressedKey.Clear();
@@ -123,7 +128,6 @@ public partial class GodotInputCache : Node2D, urd.IInputCache
 		m_mouseScreenPos.x = pos.X;
 		m_mouseScreenPos.y = pos.Y;
 	}
-
 	public override void _Input(InputEvent e)
 	{
 		if (e is InputEventKey keyInp)
@@ -140,6 +144,10 @@ public partial class GodotInputCache : Node2D, urd.IInputCache
 			else if (mouseInp.IsReleased())
 				m_releasedMouseButton.Add(mouseInp.ButtonIndex);
 		}
+		else if (e is InputEventMouseMotion mouseMotion)
+		{
+			var pos = mouseMotion.GlobalPosition;
+			m_mouseScreenPos.set(pos.X, pos.Y);
+		}
 	}
 }
-#endif
