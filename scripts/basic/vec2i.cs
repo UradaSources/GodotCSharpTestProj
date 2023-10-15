@@ -13,16 +13,16 @@
 		{
 			int diff_x = a.x - b.x;
 			int diff_y = a.y - b.y;
-			return mathf.sqrt(diff_x * diff_x + diff_y * diff_y);
+			return Mathf.Sqrt(diff_x * diff_x + diff_y * diff_y);
 		}
 
 		public static vec2i Min(vec2i lhs, vec2i rhs)
 		{
-			return new vec2i(mathf.min(lhs.x, rhs.x), mathf.min(lhs.y, rhs.y));
+			return new vec2i(Mathf.Min(lhs.x, rhs.x), Mathf.Min(lhs.y, rhs.y));
 		}
 		public static vec2i Max(vec2i lhs, vec2i rhs)
 		{
-			return new vec2i(mathf.max(lhs.x, rhs.x), mathf.max(lhs.y, rhs.y));
+			return new vec2i(Mathf.Max(lhs.x, rhs.x), Mathf.Max(lhs.y, rhs.y));
 		}
 
 		public override string ToString()
@@ -36,7 +36,7 @@
 
 		public void set(int x, int y) { this.x = x; this.y = y; }
 
-		public float magnitude() { return mathf.sqrt(x * x + y * y); }
+		public float magnitude() { return Mathf.Sqrt(x * x + y * y); }
 
 		public vec2i(int x, int y)
 		{

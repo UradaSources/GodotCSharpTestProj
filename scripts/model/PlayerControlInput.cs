@@ -21,14 +21,21 @@ namespace urd
 			else if (Input.IsActionPressed("ui_right"))
 				m_cacheMoveDirect = vec2i.right;
 
-			// 尝试切换移动方向到目标移动方向
-			vec2i targetCoord = this.motion.entity.coord + m_cacheMoveDirect;
-
-			var world = this.motion.entity.world;
-			if (world.tryGetTile(targetCoord.x, targetCoord.y, out var tile) && tile.pass)
+			if (!this.motion.moveProcessing)
 			{
+				GD.Print($"get inp, now dir is {m_cacheMoveDirect}");
 				this.motion.moveDirect = m_cacheMoveDirect;
 			}
+
+			// 尝试切换移动方向到目标移动方向
+			//vec2i targetCoord = this.motion.entity.coord + m_cacheMoveDirect;
+
+			//var world = this.motion.entity.world;
+			//if (world.tryGetTile(targetCoord.x, targetCoord.y, out var tile) && tile.pass)
+			//{
+			//	GD.Print($"get inp, now dir is {m_cacheMoveDirect}");
+			//	this.motion.moveDirect = m_cacheMoveDirect;
+			//}
 		}
 
 		public PlayerControlInput(EntityMotion motion) :

@@ -9,7 +9,7 @@ namespace urd
 		private Pathfind m_pathfind;
 
 		private vec2i? m_target;
-		private IEnumerator<Tile> m_pathfindProcess = null;
+		private Queue<Tile> m_path = new Queue<Tile>(10);
 
 		public vec2i? target => m_target;
 
@@ -17,7 +17,7 @@ namespace urd
 		{
 			if (m_target != target)
 			{
-				GD.Print($"set target {target}");
+				GD.Print($"set path target {target}");
 
 				var entity = this.motion.entity;
 				var world = entity.world;
@@ -29,24 +29,23 @@ namespace urd
 				this.clearTaget();
 
 				m_target = target;
-				m_pathfindProcess = m_pathfind.getPath(curTile, targetTile).GetEnumerator();
+				foreach(var tile in m_pathfind.getPath(curTile, targetTile))
+					m_path.Enqueue(tile);
 			}
 		}
 		public void clearTaget()
 		{
 			m_target = null;
-
-			m_pathfindProcess?.Dispose();
-			m_pathfindProcess = null;
+			m_path.Clear();
 		}
 
 		public override void _update(float dt)
 		{
 			if (this.motion.moveProcessing) return;
 
-			if (m_pathfindProcess != null && m_pathfindProcess.MoveNext())
+			if (m_path.Count > 0)
 			{
-				var t = m_pathfindProcess.Current;
+				var t = m_path.Dequeue();
 
 				var dir = new vec2i(t.x, t.y) - this.motion.entity.coord;
 				this.motion.moveDirect = dir;
@@ -74,10 +73,6 @@ namespace urd
 		{
 			var world = motion.entity.world;
 			m_pathfind = new Pathfind(world);
-		}
-		~AIControl()
-		{
-			m_pathfindProcess?.Dispose();
 		}
 	}
 }

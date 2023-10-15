@@ -27,15 +27,19 @@ namespace urd
 				g = 0;
 				h = 0;
 			}
+
+			public override string ToString()
+			{
+				return $"{id} :({tile.x},{tile.y}) :g={g}h={h}: f={this.f()}: parent={parent?.id}";
+			}
 		}
 
 		private static float ManhattanDistance(Tile a, Tile b)
 		{
-			return Mathf.Abs(b.x - a.x) + Mathf.Abs(b.y - a.y);
+			return (Godot.Mathf.Abs(b.x - a.x) + Godot.Mathf.Abs(b.y - a.y)) * 10;
 		}
 
-		
-		private readonly static Vector2I[] NearDirect = new Vector2I[] { 
+		private readonly static Vector2I[] NearDirect = new Vector2I[] {
 			Vector2I.Up, Vector2I.Down, Vector2I.Left, Vector2I.Right };
 
 		private WorldGrid m_grid;
@@ -64,7 +68,7 @@ namespace urd
 			result = null;
 			return false;
 		}
-		
+
 		private IEnumerable<Node> getNearNode(Node node)
 		{
 			foreach (var dir in NearDirect)
@@ -88,9 +92,15 @@ namespace urd
 			m_open.Clear();
 			m_close.Clear();
 
+			GD.Print($"\n\n pathfind ({start.x},{start.y})->({target.x},{target.y}) --------------------------");
+
 			// 检查起点和终点是否可到达
 			Debug.Assert(this.getOrBuildNode(start.x, start.y, out Node firstNode));
 			Debug.Assert(this.getOrBuildNode(target.x, target.y, out _));
+
+			firstNode.g = 0;
+			firstNode.h = 0;
+			firstNode.parent = null;
 
 			m_open.Add(firstNode.id, firstNode);
 
@@ -110,6 +120,8 @@ namespace urd
 					}
 				}
 
+				GD.Print($"\n\nget fmin node {fMinNode}");
+
 				m_open.Remove(fMinNode.id);
 				m_close.Add(fMinNode.id, fMinNode);
 
@@ -120,9 +132,13 @@ namespace urd
 					{
 						if (!nearNode.tile.pass) continue;
 
+						GD.Print($"get near node. {nearNode.id}:({nearNode.tile.x},{nearNode.tile.y})");
+
 						// 检查当前临近节点是否在开放列表中
 						if (m_open.ContainsKey(nearNode.id))
 						{
+							GD.Print($"\tits in open list");
+
 							// 测试新提供的g值是否令f值更小
 							float gNew = fMinNode.g + 10;
 							if (nearNode.g > gNew)
@@ -130,6 +146,8 @@ namespace urd
 								// 更新父节点和g值
 								nearNode.parent = fMinNode;
 								nearNode.g = gNew;
+
+								GD.Print($"\tand update f. {nearNode}");
 							}
 						}
 						else
@@ -142,54 +160,58 @@ namespace urd
 							nearNode.h = ManhattanDistance(target, nearNode.tile);
 
 							m_open.Add(nearNode.id, nearNode);
+
+							GD.Print($"\tits not in open list, set value. {nearNode}");
 						}
 					}
 				}
 				else
 				{
-					// Debug.WriteLine("pathfind done.");
+					GD.Print("pathfind done.");
+
+					GD.Print("open:");
+					foreach (var node in m_open.Values) GD.Print($"\t{node}");
+					
+
+					GD.Print("close:");
+					foreach (var node in m_close.Values) GD.Print($"\t{node}");
 
 					List<Tile> buf = new List<Tile>();
-
 					Node link = fMinNode;
-					do
+					while (link != null)
 					{
-						// Debug.WriteLine($"{link.id}:({link.tile.x},{link.tile.y})-> {link.parent?.id}");
-
 						buf.Add(link.tile);
 						link = link.parent;
 					}
-					while (link.parent != null);
-
+					
 					buf.Reverse();
 
-					foreach(var kk in buf)
-						yield return kk;
+					GD.Print("way:");
+					foreach (var node in buf)
+					{
+						GD.Print($"\t{node.x},{node.y}");
+						yield return node;
+					}
 
 					yield break;
 				}
 			}
 
-			//Debug.WriteLine("pathfind faild.");
+			GD.Print("pathfind faild.");
 
-			//Debug.WriteLine("open:");
-			//foreach (var node in m_open.Values)
-			//{
-			//	Debug.WriteLine($"{node.id}:({node.tile.x},{node.tile.y})-> {node.parent?.id}");
-			//}
+			GD.Print("open:");
+			foreach (var node in m_open.Values) GD.Print($"\t{node}");
 
-			//Debug.WriteLine("close:");
-			//foreach (var node in m_close.Values)
-			//{
-			//	Debug.WriteLine($"{node.id}:({node.tile.x},{node.tile.y})-> {node.parent?.id}");
-			//}
+			GD.Print("close:");
+			foreach (var node in m_close.Values) GD.Print($"\t{node}");
 
 			yield break;
 		}
-		
+
 		public Pathfind(WorldGrid grid)
 		{
 			m_grid = grid;
 		}
 	}
+
 }

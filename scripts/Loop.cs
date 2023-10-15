@@ -81,7 +81,7 @@ public partial class Loop : Node2D
 		m_player = new PlayerControlInput(m_character.motion);
 		m_ai = new AIControl(m_character.motion);
 
-		m_character.moveControl = m_player;
+		m_character.moveControl = m_ai;
 
 		var rng = new RandomNumberGenerator();
 		// rng.Seed = m_seed;

@@ -1,4 +1,7 @@
-﻿namespace urd
+﻿using System.Diagnostics;
+using Godot;
+
+namespace urd
 {
 	public class EntityMotion: BasicComponent
 	{
@@ -43,7 +46,12 @@
 
 				// 到达指定位置重置processing标志
 				if (m_position == targetPos)
+				{
+					GD.Print($"to target {targetPos}");
+
+					this.entity.coord = m_targetCoord;
 					m_moveProcessing = false;
+				}
 			}
 			else // 若当前没有在移动
 			{
@@ -51,11 +59,13 @@
 				if (m_moveDirect != vec2i.zero)
 				{
 					vec2i targetCoord = m_entity.coord + m_moveDirect;
-
+					
 					var world = m_entity.world;
 					if (world.tryGetTile(targetCoord.x, targetCoord.y, out var tile) && tile.pass)
 					{
+						m_position = new vec2(this.entity.coord.x, this.entity.coord.y);
 						m_targetCoord = targetCoord;
+
 						m_moveProcessing = true;
 					}
 					else

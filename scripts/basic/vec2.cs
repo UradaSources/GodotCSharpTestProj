@@ -3,11 +3,11 @@
 	public struct vec2
 	{
 		public static readonly vec2 up = new vec2(0, 1);
-		public static readonly vec2 down = new vec2(0, 1);
-		public static readonly vec2 left = new vec2(0, 1);
-		public static readonly vec2 right = new vec2(0, 1);
-		public static readonly vec2 zero = new vec2(0, 1);
-		public static readonly vec2 one = new vec2(0, 1);
+		public static readonly vec2 down = new vec2(0, -1);
+		public static readonly vec2 left = new vec2(-1, 0);
+		public static readonly vec2 right = new vec2(1, 0);
+		public static readonly vec2 zero = new vec2(0, 0);
+		public static readonly vec2 one = new vec2(1, 1);
 
 		public static float Dot(vec2 l, vec2 r)
 		{
@@ -16,12 +16,12 @@
 
 		public static float Angle(vec2 from, vec2 to)
 		{
-			float denominator = mathf.sqrt(from.sqrMagnitude() * to.sqrMagnitude());
-			if (denominator < mathf.EpsilonNormalSqrt)
+			float denominator = Mathf.Sqrt(from.sqrMagnitude() * to.sqrMagnitude());
+			if (denominator < Mathf.EpsilonNormalSqrt)
 				return 0;
 
-			float dot = mathf.min(mathf.max(Dot(from, to) / denominator, -1.0f), 1.0f);
-			return mathf.acos(dot) * mathf.Rad2Deg;
+			float dot = Mathf.Min(Mathf.Max(Dot(from, to) / denominator, -1.0f), 1.0f);
+			return Mathf.Acos(dot) * Mathf.Rad2Deg;
 		}
 
 		public static float SignedAngle(vec2 from, vec2 to)
@@ -35,7 +35,7 @@
 		{
 			float diff_x = a.x - b.x;
 			float diff_y = a.y - b.y;
-			return mathf.sqrt(diff_x * diff_x + diff_y * diff_y);
+			return Mathf.Sqrt(diff_x * diff_x + diff_y * diff_y);
 		}
 
 		public static vec2 Rotate(vec2 v, float angle, vec2? pivot = null)
@@ -43,8 +43,8 @@
 			var _pivot = pivot ?? vec2.zero;
 
 			float radians = angle * 3.1415926f / 180.0f;
-			float c = mathf.cos(radians);
-			float s = mathf.sin(radians);
+			float c = Mathf.Cos(radians);
+			float s = Mathf.Sin(radians);
 
 			float x = c * (v.x - _pivot.x) - s * (v.y - _pivot.y) + _pivot.x;
 			float y = s * (v.x - _pivot.x) + c * (v.y - _pivot.y) + _pivot.y;
@@ -54,11 +54,11 @@
 
 		public static vec2 Min(vec2 lhs, vec2 rhs)
 		{
-			return new vec2(mathf.min(lhs.x, rhs.x), mathf.min(lhs.y, rhs.y));
+			return new vec2(Mathf.Min(lhs.x, rhs.x), Mathf.Min(lhs.y, rhs.y));
 		}
 		public static vec2 Max(vec2 lhs, vec2 rhs)
 		{
-			return new vec2(mathf.max(lhs.x, rhs.x), mathf.max(lhs.y, rhs.y));
+			return new vec2(Mathf.Max(lhs.x, rhs.x), Mathf.Max(lhs.y, rhs.y));
 		}
 
 		public static vec2 Lerp(vec2 a, vec2 b, float t) { return (b - a) * t + a; }
@@ -73,7 +73,7 @@
 			if (sqDist == 0 || (maxDistanceDelta >= 0 && sqDist <= maxDistanceDelta * maxDistanceDelta))
 				return target;
 
-			float dist = mathf.sqrt(sqDist);
+			float dist = Mathf.Sqrt(sqDist);
 			return new vec2(current.x + toX / dist * maxDistanceDelta,
 				current.y + toY / dist * maxDistanceDelta);
 		}
@@ -101,7 +101,7 @@
 			else return this;
 		}
 
-		public float magnitude() { return mathf.sqrt(x * x + y * y); }
+		public float magnitude() { return Mathf.Sqrt(x * x + y * y); }
 
 		public vec2(float x, float y)
 		{
