@@ -8,17 +8,18 @@ namespace urd
 	{
 		private vec2i m_cacheMoveDirect;
 
-		public override void _init() { }
 		public override void _update(float dt)
 		{
+			var inp = ServiceManager.Input;
+
 			// 缓存移动方向的输入
-			if (Input.IsActionPressed("ui_up"))
+			if (inp.getKeyDown(KeyCode.W))
 				m_cacheMoveDirect = vec2i.up;
-			else if (Input.IsActionPressed("ui_down"))
+			else if (inp.getKeyDown(KeyCode.S))
 				m_cacheMoveDirect = vec2i.down;
-			else if (Input.IsActionPressed("ui_left"))
+			else if (inp.getKeyDown(KeyCode.A))
 				m_cacheMoveDirect = vec2i.left;
-			else if (Input.IsActionPressed("ui_right"))
+			else if (inp.getKeyDown(KeyCode.D))
 				m_cacheMoveDirect = vec2i.right;
 
 			if (!this.motion.moveProcessing)
@@ -26,16 +27,6 @@ namespace urd
 				GD.Print($"get inp, now dir is {m_cacheMoveDirect}");
 				this.motion.moveDirect = m_cacheMoveDirect;
 			}
-
-			// 尝试切换移动方向到目标移动方向
-			//vec2i targetCoord = this.motion.entity.coord + m_cacheMoveDirect;
-
-			//var world = this.motion.entity.world;
-			//if (world.tryGetTile(targetCoord.x, targetCoord.y, out var tile) && tile.pass)
-			//{
-			//	GD.Print($"get inp, now dir is {m_cacheMoveDirect}");
-			//	this.motion.moveDirect = m_cacheMoveDirect;
-			//}
 		}
 
 		public PlayerControlInput(EntityMotion motion) :

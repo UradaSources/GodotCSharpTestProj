@@ -1,7 +1,4 @@
-﻿using urd;
-
-
-namespace urd
+﻿namespace urd
 {
 	public enum KeyCode
 	{
@@ -59,7 +56,7 @@ namespace urd
 		Middle
 	}
 
-	public interface IInputService
+	public interface InputService
 	{
 		bool getKey(KeyCode key);
 		bool getKeyDown(KeyCode key);

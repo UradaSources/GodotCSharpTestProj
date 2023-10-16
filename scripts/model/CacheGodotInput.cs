@@ -4,7 +4,7 @@ using Godot;
 using urd;
 
 // 需要确保该对象位于节点树的较低层
-public partial class InputCache : Node, IInputService
+public partial class CacheGodotInput : Node, InputService
 {
 	private readonly static Key[] _KeycodeEnumMap = new Key[] {
 		Key.Apostrophe,   // Key: '
@@ -82,7 +82,6 @@ public partial class InputCache : Node, IInputService
 	{
 		return Input.IsPhysicalKeyPressed(_GetGodotKeycode(key));
 	}
-
 	public bool getKeyDown(KeyCode key)
 	{
 		return m_pressedKey.Contains(_GetGodotKeycode(key));
@@ -91,12 +90,10 @@ public partial class InputCache : Node, IInputService
 	{
 		return m_releasedKey.Contains(_GetGodotKeycode(key));
 	}
-
 	public bool getMouseKey(MouseCode key)
 	{
 		return Input.IsMouseButtonPressed(_GetGodotMouseButton(key));
 	}
-
 	public bool getMouseKeyDown(MouseCode key)
 	{
 		return m_pressedMouseButton.Contains(_GetGodotMouseButton(key));
