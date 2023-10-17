@@ -1,4 +1,6 @@
-﻿using System.Diagnostics;
+﻿using System.Collections;
+using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace urd
 {
@@ -15,6 +17,21 @@ namespace urd
 			this.x = x;
 			this.y = y;
 		}
+	}
+
+	public interface ITileType
+	{
+		public int id { get; }
+
+		public string name { get; }
+		public bool pass { get; }
+	}
+
+	public static class TileTypeData
+	{
+		private static List<string> _NameData;
+		private static List<bool> _PassData;
+
 	}
 
 	public class WorldGrid

@@ -4,19 +4,17 @@ using System.Diagnostics;
 using Godot;
 using urd;
 
-public partial class Loop : Node2D
+public partial class Game : Node2D
 {
-	public static Rect2I GetSpriteRect(char c)
+	// 16, 8
+	public static Rect2I GetCharacterSpriteRect(int lineCount, int size, char c)
 	{
-		const int SpriteLineCount = 16;
-		const int SpriteUnitSize = 8;
-
 		int index = c - ' ';
 
-		int x = index % SpriteLineCount;
-		int y = index / SpriteLineCount;
+		int x = index % lineCount;
+		int y = index / lineCount;
 
-		return new Rect2I(new Vector2I(x, y) * SpriteUnitSize, Vector2I.One * SpriteUnitSize);
+		return new Rect2I(new Vector2I(x * size, y * size), new Vector2I(size, size));
 	}
 	public static bool Metronome(int frequency, float offset = 0)
 	{
@@ -30,58 +28,42 @@ public partial class Loop : Node2D
 		return (int)(t * 2 * frequency) % 2 == 0;
 	}
 
-	[ExportGroup("grid params")]
-	[Export] private ulong m_seed;
-	[Export] private int m_w = 100;
-	[Export] private int m_h = 100;
-
-	[ExportGroup("view params")]
-	[Export] private Texture2D m_tex;
+	[Export] private Texture2D m_characterSheet;
 	[Export] private float m_tileSize = 20;
 
 	private WorldGrid m_world;
 
 	private Character m_character;
 
-	private PlayerControlInput m_player;
-	private PathfindTestControl m_ai;
-
-	private Transform2D m_drawMat;
-
-	public void DrawSprite(int x, int y, char c, Color? color = null)
+	public void DrawCharacterSprite(int x, int y, char c, Color? color = null)
 	{
 		color ??= Colors.White;
 
-		var pos = new Vector2(x, y) * m_tileSize * m_drawMat;
-
+		var pos = new Vector2(x, -y) * m_tileSize;
 		var target = new Rect2(pos, Vector2.One * m_tileSize);
-		var source = GetSpriteRect(c);
 
-		this.DrawTextureRectRegion(m_tex, target, source, color);
+		var source = GetCharacterSpriteRect(18, 8, c);
+
+		this.DrawTextureRectRegion(m_characterSheet, target, source, color);
 	}
 	public void DrawSelectBox(int x, int y, Color? color = null)
 	{
 		color ??= Colors.White;
 
-		var pos = new Vector2(x, y) * m_tileSize * m_drawMat;
+		var pos = new Vector2(x, -y) * m_tileSize;
 
 		var target = new Rect2(pos, Vector2.One * m_tileSize);
-		this.DrawRect(target, color.Value);
+		this.DrawRect(target, color.Value, false);
 	}
 
 	public override void _Ready()
 	{
-		m_drawMat = Transform2D.Identity;
-		m_drawMat.Scaled(new Vector2(1, -1));
+		System.IO.File.ReadAllText("");
 
 		m_world = new WorldGrid(m_w, m_h);
 
 		m_character = new Character(m_world, vec2i.zero, 1.0f, vec2i.zero);
-
-		m_player = new PlayerControlInput(m_character.motion);
-		m_ai = new PathfindTestControl(m_character.motion);
-
-		m_character.moveControl = m_ai;
+		m_character.moveControl = new PathfindTestControl(m_character.motion);
 
 		var rng = new RandomNumberGenerator();
 		// rng.Seed = m_seed;
@@ -104,14 +86,24 @@ public partial class Loop : Node2D
 		for (int i = 0; i < m_world.tileCount; i++)
 		{
 			var tile = m_world.rawGetTile(i);
-			this.DrawSprite(tile.x, tile.y, tile.pass ? '.' : 'T', tile.pass ? null : new Color("#BAB060"));
+			this.DrawCharacterSprite(tile.x, tile.y, tile.pass ? '.' : 'G', tile.pass ? null : new Color("#6A536E"));
 		}
 
 		// draw char
 		// bool drawSprite = Metronome(m_character.motion.moveProcessing ? 2 : 1);
 		// if (drawSprite)
 		{
-			this.DrawSprite(m_character.entity.coord.x, m_character.entity.coord.y, 'P');
+			this.DrawCharacterSprite(m_character.entity.coord.x, m_character.entity.coord.y, 'P');
+		}
+
+		var mousePos = this.GetLocalMousePosition();
+		int x = (int)(mousePos.X / m_tileSize);
+		int y = (int)(mousePos.Y / m_tileSize);
+		GD.Print($"{x},{y} : {mousePos}");
+		if (m_world.vaildCoord(x, y))
+		{
+			var pos = new Vector2(x, y) * m_tileSize;
+			this.DrawRect(new Rect2(pos, Vector2.One * m_tileSize), Colors.Red, false);
 		}
 	}
 }
