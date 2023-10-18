@@ -8,7 +8,7 @@ public partial class Game : Node2D
 {
 	public static Color ToGDColor(color c)
 	{
-		return new Color(c.r, c.g, c.b, c.a);
+		return new Color((float)c.r/255, (float)c.g/255, (float)c.b/255, (float)c.a/255);
 	}
 	public static Rect2I GetCharacterSpriteRect(int lineCount, int size, char c)
 	{
@@ -36,11 +36,13 @@ public partial class Game : Node2D
 	[Export] private Texture2D m_characterSheet;
 	[Export] private float m_tileSize = 20;
 
+	private SystemFont m_font;
+
 	private WorldGrid m_world;
 	private Character m_character;
 
-	private PlayerControlInput m_playerController;
-	private IdleAIControl m_aiController;
+	private RpgControl m_playerController;
+	private RandomWalkAIControl m_aiController;
 
 	private TileCell m_selectedTile;
 
@@ -74,10 +76,10 @@ public partial class Game : Node2D
 
 	public override void _Ready()
 	{
-		TileType treeTile = TileType.Create("Tree", 'T', color.FromHex(0x25562e), 3);
+		TileType treeTile = TileType.Create("Tree", 'T', color.FromHex(0x8AB969), 3);
 		TileType wallTile = TileType.Create("Wall", 'W', color.FromHex(0x411d31), -1);
 		TileType doorTile = TileType.Create("Door", 'D', color.FromHex(0x819796), 2);
-		TileType groundTile = TileType.Create("Ground", '.', color.FromHex(0x602c2c), 1);
+		TileType groundTile = TileType.Create("Ground", '.', color.FromHex(0xA77B5B), 1);
 
 		//var path = ProjectSettings.GlobalizePath("user://data/tile_types.json");
 		//if (System.IO.File.Exists(path))
@@ -97,11 +99,14 @@ public partial class Game : Node2D
 		//	System.IO.File.AppendAllText(path, jsonData);
 		//}
 
-		m_world = new WorldGrid(20, 20, groundTile);
+		m_font = new SystemFont();
 
-		m_character = new Character(m_world, vec2i.zero, 1.0f, vec2i.zero);
-		m_playerController = new PlayerControlInput(m_character.motion);
-		m_aiController = new IdleAIControl(m_character.motion);
+		m_world = new WorldGrid(10, 10, groundTile);
+
+		m_character = new Character(m_world, vec2i.zero, 3.0f, vec2i.zero);
+
+		m_playerController = new RpgControl(m_character.motion);
+		m_aiController = new RandomWalkAIControl(m_character.motion);
 
 		// 使用ai控制器
 		m_character.moveControl = m_aiController;
@@ -121,18 +126,32 @@ public partial class Game : Node2D
 		}
 	}
 
+	private float m_delta;
+
 	public override void _Process(double delta)
 	{
+		m_delta = (float)delta;
+
 		m_character._update((float)delta);
 
 		var mousePos = this.GetLocalMousePosition();
 		this.TrySelectTile(mousePos);
+
+		if (ServiceManager.Input.getKeyDown(KeyCode.P))
+		{
+			if (m_character.moveControl == m_aiController)
+				m_character.moveControl = m_playerController;
+			else
+				m_character.moveControl = m_aiController;
+		}
 
 		this.QueueRedraw();
 	}
 
 	public override void _Draw()
 	{
+		this.DrawString(m_font, new Vector2(0, 0), $"fps: {1/m_delta}");
+
 		for (int i = 0; i < m_world.tileCount; i++)
 		{
 			var tile = m_world.rawGetTile(i);

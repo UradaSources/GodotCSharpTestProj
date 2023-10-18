@@ -41,5 +41,28 @@
 		{
 			return Mathf.Abs(b - a) < Mathf.Max(0.000001f * Mathf.Max(Mathf.Abs(a), Mathf.Abs(b)), Mathf.Epsilon * 8);
 		}
+
+		public static float LoopValue(float v, float max, float min)
+		{
+			if (v < min)
+			{
+				float dist = Mathf.Abs(v - min) % (max - min);
+				return max - dist;
+			}
+			else if (v > max)
+			{
+				float dist = Mathf.Abs(max - v) % (max - min);
+				return min + dist;
+			}
+			else return v;
+		}
+		public static float LoopValue(float v, float max)
+			=> LoopValue(v, max, 0);
+
+		public static int LoopIndex(int i, int length)
+		{
+			if (i < 0) i = length + (i % length);
+			return i % length;
+		}
 	}
 }

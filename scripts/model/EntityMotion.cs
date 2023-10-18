@@ -5,6 +5,8 @@ namespace urd
 {
 	public class EntityMotion: BasicComponent
 	{
+		const bool Loop = true;
+
 		private Entity m_entity;
 
 		private vec2i m_targetCoord;
@@ -13,7 +15,8 @@ namespace urd
 		private float m_moveSpeed;
 		private vec2i m_moveDirect;
 
-		private bool m_moveProcessing;
+		//private bool m_processJustComplete;
+		private bool m_processing;
 
 		public Entity entity => m_entity;
 
@@ -31,16 +34,18 @@ namespace urd
 			get => m_moveDirect;
 		}
 
-		public bool moveProcessing => m_moveProcessing;
+		//public bool processJustComplete => m_processJustComplete;
+		public bool processing => m_processing;
 
 		public override void _init() { }
 		public override void _update(float delta)
 		{
 			// 若当前正在移动中, 则更新位置
-			if (m_moveProcessing)
+			if (m_processing)
 			{
+				var cost = m_entity.world.getTile(m_targetCoord.x, m_targetCoord.y).type.cost;
 				var targetPos = new vec2(m_targetCoord.x, m_targetCoord.y);
-				var posDelta = m_moveSpeed * delta;
+				var posDelta = m_moveSpeed * delta / cost;
 
 				m_position = vec2.MoveTowards(m_position, targetPos, posDelta);
 
@@ -50,7 +55,8 @@ namespace urd
 					GD.Print($"to target {targetPos}");
 
 					this.entity.coord = m_targetCoord;
-					m_moveProcessing = false;
+					m_processing = false;
+					//m_processJustComplete = true;
 				}
 			}
 			else // 若当前没有在移动
@@ -59,7 +65,11 @@ namespace urd
 				if (m_moveDirect != vec2i.zero)
 				{
 					vec2i targetCoord = m_entity.coord + m_moveDirect;
-					
+
+					// 计算循环的坐标
+					targetCoord.x = Mathf.LoopIndex(targetCoord.x, m_entity.world.width);
+					targetCoord.y = Mathf.LoopIndex(targetCoord.y, m_entity.world.height);
+
 					var world = m_entity.world;
 					if (world.tryGetTile(targetCoord.x, targetCoord.y, out var tile) 
 						&& tile.type.cost >= 0)
@@ -67,7 +77,7 @@ namespace urd
 						m_position = new vec2(this.entity.coord.x, this.entity.coord.y);
 						m_targetCoord = targetCoord;
 
-						m_moveProcessing = true;
+						m_processing = true;
 					}
 					else
 					{

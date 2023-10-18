@@ -7,7 +7,7 @@ public class TileType
 {
 	private static SortedList<char, TileType> _Types = new SortedList<char, TileType>();
 
-	public static TileType Create(string name, char graph, color color, int cost)
+	public static TileType Create(string name, char graph, color color, float cost)
 	{
 		Debug.Assert(_Types.ContainsKey(graph));
 
@@ -46,9 +46,9 @@ public class TileType
 	public readonly color color;
 
 	public readonly string name;
-	public readonly int cost;
+	public readonly float cost;
 
-	private TileType(string name, char graph, color color, int cost)
+	private TileType(string name, char graph, color color, float cost)
 	{
 		this.graph = graph;
 		this.color = color;

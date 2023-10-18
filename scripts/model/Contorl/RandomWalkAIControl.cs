@@ -3,7 +3,7 @@ using System.Collections;
 using Godot;
 using urd;
 
-public class IdleAIControl : BasicMoveControl
+public class RandomWalkAIControl : BasicMoveControl
 {
 	private Pathfind m_pathfind;
 
@@ -40,7 +40,7 @@ public class IdleAIControl : BasicMoveControl
 
 	public override void _update(float dt)
 	{
-		if (this.motion.moveProcessing) return;
+		if (this.motion.processing) return;
 
 		if (m_path.Count > 0)
 		{
@@ -67,7 +67,7 @@ public class IdleAIControl : BasicMoveControl
 		}
 	}
 
-	public IdleAIControl(EntityMotion motion)
+	public RandomWalkAIControl(EntityMotion motion)
 		: base(motion)
 	{
 		var world = motion.entity.world;
