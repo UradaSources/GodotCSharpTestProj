@@ -8,7 +8,6 @@
 		public WorldGrid world { get => m_world; }
 		public vec2i coord { get => m_coord; set => m_coord = value; }
 
-
 		public Entity(WorldGrid world, vec2i coord)
 		{
 			this.m_world = world;

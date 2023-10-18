@@ -61,7 +61,8 @@ namespace urd
 					vec2i targetCoord = m_entity.coord + m_moveDirect;
 					
 					var world = m_entity.world;
-					if (world.tryGetTile(targetCoord.x, targetCoord.y, out var tile) && tile.pass)
+					if (world.tryGetTile(targetCoord.x, targetCoord.y, out var tile) 
+						&& tile.type.cost >= 0)
 					{
 						m_position = new vec2(this.entity.coord.x, this.entity.coord.y);
 						m_targetCoord = targetCoord;

@@ -1,12 +1,11 @@
-[gd_scene load_steps=3 format=3 uid="uid://daqieuw0gwxy3"]
+[gd_scene load_steps=3 format=3 uid="uid://ct4hhjvcst8hh"]
 
-[ext_resource type="Script" path="res://scripts/Loop.cs" id="1_6lujd"]
-[ext_resource type="Texture2D" uid="uid://bp2c8sp6qeq05" path="res://art/soft-thick-dark.png" id="2_1nsig"]
+[ext_resource type="Script" path="res://scripts/model/Game.cs" id="1_trikb"]
+[ext_resource type="Texture2D" uid="uid://bp2c8sp6qeq05" path="res://art/soft-thick-dark.png" id="2_fi8re"]
 
-[node name="Node2D" type="Node2D"]
+[node name="main" type="Node2D"]
 texture_filter = 1
-script = ExtResource("1_6lujd")
-m_seed = 123456
-m_w = 30
-m_h = 30
-m_tex = ExtResource("2_1nsig")
+position = Vector2(7, 641)
+script = ExtResource("1_trikb")
+m_seed = 12345678
+m_characterSheet = ExtResource("2_fi8re")

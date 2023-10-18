@@ -12,14 +12,14 @@ namespace urd
 			public Node parent = null;
 
 			public int id;
-			public Tile tile;
+			public TileCell tile;
 
 			public float g;
 			public float h;
 
 			public float f() { return this.g + this.h; }
 
-			public Node(int id, Tile tile)
+			public Node(int id, TileCell tile)
 			{
 				this.id = id;
 				this.tile = tile;
@@ -34,9 +34,9 @@ namespace urd
 			}
 		}
 
-		private static float ManhattanDistance(Tile a, Tile b)
+		private static float ManhattanDistance(TileCell a, TileCell b)
 		{
-			return (Godot.Mathf.Abs(b.x - a.x) + Godot.Mathf.Abs(b.y - a.y)) * 10;
+			return (Godot.Mathf.Abs(b.x - a.x) + Godot.Mathf.Abs(b.y - a.y)) * 1;
 		}
 
 		private readonly static Vector2I[] NearDirect = new Vector2I[] {
@@ -87,7 +87,7 @@ namespace urd
 			}
 		}
 
-		public IEnumerable<Tile> getPath(Tile start, Tile target)
+		public IEnumerable<TileCell> getPath(TileCell start, TileCell target)
 		{
 			m_open.Clear();
 			m_close.Clear();
@@ -130,7 +130,7 @@ namespace urd
 					// 处理全部有效的临近节点
 					foreach (Node nearNode in this.getNearNode(fMinNode))
 					{
-						if (!nearNode.tile.pass) continue;
+						if (nearNode.tile.type.cost < 0) continue;
 
 						GD.Print($"get near node. {nearNode.id}:({nearNode.tile.x},{nearNode.tile.y})");
 
@@ -140,7 +140,7 @@ namespace urd
 							GD.Print($"\tits in open list");
 
 							// 测试新提供的g值是否令f值更小
-							float gNew = fMinNode.g + 10;
+							float gNew = fMinNode.g + nearNode.tile.type.cost;
 							if (nearNode.g > gNew)
 							{
 								// 更新父节点和g值
@@ -153,7 +153,7 @@ namespace urd
 						else
 						{
 							nearNode.parent = fMinNode;
-							nearNode.g = fMinNode.g + 10;
+							nearNode.g = fMinNode.g + nearNode.tile.type.cost;
 
 							// 计算当前节点到目标的距离h值,
 							// 在整个算法过程中, h总是不变
@@ -172,11 +172,10 @@ namespace urd
 					GD.Print("open:");
 					foreach (var node in m_open.Values) GD.Print($"\t{node}");
 					
-
 					GD.Print("close:");
 					foreach (var node in m_close.Values) GD.Print($"\t{node}");
 
-					List<Tile> buf = new List<Tile>();
+					List<TileCell> buf = new List<TileCell>();
 					Node link = fMinNode;
 					while (link != null)
 					{
@@ -210,6 +209,8 @@ namespace urd
 
 		public Pathfind(WorldGrid grid)
 		{
+			Debug.Assert(grid != null);
+
 			m_grid = grid;
 		}
 	}

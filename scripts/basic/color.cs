@@ -17,6 +17,14 @@ namespace urd
 
 		public static color FromHex(int hex)
 		{
+			byte red = (byte)((hex >> 16) & 0xFF);
+			byte green = (byte)((hex >> 8) & 0xFF);
+			byte blue = (byte)(hex & 0xFF);
+
+			return new color(red, green, blue, 255);
+		}
+		public static color FromHexIncludeAlpha(int hex)
+		{
 			byte red = (byte)((hex >> 24) & 0xFF);
 			byte green = (byte)((hex >> 16) & 0xFF);
 			byte blue = (byte)((hex >> 8) & 0xFF);
