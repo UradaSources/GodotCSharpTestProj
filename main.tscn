@@ -1,11 +1,28 @@
-[gd_scene load_steps=3 format=3 uid="uid://daqieuw0gwxy3"]
+[gd_scene load_steps=4 format=3 uid="uid://daqieuw0gwxy3"]
 
+[ext_resource type="Script" path="res://scripts/tmp/UpdateDebugDisplay.cs" id="1_a4pel"]
 [ext_resource type="Script" path="res://scripts/model/Game.cs" id="1_trikb"]
 [ext_resource type="Texture2D" uid="uid://bp2c8sp6qeq05" path="res://art/soft-thick-dark.png" id="2_fi8re"]
 
-[node name="main" type="Node2D"]
+[node name="Root" type="Node2D"]
 texture_filter = 1
-position = Vector2(222, 214)
+
+[node name="UI" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 0
+offset_left = 640.0
+offset_top = 4.0
+offset_right = 1140.0
+offset_bottom = 504.0
+
+[node name="ItemList" type="ItemList" parent="UI"]
+layout_mode = 0
+offset_right = 509.0
+offset_bottom = 616.0
+auto_height = true
+script = ExtResource("1_a4pel")
+
+[node name="Game" type="Node2D" parent="."]
 script = ExtResource("1_trikb")
-m_seed = 12345678
+m_seed = 123
 m_characterSheet = ExtResource("2_fi8re")

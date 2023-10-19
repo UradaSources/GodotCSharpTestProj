@@ -5,8 +5,6 @@ namespace urd
 {
 	public class EntityMotion: BasicComponent
 	{
-		const bool Loop = true;
-
 		private Entity m_entity;
 
 		private vec2i m_targetCoord;

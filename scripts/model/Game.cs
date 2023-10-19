@@ -77,7 +77,7 @@ public partial class Game : Node2D
 	public override void _Ready()
 	{
 		TileType treeTile = TileType.Create("Tree", 'T', color.FromHex(0x8AB969), 1.5f);
-		TileType wallTile = TileType.Create("Wall", 'W', color.FromHex(0x411d31), -1.0f);
+		TileType wallTile = TileType.Create("Wall", 'X', color.FromHex(0x411d31), -1.0f);
 		TileType doorTile = TileType.Create("Door", 'D', color.FromHex(0x819796), 1.1f);
 		TileType groundTile = TileType.Create("Ground", '.', color.FromHex(0xA77B5B), 1.0f);
 
@@ -108,6 +108,7 @@ public partial class Game : Node2D
 		// 初始化并选择控制器
 		m_controllerSet = new List<BasicMoveControl>
 		{
+			new ClassicArcadeControl(m_character.motion),
 			new RpgControl(m_character.motion),
 			new RandomWalkAIControl(m_character.motion)
 		};
