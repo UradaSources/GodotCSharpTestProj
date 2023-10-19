@@ -9,7 +9,7 @@ public class TileType
 
 	public static TileType Create(string name, char graph, color color, float cost)
 	{
-		Debug.Assert(_Types.ContainsKey(graph));
+		Debug.Assert(!_Types.ContainsKey(graph));
 
 		var type = new TileType(name, graph, color, cost);
 		_Types.Add(graph, type);

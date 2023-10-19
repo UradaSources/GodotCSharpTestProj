@@ -43,11 +43,16 @@ namespace urd
 			// 若当前正在移动中, 则更新位置
 			if (m_processing)
 			{
-				var cost = m_entity.world.getTile(m_targetCoord.x, m_targetCoord.y).type.cost;
+				var targetCost = m_entity.world.getTile(m_targetCoord.x, m_targetCoord.y).type.cost;
 				var targetPos = new vec2(m_targetCoord.x, m_targetCoord.y);
-				var posDelta = m_moveSpeed * delta / cost;
 
-				m_position = vec2.MoveTowards(m_position, targetPos, posDelta);
+				var posDelta = m_moveSpeed * delta / targetCost;
+
+				m_position += (vec2)m_moveDirect * posDelta;
+				m_position.x = Mathf.LoopValue(m_position.x, m_entity.world.width);
+				m_position.y = Mathf.LoopValue(m_position.y, m_entity.world.height);
+
+				// m_position = vec2.MoveTowards(m_position, targetPos, posDelta);
 
 				// 到达指定位置重置processing标志
 				if (m_position == targetPos)

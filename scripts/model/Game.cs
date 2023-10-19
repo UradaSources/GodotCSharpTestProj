@@ -41,8 +41,8 @@ public partial class Game : Node2D
 	private WorldGrid m_world;
 	private Character m_character;
 
-	private RpgControl m_playerController;
-	private RandomWalkAIControl m_aiController;
+	private int m_controllerIndex = 0;
+	private List<BasicMoveControl> m_controllerSet;
 
 	private TileCell m_selectedTile;
 
@@ -76,10 +76,10 @@ public partial class Game : Node2D
 
 	public override void _Ready()
 	{
-		TileType treeTile = TileType.Create("Tree", 'T', color.FromHex(0x8AB969), 3);
-		TileType wallTile = TileType.Create("Wall", 'W', color.FromHex(0x411d31), -1);
-		TileType doorTile = TileType.Create("Door", 'D', color.FromHex(0x819796), 2);
-		TileType groundTile = TileType.Create("Ground", '.', color.FromHex(0xA77B5B), 1);
+		TileType treeTile = TileType.Create("Tree", 'T', color.FromHex(0x8AB969), 1.5f);
+		TileType wallTile = TileType.Create("Wall", 'W', color.FromHex(0x411d31), -1.0f);
+		TileType doorTile = TileType.Create("Door", 'D', color.FromHex(0x819796), 1.1f);
+		TileType groundTile = TileType.Create("Ground", '.', color.FromHex(0xA77B5B), 1.0f);
 
 		//var path = ProjectSettings.GlobalizePath("user://data/tile_types.json");
 		//if (System.IO.File.Exists(path))
@@ -105,11 +105,13 @@ public partial class Game : Node2D
 
 		m_character = new Character(m_world, vec2i.zero, 3.0f, vec2i.zero);
 
-		m_playerController = new RpgControl(m_character.motion);
-		m_aiController = new RandomWalkAIControl(m_character.motion);
-
-		// 使用ai控制器
-		m_character.moveControl = m_aiController;
+		// 初始化并选择控制器
+		m_controllerSet = new List<BasicMoveControl>
+		{
+			new RpgControl(m_character.motion),
+			new RandomWalkAIControl(m_character.motion)
+		};
+		m_character.moveControl = m_controllerSet[m_controllerIndex];
 
 		var rng = new RandomNumberGenerator();
 		rng.Seed = m_seed;
@@ -137,12 +139,17 @@ public partial class Game : Node2D
 		var mousePos = this.GetLocalMousePosition();
 		this.TrySelectTile(mousePos);
 
-		if (ServiceManager.Input.getKeyDown(KeyCode.P))
+		if (Input.IsActionJustPressed("ui_select"))
 		{
-			if (m_character.moveControl == m_aiController)
-				m_character.moveControl = m_playerController;
-			else
-				m_character.moveControl = m_aiController;
+			m_controllerIndex = (m_controllerIndex + 1) % m_controllerSet.Count;
+			m_character.moveControl = m_controllerSet[m_controllerIndex];
+		}
+		if (Input.IsMouseButtonPressed(MouseButton.Left))
+		{
+			if (m_selectedTile != null)
+			{
+				m_selectedTile.type = TileType.GetType('W');	
+			}
 		}
 
 		this.QueueRedraw();
@@ -150,7 +157,8 @@ public partial class Game : Node2D
 
 	public override void _Draw()
 	{
-		this.DrawString(m_font, new Vector2(0, 0), $"fps: {1/m_delta}");
+		this.DrawString(m_font, new Vector2(0, -24), $"fps: {(1 / m_delta).ToString("0.0")}");
+		this.DrawString(m_font, new Vector2(0, -12), $"control mode: {m_controllerIndex}");
 
 		for (int i = 0; i < m_world.tileCount; i++)
 		{

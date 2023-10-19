@@ -157,7 +157,7 @@ namespace urd
 
 							// 计算当前节点到目标的距离h值,
 							// 在整个算法过程中, h总是不变
-							nearNode.h = ManhattanDistance(target, nearNode.tile);
+							nearNode.h = 0; // ManhattanDistance(target, nearNode.tile);
 
 							m_open.Add(nearNode.id, nearNode);
 

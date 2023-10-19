@@ -1,22 +1,22 @@
-﻿namespace urd
+﻿using Godot;
+
+namespace urd
 {
 	// rpg样式的控制器
 	public class RpgControl : BasicMoveControl
 	{
 		public override void _update(float dt)
 		{
-			var inp = ServiceManager.Input;
-
 			if (!this.motion.processing)
 			{
 				var dir = vec2i.zero;
-				if (inp.getKey(KeyCode.S))
+				if (Input.IsActionPressed("ui_down"))
 					dir = vec2i.up;
-				else if (inp.getKey(KeyCode.W))
+				else if (Input.IsActionPressed("ui_up"))
 					dir = vec2i.down;
-				else if (inp.getKey(KeyCode.A))
+				else if (Input.IsActionPressed("ui_left"))
 					dir = vec2i.left;
-				else if (inp.getKey(KeyCode.D))
+				else if (Input.IsActionPressed("ui_right"))
 					dir = vec2i.right;
 				this.motion.moveDirect = dir;
 			}

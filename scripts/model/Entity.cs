@@ -8,6 +8,17 @@
 		public WorldGrid world { get => m_world; }
 		public vec2i coord { get => m_coord; set => m_coord = value; }
 
+		public TileCell tile
+		{
+			get
+			{
+				if (world.tryGetTile(m_coord.x, m_coord.y, out var tile))
+					return tile;
+				else
+					return null;
+			}
+		}
+
 		public Entity(WorldGrid world, vec2i coord)
 		{
 			this.m_world = world;

@@ -11,16 +11,13 @@ namespace urd
 
 		public override void _update(float dt)
 		{
-			var inp = ServiceManager.Input;
-
-			// 缓存移动方向的输入
-			if (inp.getKeyDown(KeyCode.S))
+			if (Input.IsActionJustPressed("ui_down"))
 				m_cacheMoveDirect = vec2i.up;
-			else if (inp.getKeyDown(KeyCode.W))
+			else if (Input.IsActionJustPressed("ui_up"))
 				m_cacheMoveDirect = vec2i.down;
-			else if (inp.getKeyDown(KeyCode.A))
+			else if (Input.IsActionJustPressed("ui_left"))
 				m_cacheMoveDirect = vec2i.left;
-			else if (inp.getKeyDown(KeyCode.D))
+			else if (Input.IsActionJustPressed("ui_right"))
 				m_cacheMoveDirect = vec2i.right;
 
 			if (!this.motion.processing)
