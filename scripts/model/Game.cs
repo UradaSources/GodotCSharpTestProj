@@ -36,8 +36,6 @@ public partial class Game : Node2D
 	[Export] private Texture2D m_characterSheet;
 	[Export] private float m_tileSize = 20;
 
-	private SystemFont m_font;
-
 	private WorldGrid m_world;
 	private Character m_character;
 
@@ -45,6 +43,8 @@ public partial class Game : Node2D
 	private List<BasicMoveControl> m_controllerSet;
 
 	private TileCell m_selectedTile;
+
+	private RandomNumberGenerator m_rng;
 
 	public void DrawCharacterSprite(int x, int y, char c, Color? color = null)
 	{
@@ -76,32 +76,12 @@ public partial class Game : Node2D
 
 	public override void _Ready()
 	{
-		TileType treeTile = TileType.Create("Tree", 'T', color.FromHex(0x8AB969), 1.5f);
-		TileType wallTile = TileType.Create("Wall", 'X', color.FromHex(0x411d31), -1.0f);
-		TileType doorTile = TileType.Create("Door", 'D', color.FromHex(0x819796), 1.1f);
-		TileType groundTile = TileType.Create("Ground", '.', color.FromHex(0xA77B5B), 1.0f);
+		TileType treeTile = TileType.Create('T', color.FromHex(0x8AB969), 1.5f);
+		TileType wallTile = TileType.Create('X', color.FromHex(0xA2DCC7), -1.0f);
+		TileType doorTile = TileType.Create('D', color.FromHex(0x819796), 3.0f);
+		TileType groundTile = TileType.Create('.', color.FromHex(0xA77B5B), 1.0f);
 
-		//var path = ProjectSettings.GlobalizePath("user://data/tile_types.json");
-		//if (System.IO.File.Exists(path))
-		//{
-		//	var jsonData = System.IO.File.ReadAllText(path);
-		//	int count = TileType.AttachFromJson(jsonData);
-		//	GD.Print($"加载瓦片数据{count}个");
-		//}
-		//else
-		//{
-		//	treeTile = TileType.Create("Tree", 'T', color.FromHex(1), -1);
-		//	groundTile = TileType.Create("Ground", '.', color.FromHex(1), -1);
-		//	wallTile = TileType.Create("Wall", 'W', color.FromHex(1), -1);
-		//	doorTile = TileType.Create("Door", 'D', color.FromHex(1), -1);
-
-		//	var jsonData = TileType.ToJson();
-		//	System.IO.File.AppendAllText(path, jsonData);
-		//}
-
-		m_font = new SystemFont();
-
-		m_world = new WorldGrid(10, 10, groundTile);
+		m_world = new WorldGrid(20, 20, groundTile);
 
 		m_character = new Character(m_world, vec2i.zero, 3.0f, vec2i.zero);
 
@@ -114,13 +94,13 @@ public partial class Game : Node2D
 		};
 		m_character.moveControl = m_controllerSet[m_controllerIndex];
 
-		var rng = new RandomNumberGenerator();
-		rng.Seed = m_seed;
+		m_rng = new RandomNumberGenerator();
+		m_rng.Seed = m_seed;
 
 		for (int i = 1; i < m_world.tileCount-1; i++)
 		{
 			TileType type;
-			var v = rng.Randf();
+			var v = m_rng.Randf();
 
 			if (v < 0.1f) type = treeTile;
 			else type = groundTile;
@@ -129,12 +109,8 @@ public partial class Game : Node2D
 		}
 	}
 
-	private float m_delta;
-
 	public override void _Process(double delta)
 	{
-		m_delta = (float)delta;
-
 		m_character._update((float)delta);
 
 		var mousePos = this.GetLocalMousePosition();
@@ -145,11 +121,24 @@ public partial class Game : Node2D
 			m_controllerIndex = (m_controllerIndex + 1) % m_controllerSet.Count;
 			m_character.moveControl = m_controllerSet[m_controllerIndex];
 		}
-		if (Input.IsMouseButtonPressed(MouseButton.Left))
+
+		if (Input.IsActionJustPressed("mouse_right"))
+		{
+			if (m_selectedTile != null && m_controllerIndex == 2)
+			{
+				if (m_controllerSet[2] is RandomWalkAIControl control)
+				{
+					control.setTarget(new vec2i(m_selectedTile.x, m_selectedTile.y));
+				}
+			}
+		}
+		else if (Input.IsActionJustPressed("mouse_left"))
 		{
 			if (m_selectedTile != null)
 			{
-				m_selectedTile.type = TileType.GetType('W');	
+				int typeid = m_selectedTile.type.id;
+				typeid = (typeid + 1) % TileType.TypeCount;
+				m_selectedTile.type = TileType.GetFromId(typeid);
 			}
 		}
 
@@ -158,15 +147,34 @@ public partial class Game : Node2D
 
 	public override void _Draw()
 	{
-		this.DrawString(m_font, new Vector2(0, -24), $"fps: {(1 / m_delta).ToString("0.0")}");
-		this.DrawString(m_font, new Vector2(0, -12), $"control mode: {m_controllerIndex}");
+		DebugDisplay.Main.outString("control mode", m_controllerIndex.ToString());
 
 		for (int i = 0; i < m_world.tileCount; i++)
 		{
 			var tile = m_world.rawGetTile(i);
-			var color = ToGDColor(tile.type.color);
+			var color = ToGDColor(tile.type.c);
 
-			this.DrawCharacterSprite(tile.x, tile.y, tile.type.graph, color);
+			var graph = tile.type.graph;
+
+			this.DrawCharacterSprite(tile.x, tile.y, graph, color);
+		}
+
+		if (m_character.motion.processing)
+		{
+			var target = m_character.motion.targetCoord;
+			this.DrawCharacterSprite(target.x, target.y, 'x', new Color(0, 0.5f, 0, 0.5f));
+		}
+
+		if (m_controllerIndex == 2)
+		{
+			if (m_controllerSet[m_controllerIndex] is RandomWalkAIControl control)
+			{
+				for (int i = 0; i < control.pathNodeCount; i++)
+				{
+					var node = control.getPathNode(i);
+					this.DrawCharacterSprite(node.x, node.y, 'x', new Color(1,1,1,0.5f));
+				}
+			}
 		}
 		
 		this.DrawCharacterSprite(m_character.entity.coord.x, m_character.entity.coord.y, 'P');

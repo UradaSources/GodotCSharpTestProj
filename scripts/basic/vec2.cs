@@ -80,7 +80,7 @@
 
 		public override string ToString()
 		{
-			return $"vec2{{{this.x},{this.y}}}";
+			return $"vec2{{{this.x:0.00},{this.y:0.00}}}";
 		}
 
 		public float x, y;

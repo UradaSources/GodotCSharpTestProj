@@ -1,9 +1,15 @@
-﻿namespace urd
+﻿using System.Collections;
+using System.Collections.Generic;
+
+namespace urd
 {
 	public class Entity
 	{
 		private WorldGrid m_world;
 		private vec2i m_coord;
+
+		private bool m_shouldBeDestroyed;
+		private bool m_isDestroyed;
 
 		public WorldGrid world { get => m_world; }
 		public vec2i coord { get => m_coord; set => m_coord = value; }

@@ -1,15 +1,20 @@
 using Godot;
+using System.Text;
 
-public partial class UpdateDebugDisplay : ItemList
+public partial class UpdateDebugDisplay : RichTextLabel
 {
 	public override void _Process(double delta)
 	{
-		this.Clear();
+		var build = new StringBuilder();
+
+		build.AppendLine($"fps: {1/delta:0.0}\tdelta: {delta:0.000}\n");
 
 		for (int i = 0; i < DebugDisplay.Main.recordCount; i++)
 		{
-			var record = DebugDisplay.Main.GetRecord(i);
-			this.AddItem($"{record.msg} {record.title} {record.time} {record.key}");
+			var record = DebugDisplay.Main.getRecord(i);
+			build.AppendLine($"[color=green]{record.title} -{record.time.ToString("HH:mm:ss")}[/color]\n{record.msg}");
 		}
+
+		this.Text = build.ToString();
 	}
 }

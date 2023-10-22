@@ -5,54 +5,45 @@ using urd;
 
 public class TileType
 {
-	private static SortedList<char, TileType> _Types = new SortedList<char, TileType>();
+	private static List<TileType> _Types = new List<TileType>();
 
-	public static TileType Create(string name, char graph, color color, float cost)
+	public static int TypeCount => _Types.Count;
+
+	public static TileType Create(char graph, color color, float cost)
 	{
-		Debug.Assert(!_Types.ContainsKey(graph));
-
-		var type = new TileType(name, graph, color, cost);
-		_Types.Add(graph, type);
-
+		int id = _Types.Count;
+		var type = new TileType(id, graph, color, cost);
+		_Types.Add(type);
 		return type;
 	}
-	public static TileType GetType(char graph)
+	public static TileType GetFromId(int id)
 	{
-		if (_Types.TryGetValue(graph, out var type)) return type;
-		else return null;
-	}
-	public static TileType FindType(string name)
-	{
-		foreach (var pair in _Types)
-		{
-			if (pair.Value.name == name)
-				return pair.Value;
-		}
-		return null;
+		Debug.Assert(id >= 0 && id < _Types.Count, $"invaild tiletype id: {id}");
+		return _Types[id];
 	}
 
+	public static void InitFromJson(string jsonData)
+	{
+		Debug.Assert(_Types.Count == 0, "cannot init tiletype form json.");
+		_Types = JsonSerializer.Deserialize<List<TileType>>(jsonData);
+	}
 	public static string ToJson()
 	{
 		return JsonSerializer.Serialize(_Types);
 	}
-	public static int AttachFromJson(string jsonData)
-	{
-		int count = _Types.Count;
-		_Types = JsonSerializer.Deserialize<SortedList<char, TileType>>(jsonData);
-		return _Types.Count - count;
-	}
 
-	public readonly char graph;
-	public readonly color color;
-
-	public readonly string name;
+	public readonly int id;
 	public readonly float cost;
 
-	private TileType(string name, char graph, color color, float cost)
+	public readonly char graph;
+	public readonly color c;
+
+	private TileType(int id, char graph, color c, float cost)
 	{
-		this.graph = graph;
-		this.color = color;
-		this.name = name;
+		this.id = id;
 		this.cost = cost;
+
+		this.graph = graph;
+		this.c = c;
 	}
 }

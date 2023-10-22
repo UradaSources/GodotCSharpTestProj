@@ -15,14 +15,19 @@ offset_top = 4.0
 offset_right = 1140.0
 offset_bottom = 504.0
 
-[node name="ItemList" type="ItemList" parent="UI"]
-layout_mode = 0
-offset_right = 509.0
-offset_bottom = 616.0
-auto_height = true
+[node name="RichTextLabel" type="RichTextLabel" parent="UI"]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -441.0
+offset_bottom = 640.0
+grow_horizontal = 0
+bbcode_enabled = true
 script = ExtResource("1_a4pel")
 
 [node name="Game" type="Node2D" parent="."]
+position = Vector2(0, 6)
 script = ExtResource("1_trikb")
 m_seed = 123
 m_characterSheet = ExtResource("2_fi8re")

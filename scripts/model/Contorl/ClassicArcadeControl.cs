@@ -11,6 +11,8 @@ namespace urd
 
 		public override void _update(float dt)
 		{
+			DebugDisplay.Main.outObject(this);
+
 			if (Input.IsActionJustPressed("ui_down"))
 				m_cacheMoveDirect = vec2i.up;
 			else if (Input.IsActionJustPressed("ui_up"))
@@ -22,7 +24,6 @@ namespace urd
 
 			if (!this.motion.processing)
 			{
-				GD.Print($"get inp, now dir is {m_cacheMoveDirect}");
 				this.motion.moveDirect = m_cacheMoveDirect;
 			}
 		}
