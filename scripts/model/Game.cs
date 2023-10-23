@@ -37,14 +37,11 @@ public partial class Game : Node2D
 	[Export] private float m_tileSize = 20;
 
 	private WorldGrid m_world;
-	private Character m_character;
-
-	private int m_controllerIndex = 0;
-	private List<BasicMoveControl> m_controllerSet;
+	private Pathfind m_pathfind;
 
 	private TileCell m_selectedTile;
 
-	private RandomNumberGenerator m_rng;
+	private ComponentContainer m_player;
 
 	public void DrawCharacterSprite(int x, int y, char c, Color? color = null)
 	{
@@ -80,27 +77,28 @@ public partial class Game : Node2D
 		TileType wallTile = TileType.Create('X', color.FromHex(0xA2DCC7), -1.0f);
 		TileType doorTile = TileType.Create('D', color.FromHex(0x819796), 3.0f);
 		TileType groundTile = TileType.Create('.', color.FromHex(0xA77B5B), 1.0f);
+		TileType floorTile = TileType.Create('_', color.FromHex(0xA77B5B), 3.0f);
 
 		m_world = new WorldGrid(20, 20, groundTile);
+		m_pathfind = new Pathfind(m_world);
 
-		m_character = new Character(m_world, vec2i.zero, 3.0f, vec2i.zero);
+		m_player = new ComponentContainer();
 
-		// 初始化并选择控制器
-		m_controllerSet = new List<BasicMoveControl>
-		{
-			new ClassicArcadeControl(m_character.motion),
-			new RpgControl(m_character.motion),
-			new RandomWalkAIControl(m_character.motion)
-		};
-		m_character.moveControl = m_controllerSet[m_controllerIndex];
+		m_player.addComponent(new Entity(m_world, vec2i.zero));
+		m_player.addComponent(new EntityMotion(3.0f, vec2i.zero));
+		m_player.addComponent(new EntityMoveToward(m_pathfind));
 
-		m_rng = new RandomNumberGenerator();
-		m_rng.Seed = m_seed;
+		m_player.addComponent(new RandomWalkControl());
+
+		m_player._init();
+
+		RandomNumberGenerator rng = new RandomNumberGenerator();
+		rng.Seed = m_seed;
 
 		for (int i = 1; i < m_world.tileCount-1; i++)
 		{
 			TileType type;
-			var v = m_rng.Randf();
+			var v = rng.Randf();
 
 			if (v < 0.1f) type = treeTile;
 			else type = groundTile;
@@ -111,28 +109,30 @@ public partial class Game : Node2D
 
 	public override void _Process(double delta)
 	{
-		m_character._update((float)delta);
+		m_player._update((float)delta);
 
 		var mousePos = this.GetLocalMousePosition();
 		this.TrySelectTile(mousePos);
 
-		if (Input.IsActionJustPressed("ui_select"))
-		{
-			m_controllerIndex = (m_controllerIndex + 1) % m_controllerSet.Count;
-			m_character.moveControl = m_controllerSet[m_controllerIndex];
-		}
+		// 切换控制器
+		//if (Input.IsActionJustPressed("ui_select"))
+		//{
+		//	m_controllerIndex = (m_controllerIndex + 1) % m_controllerSet.Count;
+		//	m_character.moveControl = m_controllerSet[m_controllerIndex];
+		//}
 
+		// 设置目的地
 		if (Input.IsActionJustPressed("mouse_right"))
 		{
-			if (m_selectedTile != null && m_controllerIndex == 2)
+			if (m_selectedTile != null && m_player.getComponent(typeof(BasicMotionControl)) == null)
 			{
-				if (m_controllerSet[2] is RandomWalkAIControl control)
-				{
-					control.setTarget(new vec2i(m_selectedTile.x, m_selectedTile.y));
-				}
+				var navigation = m_player.getComponent<EntityMoveToward>();
+				navigation.setTarget(new vec2i(m_selectedTile.x, m_selectedTile.y));
 			}
 		}
-		else if (Input.IsActionJustPressed("mouse_left"))
+		
+		// 设置图块
+		if (Input.IsActionJustPressed("mouse_left"))
 		{
 			if (m_selectedTile != null)
 			{
@@ -147,8 +147,7 @@ public partial class Game : Node2D
 
 	public override void _Draw()
 	{
-		DebugDisplay.Main.outString("control mode", m_controllerIndex.ToString());
-
+		// 绘制地图
 		for (int i = 0; i < m_world.tileCount; i++)
 		{
 			var tile = m_world.rawGetTile(i);
@@ -159,25 +158,25 @@ public partial class Game : Node2D
 			this.DrawCharacterSprite(tile.x, tile.y, graph, color);
 		}
 
-		if (m_character.motion.processing)
+		// 绘制角色本身
+		var entity = m_player.getComponent<Entity>();
+		this.DrawCharacterSprite(entity.coord.x, entity.coord.y, 'P');
+
+		// 绘制目标格子
+		var motion = m_player.getComponent<EntityMotion>();
+		if (motion.processing)
 		{
-			var target = m_character.motion.targetCoord;
+			var target = motion.targetCoord;
 			this.DrawCharacterSprite(target.x, target.y, 'x', new Color(0, 0.5f, 0, 0.5f));
 		}
 
-		if (m_controllerIndex == 2)
+		// 绘制寻路路径
+		var navigation = m_player.getComponent<EntityMoveToward>();
+		for (int i = 0; i < navigation.pathNodeCount; i++)
 		{
-			if (m_controllerSet[m_controllerIndex] is RandomWalkAIControl control)
-			{
-				for (int i = 0; i < control.pathNodeCount; i++)
-				{
-					var node = control.getPathNode(i);
-					this.DrawCharacterSprite(node.x, node.y, 'x', new Color(1,1,1,0.5f));
-				}
-			}
+			var node = navigation.getPathNode(i);
+			this.DrawCharacterSprite(node.x, node.y, 'x', new Color(1,1,1,0.5f));
 		}
-		
-		this.DrawCharacterSprite(m_character.entity.coord.x, m_character.entity.coord.y, 'P');
 
 		if (m_selectedTile != null)
 			this.DrawSelectBox(m_selectedTile.x, m_selectedTile.y, Colors.Red);

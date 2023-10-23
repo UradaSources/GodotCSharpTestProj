@@ -3,7 +3,7 @@ using Godot;
 
 namespace urd
 {
-	public class EntityMotion: BasicComponent
+	public class EntityMotion: Component
 	{
 		private Entity m_entity;
 
@@ -32,7 +32,11 @@ namespace urd
 
 		public bool processing => m_processing;
 
-		public override void _init() { }
+		public override void _init()
+		{
+			m_entity = this.container.getComponent<Entity>();
+			Debug.Assert(m_entity != null);
+		}
 		public override void _update(float delta)
 		{
 			DebugDisplay.Main.outObject(this);
@@ -90,9 +94,8 @@ namespace urd
 			}
 		}
 
-		public EntityMotion(Entity entity, float moveSpeed, vec2i moveDirect)
+		public EntityMotion(float moveSpeed, vec2i moveDirect)
 		{
-			m_entity = entity;
 			m_moveSpeed = moveSpeed;
 			m_moveDirect = moveDirect;
 		}
