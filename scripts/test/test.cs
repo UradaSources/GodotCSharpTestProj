@@ -1,25 +1,57 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 public interface ComponentConfig
 {
 	bool beforeJoinContainer(Component com, ComponentContainer container);
 }
 
+public class RequiredComponentConfig : ComponentConfig
+{
+	private System.Type[] m_require;
+
+	public bool beforeJoinContainer(Component com, ComponentContainer container)
+	{
+		bool missRequired = false;
+		for (int i = 0; i < m_require.Length; i++)
+		{
+			var type = m_require[i];
+			if (container.getComponent(type) == null)
+			{
+				Debug.WriteLine($"required prefix type was not found: {type.Name}");
+				missRequired = true;
+			}
+		}
+		return !missRequired;
+	}
+
+	public RequiredComponentConfig(params System.Type[] require) 
+	{
+#if DEBUG
+		for (int i = 0; i < m_require.Length; i++)
+		{
+			Debug.Assert(m_require[i].IsInterface || m_require[i].IsSubclassOf(typeof(Component)),
+				"invalid type, must be an interface or inherited from component");
+		}
+#endif
+		m_require = require;
+	}
+}
+
 public abstract class Component
 {
-	private static Dictionary<System.Type, ComponentConfig> _Config;
+	private static Dictionary<System.Type, ComponentConfig> _Config 
+		= new Dictionary<System.Type, ComponentConfig>();
 
 	public static void BindConfig<T>(ComponentConfig config)
 		where T : Component
 	{
 		var key = typeof(T);
 
-		if (config != null)
-			_Config[key] = config;
-		else
-			_Config.Remove(key);
+		if (config != null) _Config[key] = config;
+		else _Config.Remove(key);
 	}
 	public static ComponentConfig GetConfig<T>()
 		where T : Component
@@ -35,8 +67,8 @@ public abstract class Component
 
 	public virtual void _onAddToContainer(ComponentContainer container, int index)
 	{
-		Debug.Assert(m_container == null, "");
-		Debug.Assert(container != null, "");
+		Debug.Assert(m_container == null, $"component {this} is currently in the container {m_container}");
+		Debug.Assert(container != null, $"");
 
 		m_container = container;
 		m_index = index;
@@ -49,11 +81,11 @@ public abstract class Component
 		m_index = -1;
 	}
 
-	public abstract void _onEnable();
-	public abstract void _onDisable();
+	public virtual void _onEnable() { }
+	public virtual void _onDisable() { }
 
-	public abstract void _update(float delta);
-	public abstract void _lateUpdate(float delta);
+	public virtual void _update(float delta) { }
+	public virtual void _lateUpdate(float delta) { }
 }
 
 public class ComponentContainer
@@ -167,7 +199,8 @@ public class ComponentContainer
 	}
 	public Component getComponent(System.Type type)
 	{
-		Debug.Assert(type.IsSubclassOf(typeof(Component)));
+		Debug.Assert(type.IsInterface || type.IsSubclassOf(typeof(Component)),
+			"invalid type, must be an interface or inherited from component");
 
 		var it = m_components.First;
 		while (it != null)
@@ -205,7 +238,10 @@ public class ComponentContainer
 			return com;
 		}
 		else
+		{
+			Debug.WriteLine($"add compnent {typeof(T).Name} faild", $"{this.GetType().Name}.Warn");
 			return null;
+		}
 	}
 
 	public T removeComponent<T>()
@@ -225,5 +261,54 @@ public class ComponentContainer
 	{
 		m_components = new LinkedList<Component>();
 		m_indexMap = new Dictionary<System.Type, LinkedListNode<Component>>();
+	}
+}
+
+public static class Program
+{
+	public class Com1 : Component
+	{
+		public override void _onEnable()
+		{
+			System.Console.WriteLine("Com1 Init");
+		}
+		public override void _update(float delta)
+		{
+			System.Console.WriteLine("Com1 Update");
+		}
+	}
+	public class Com2 : Component
+	{
+		public override void _onEnable()
+		{
+			System.Console.WriteLine("Com2 Init");
+		}
+		public override void _update(float delta)
+		{
+			System.Console.WriteLine("Com2 Update");
+		}
+
+		static Com2()
+		{
+			BindConfig<Com2>(new RequiredComponentConfig(typeof(Com1)));
+		}
+	}
+
+	public static void Main()
+	{
+		ConsoleTraceListener consoleTrace = new ConsoleTraceListener();
+		Trace.Listeners.Add(consoleTrace);
+
+		var go = new ComponentContainer();
+		go.emplaceComponent<Com1>();
+		go.emplaceComponent<Com2>();
+
+		ComponentContainer.Enable(go);
+
+		ComponentContainer.UpdateEnabled(0);
+		ComponentContainer.UpdateEnabled(0);
+		ComponentContainer.UpdateEnabled(0);
+		ComponentContainer.UpdateEnabled(0);
+		ComponentContainer.UpdateEnabled(0);
 	}
 }
