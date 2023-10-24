@@ -1,11 +1,43 @@
-﻿using System.Collections;
+﻿using System.IO;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Godot;
 using urd;
 
 public partial class Game : Node2D
 {
+	public struct WorldData
+	{
+		[JsonInclude] public int width, height;
+		[JsonInclude] public int[] tile;
+	}
+
+	public static string ToJson(WorldGrid world)
+	{ 
+		var data = new WorldData();
+		data.width = world.width;
+		data.height = world.height;
+
+		data.tile = new int[data.width * data.height];
+		for (int i = 0; i < world.tileCount; i++)
+			data.tile[i] = world.rawGetTile(i).type.id;
+
+		return JsonSerializer.Serialize(data);
+	}
+	public static WorldGrid FromJson(string json)
+	{
+		var data = JsonSerializer.Deserialize<WorldData>(json);
+		WorldGrid world = new WorldGrid(data.width, data.height, TileType.GetFromId(0));
+
+		for (int i = 0; i < world.tileCount; i++)
+			world.rawGetTile(i).type = TileType.GetFromId(i);
+
+		return world;
+	}
+
 	public static Color ToGDColor(color c)
 	{
 		return new Color((float)c.r/255, (float)c.g/255, (float)c.b/255, (float)c.a/255);
@@ -79,7 +111,15 @@ public partial class Game : Node2D
 		TileType groundTile = TileType.Create('.', color.FromHex(0xA77B5B), 1.0f);
 		TileType floorTile = TileType.Create('_', color.FromHex(0xA77B5B), 3.0f);
 
-		m_world = new WorldGrid(20, 20, groundTile);
+		var worldFilePath = "./save/world.json";
+		if (File.Exists(worldFilePath))
+		{
+			var json = File.ReadAllText(worldFilePath);
+			m_world = FromJson(json);
+		}
+		else
+			m_world = new WorldGrid(20, 20, groundTile);
+
 		m_pathfind = new Pathfind(m_world);
 
 		m_player = new ComponentContainer();
@@ -140,6 +180,15 @@ public partial class Game : Node2D
 				typeid = (typeid + 1) % TileType.TypeCount;
 				m_selectedTile.type = TileType.GetFromId(typeid);
 			}
+		}
+
+		// 储存地图数据
+		if (Input.IsActionJustPressed(""))
+		{
+			var json = ToJson(m_world);
+
+			var worldFilePath = "./save/world.json";
+			File.AppendAllText(worldFilePath, json);
 		}
 
 		this.QueueRedraw();
