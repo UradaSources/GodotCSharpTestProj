@@ -25,7 +25,7 @@ namespace urd
 		{
 			if (m_target != target)
 			{
-				GD.Print($"set path target {target}");
+				Debug.WriteLine($"set path target {target}");
 
 				var entity = m_motion.entity;
 				var world = entity.world;

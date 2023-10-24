@@ -92,7 +92,7 @@ namespace urd
 			m_open.Clear();
 			m_close.Clear();
 
-			//GD.Print($"\n\n pathfind ({start.x},{start.y})->({target.x},{target.y}) --------------------------");
+			//Debug.WriteLine($"\n\n pathfind ({start.x},{start.y})->({target.x},{target.y}) --------------------------");
 
 			// 检查起点和终点是否可到达
 			Debug.Assert(this.getOrBuildNode(start.x, start.y, out Node firstNode));
@@ -120,7 +120,7 @@ namespace urd
 					}
 				}
 
-				//GD.Print($"\n\nget fmin node {fMinNode}");
+				//Debug.WriteLine($"\n\nget fmin node {fMinNode}");
 
 				m_open.Remove(fMinNode.id);
 				m_close.Add(fMinNode.id, fMinNode);
@@ -132,12 +132,12 @@ namespace urd
 					{
 						if (nearNode.tile.type.cost < 0) continue;
 
-						//GD.Print($"get near node. {nearNode.id}:({nearNode.tile.x},{nearNode.tile.y})");
+						//Debug.WriteLine($"get near node. {nearNode.id}:({nearNode.tile.x},{nearNode.tile.y})");
 
 						// 检查当前临近节点是否在开放列表中
 						if (m_open.ContainsKey(nearNode.id))
 						{
-							//GD.Print($"\tits in open list");
+							//Debug.WriteLine($"\tits in open list");
 
 							// 测试新提供的g值是否令f值更小
 							float gNew = fMinNode.g + nearNode.tile.type.cost;
@@ -147,7 +147,7 @@ namespace urd
 								nearNode.parent = fMinNode;
 								nearNode.g = gNew;
 
-								//GD.Print($"\tand update f. {nearNode}");
+								//Debug.WriteLine($"\tand update f. {nearNode}");
 							}
 						}
 						else
@@ -161,19 +161,19 @@ namespace urd
 
 							m_open.Add(nearNode.id, nearNode);
 
-							//GD.Print($"\tits not in open list, set value. {nearNode}");
+							//Debug.WriteLine($"\tits not in open list, set value. {nearNode}");
 						}
 					}
 				}
 				else
 				{
-					//GD.Print("pathfind done.");
+					//Debug.WriteLine("pathfind done.");
 
-					//GD.Print("open:");
-					//foreach (var node in m_open.Values) GD.Print($"\t{node}");
+					//Debug.WriteLine("open:");
+					//foreach (var node in m_open.Values) Debug.WriteLine($"\t{node}");
 					
-					//GD.Print("close:");
-					//foreach (var node in m_close.Values) GD.Print($"\t{node}");
+					//Debug.WriteLine("close:");
+					//foreach (var node in m_close.Values) Debug.WriteLine($"\t{node}");
 
 					List<TileCell> buf = new List<TileCell>();
 					Node link = fMinNode;
@@ -185,10 +185,10 @@ namespace urd
 					
 					// buf.Reverse();
 
-					//GD.Print("way:");
+					//Debug.WriteLine("way:");
 					foreach (var node in buf)
 					{
-						// GD.Print($"\t{node.x},{node.y}");
+						// Debug.WriteLine($"\t{node.x},{node.y}");
 						yield return node;
 					}
 
@@ -196,13 +196,13 @@ namespace urd
 				}
 			}
 
-			//GD.Print("pathfind faild.");
+			//Debug.WriteLine("pathfind faild.");
 
-			//GD.Print("open:");
-			//foreach (var node in m_open.Values) GD.Print($"\t{node}");
+			//Debug.WriteLine("open:");
+			//foreach (var node in m_open.Values) Debug.WriteLine($"\t{node}");
 
-			//GD.Print("close:");
-			//foreach (var node in m_close.Values) GD.Print($"\t{node}");
+			//Debug.WriteLine("close:");
+			//foreach (var node in m_close.Values) Debug.WriteLine($"\t{node}");
 
 			yield break;
 		}
