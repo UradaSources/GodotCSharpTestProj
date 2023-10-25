@@ -150,7 +150,7 @@ namespace urd
 			m_player = new ComponentContainer();
 
 			m_player.addComponent(new Entity(m_world, vec2i.zero));
-			m_player.addComponent(new EntityMotion(3.0f, vec2i.zero));
+			m_player.addComponent(new Movement(3.0f, vec2i.zero));
 			m_player.addComponent(new EntityMoveToward(m_pathfind));
 
 			m_player.addComponent(new RandomWalkControl());
@@ -214,7 +214,7 @@ namespace urd
 			this.DrawCharacterSprite(entity.coord.x, entity.coord.y, 'P');
 
 			// 绘制目标格子
-			var motion = m_player.getComponent<EntityMotion>();
+			var motion = m_player.getComponent<Movement>();
 			if (motion.processing)
 			{
 				var target = motion.targetCoord;

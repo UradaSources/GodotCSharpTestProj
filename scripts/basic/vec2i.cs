@@ -62,6 +62,7 @@
 		public static vec2i operator -(vec2i a, vec2i b) { return new vec2i(a.x - b.x, a.y - b.y); }
 		public static vec2i operator *(vec2i a, vec2i b) { return new vec2i(a.x * b.x, a.y * b.y); }
 		public static vec2i operator /(vec2i a, vec2i b) { return new vec2i(a.x / b.x, a.y / b.y); }
+		public static vec2i operator %(vec2i a, vec2i b) { return new vec2i(a.x / b.x, a.y / b.y); }
 
 		public static bool operator ==(vec2i a, vec2i b)
 		{

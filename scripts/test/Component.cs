@@ -3,6 +3,12 @@ using System.Diagnostics;
 
 namespace urd
 {
+	[System.AttributeUsage(System.AttributeTargets.Field)]
+	public class BindComponentAttribute : System.Attribute
+	{
+		public BindComponentAttribute() { }
+	}
+
 	public abstract class Component
 	{
 		private static Dictionary<System.Type, ConfigComponent> _Config
@@ -22,10 +28,7 @@ namespace urd
 			return _Config.TryGetValue(typeof(T), out var config) ? config : null;
 		}
 
-		private bool m_enable = true;
 		private ComponentContainer m_container;
-
-		public bool enable => m_enable;
 		public ComponentContainer container => m_container;
 
 		public virtual void _onAddToContainer(ComponentContainer container, int index)
@@ -41,7 +44,6 @@ namespace urd
 			m_container = null;
 		}
 
-		public virtual void _init() { }
 		public virtual void _update(float delta) { }
 	}
 }

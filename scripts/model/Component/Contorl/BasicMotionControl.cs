@@ -2,13 +2,13 @@
 {
 	public abstract class BasicMotionControl : Component
 	{
-		private EntityMotion m_motion;
+		private Movement m_motion;
 
-		protected EntityMotion motion => m_motion;
+		protected Movement motion => m_motion;
 
 		public override void _init()
 		{
-			m_motion = this.container.getComponent<EntityMotion>();
+			m_motion = this.container.getComponent<Movement>();
 		}
 	}
 }

@@ -14,6 +14,7 @@ namespace urd
 		public int width => m_width;
 		public int height => m_height;
 
+		public vec2i size => new vec2i(m_width, m_height);
 		public int tileCount => m_width * m_height;
 
 		public bool vaildCoord(int x, int y)

@@ -7,7 +7,7 @@ namespace urd
 	public class EntityMoveToward : Component
 	{
 		private Pathfind m_pathfind;
-		private EntityMotion m_motion;
+		private Movement m_motion;
 
 		private vec2i? m_target;
 		private List<TileCell> m_pathNodeList;
@@ -47,9 +47,11 @@ namespace urd
 			m_pathNodeList.Clear();
 		}
 
-		public override void _init()
+		public override void _onAddToContainer(ComponentContainer container, int index)
 		{
-			m_motion = this.container.getComponent<EntityMotion>();
+			base._onAddToContainer(container, index);
+
+			m_motion = this.container.getComponent<Movement>();
 			Debug.Assert(m_motion != null);
 		}
 		public override void _update(float delta)

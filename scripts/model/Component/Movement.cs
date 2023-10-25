@@ -3,7 +3,7 @@ using Godot;
 
 namespace urd
 {
-	public class EntityMotion: Component
+	public class Movement: Component
 	{
 		private Entity m_entity;
 
@@ -13,45 +13,33 @@ namespace urd
 		private vec2i m_moveDirect;
 
 		private float m_progress;
-		private bool m_processing;
-
-		public Entity entity => m_entity;
 
 		public vec2i targetCoord => m_targetCoord;
 
-		public float moveSpeed
-		{
-			set => m_moveSpeed = value;
-			get => m_moveSpeed;
-		}
-		public vec2i moveDirect
-		{
-			set => m_moveDirect = value;
-			get => m_moveDirect;
-		}
+		public float moveSpeed { set => m_moveSpeed = value; get => m_moveSpeed; }
+		public vec2i moveDirect { set => m_moveDirect = value; get => m_moveDirect; }
 
-		public bool processing => m_processing;
+		public float progress => m_progress;
+		public bool processing => m_progress >= 0;
 
-		public override void _init()
+		public override void _onAddToContainer(ComponentContainer container, int index)
 		{
+			base._onAddToContainer(container, index);
+
 			m_entity = this.container.getComponent<Entity>();
 			Debug.Assert(m_entity != null);
 		}
 		public override void _update(float delta)
 		{
-			DebugDisplay.Main.outObject(this);
-
 			// 若当前正在移动中, 则更新位置
-			if (m_processing)
+			if (this.processing)
 			{
 				var targetCost = m_entity.world.getTile(m_targetCoord.x, m_targetCoord.y).type.cost;
 				
 				// 若块在移动过程中突然无法通过, 回退到原先的块
 				if (targetCost < 0)
 				{
-					m_processing = false;
-					m_progress = 0;
-
+					m_progress = -1;
 					return;
 				}
 
@@ -61,8 +49,8 @@ namespace urd
 				// 到达指定位置后重置标志
 				if (m_progress == 1)
 				{
-					this.entity.coord = m_targetCoord;
-					m_processing = false;
+					m_entity.coord = m_targetCoord;
+					m_progress = -1;
 				}
 			}
 			else // 若当前没有在移动
@@ -81,9 +69,7 @@ namespace urd
 						&& tile.type.cost >= 0)
 					{
 						m_targetCoord = targetCoord;
-
 						m_progress = 0;
-						m_processing = true;
 					}
 					else
 					{
@@ -94,7 +80,7 @@ namespace urd
 			}
 		}
 
-		public EntityMotion(float moveSpeed, vec2i moveDirect)
+		public Movement(float moveSpeed, vec2i moveDirect)
 		{
 			m_moveSpeed = moveSpeed;
 			m_moveDirect = moveDirect;
