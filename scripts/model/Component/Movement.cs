@@ -1,44 +1,40 @@
 ﻿using System.Diagnostics;
-using Godot;
 
 namespace urd
 {
 	public class Movement: Component
 	{
+		[BindComponent]
 		private Entity m_entity;
 
-		private vec2i m_targetCoord;
+		private vec2i m_currentDirect;
 
 		private float m_moveSpeed;
-		private vec2i m_moveDirect;
+		private vec2i m_direct;
 
 		private float m_progress;
 
-		public vec2i targetCoord => m_targetCoord;
+		public vec2i currentDirect => m_currentDirect;
 
-		public float moveSpeed { set => m_moveSpeed = value; get => m_moveSpeed; }
-		public vec2i moveDirect { set => m_moveDirect = value; get => m_moveDirect; }
+		public float speed { set => m_moveSpeed = value; get => m_moveSpeed; }
+		public vec2i direct { set => m_direct = value; get => m_direct; }
 
 		public float progress => m_progress;
 		public bool processing => m_progress >= 0;
 
-		public override void _onAddToContainer(ComponentContainer container, int index)
-		{
-			base._onAddToContainer(container, index);
-
-			m_entity = this.container.getComponent<Entity>();
-			Debug.Assert(m_entity != null);
-		}
 		public override void _update(float delta)
 		{
 			// 若当前正在移动中, 则更新位置
 			if (this.processing)
 			{
-				var targetCost = m_entity.world.getTile(m_targetCoord.x, m_targetCoord.y).type.cost;
+				var targetTile = m_entity.getNearTile(this.currentDirect, loop: true);
+				var targetCost = targetTile.type.cost;
 				
 				// 若块在移动过程中突然无法通过, 回退到原先的块
 				if (targetCost < 0)
 				{
+					Debug.WriteLine($"break in tile({m_currentDirect.x},{m_currentDirect.y})");
+
 					m_progress = -1;
 					return;
 				}
@@ -49,33 +45,21 @@ namespace urd
 				// 到达指定位置后重置标志
 				if (m_progress == 1)
 				{
-					m_entity.coord = m_targetCoord;
+					m_entity.coord = new vec2i(targetTile.x, targetTile.y);
+					m_currentDirect = vec2i.zero;
+
 					m_progress = -1;
 				}
 			}
-			else // 若当前没有在移动
+			// 若当前没有在移动, 则按照既定方向尝试进行移动
+			else if(m_direct != vec2i.zero)
 			{
-				// 继续移动
-				if (m_moveDirect != vec2i.zero)
+				// 尝试检查目标方向的下一个块是否可达
+				var nextTile = m_entity.getNearTile(m_direct, loop: true);
+				if (nextTile != null && nextTile.type.cost >= 0)
 				{
-					vec2i targetCoord = m_entity.coord + m_moveDirect;
-
-					// 计算循环的坐标
-					targetCoord.x = Mathf.LoopIndex(targetCoord.x, m_entity.world.width);
-					targetCoord.y = Mathf.LoopIndex(targetCoord.y, m_entity.world.height);
-
-					var world = m_entity.world;
-					if (world.tryGetTile(targetCoord.x, targetCoord.y, out var tile) 
-						&& tile.type.cost >= 0)
-					{
-						m_targetCoord = targetCoord;
-						m_progress = 0;
-					}
-					else
-					{
-						// 清空移动方向
-						m_moveDirect = vec2i.zero;
-					}
+					m_currentDirect = m_direct;
+					m_progress = 0;
 				}
 			}
 		}
@@ -83,7 +67,7 @@ namespace urd
 		public Movement(float moveSpeed, vec2i moveDirect)
 		{
 			m_moveSpeed = moveSpeed;
-			m_moveDirect = moveDirect;
+			m_direct = moveDirect;
 		}
 	}
 }

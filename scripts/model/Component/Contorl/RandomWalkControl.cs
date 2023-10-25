@@ -6,26 +6,22 @@ namespace urd
 {
 	public class RandomWalkControl : BasicMotionControl
 	{
-		private EntityMoveToward m_moveToward;
+		[BindComponent] private Entity m_entity;
+		[BindComponent] private Navigation m_moveToward;
 
 		private Godot.RandomNumberGenerator m_rng;
 		private float m_timer = 0;
 
-		public override void _init()
-		{
-			base._init();
-			m_moveToward = this.container.getComponent<EntityMoveToward>();
-		}
 		public override void _update(float dt)
 		{
-			if (this.motion.processing) return;
+			if (m_motion.processing) return;
 			if (m_timer > 0)
 			{
 				m_timer -= dt;
 				return;
 			}
 
-			var world = this.motion.entity.world;
+			var world = m_entity.world;
 
 			TileCell tile;
 			do

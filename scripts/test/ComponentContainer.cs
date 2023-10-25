@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Reflection;
 
 namespace urd
 {
@@ -22,6 +23,9 @@ namespace urd
 			Debug.Assert(type.IsInterface || type.IsSubclassOf(typeof(Component)),
 				"invalid type, must be an interface or inherited from component");
 
+			if (m_indexMap.TryGetValue(type, out var com))
+				return com.Value;
+
 			for (var it = m_components.First; it != null; it = it.Next)
 			{
 				if (type.IsInstanceOfType(it.Value))
@@ -36,21 +40,44 @@ namespace urd
 			return m_indexMap.ContainsKey(typeof(T));
 		}
 
-		public T emplaceComponent<T>()
+		public T emplaceComponent<T>(bool autoBindComponent = true)
 			where T : Component, new()
 		{
 			Debug.Assert(!this.hasComponent<T>());
 
 			var com = new T();
-			return this.addComponent(com);
+			return this.addComponent(com, autoBindComponent);
 		}
-		public T addComponent<T>(T com)
+		public T addComponent<T>(T com, bool autoBindComponent = true)
 			where T : Component
 		{
+			Debug.Assert(!this.hasComponent<T>());
+
 			var config = Component.GetTypeConfig<T>();
 			if (config == null || config.beforeJoinContainer(com, this))
 			{
 				com._onAddToContainer(this, m_components.Count);
+
+				// 使用反射绑定需要的组件
+				if (autoBindComponent)
+				{
+					var flag = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
+					var fields = typeof(T).GetFields(flag);
+
+					// 遍历字段并查找具有CustomAttribute的字段
+					foreach (var field in fields)
+					{
+						var bindOptions = field.GetCustomAttribute<BindComponentAttribute>();
+						if (bindOptions != null)
+						{
+							var dependent = this.getComponent(field.FieldType);
+							Debug.Assert(dependent != null || !bindOptions.require,
+								$"Unable to add component ({typeof(T).Name}) to the container, its dependent component ({field.DeclaringType.Name}) does not exist");
+								
+							if (dependent != null) field.SetValue(com, dependent);
+						}
+					}
+				}
 
 				var it = m_components.AddLast(com);
 				m_indexMap.Add(typeof(T), it);
@@ -76,21 +103,17 @@ namespace urd
 			return null;
 		}
 
-		public void _init()
+		public IEnumerable<Component> iterateComponents()
 		{
 			for (var it = m_components.First; it != null; it = it.Next)
-			{
-				var com = it.Value;
-				if (com.enable) com._init();
-			}
+				yield return it.Value;
 		}
-		public void _update(float delta)
+
+		public virtual void _init() { }
+		public virtual void _update(float delta)
 		{
 			for (var it = m_components.First; it != null; it = it.Next)
-			{
-				var com = it.Value;
-				if (com.enable) com._update(delta);
-			}
+				it.Value._update(delta);
 		}
 
 		public ComponentContainer()

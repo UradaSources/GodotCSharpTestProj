@@ -4,10 +4,12 @@ using Godot;
 
 namespace urd
 {
-	public class EntityMoveToward : Component
+	public class Navigation : Component
 	{
 		private Pathfind m_pathfind;
-		private Movement m_motion;
+
+		[BindComponent] private Entity m_entity;
+		[BindComponent] private Movement m_motion;
 
 		private vec2i? m_target;
 		private List<TileCell> m_pathNodeList;
@@ -27,10 +29,9 @@ namespace urd
 			{
 				Debug.WriteLine($"set path target {target}");
 
-				var entity = m_motion.entity;
-				var world = entity.world;
+				var world = m_entity.world;
 
-				var curTile = world.getTile(entity.coord.x, entity.coord.y);
+				var curTile = world.getTile(m_entity.coord.x, m_entity.coord.y);
 				var targetTile = world.getTile(target.x, target.y);
 
 				// 清除旧目标
@@ -47,42 +48,45 @@ namespace urd
 			m_pathNodeList.Clear();
 		}
 
-		public override void _onAddToContainer(ComponentContainer container, int index)
-		{
-			base._onAddToContainer(container, index);
-
-			m_motion = this.container.getComponent<Movement>();
-			Debug.Assert(m_motion != null);
-		}
 		public override void _update(float delta)
 		{
 			DebugDisplay.Main.outObject(this);
 			DebugDisplay.Main.outString("pathcount", $"{m_pathNodeList.Count}");
 
+			// 等待当前运动完成
 			if (m_motion.processing) return;
 
+			// 设置下一个目的tile
 			if (m_pathNodeList.Count > 0)
 			{
-				var t = m_pathNodeList[m_pathNodeList.Count - 1];
-				if (t.type.cost < 0)
+				var nextTile = m_pathNodeList[m_pathNodeList.Count - 1];
+				if (nextTile.type.cost < 0) // 若下一个目标路点无效了, 则清除当前路径和移动方向
 				{
+					Debug.WriteLine($"next tile({nextTile.x},{nextTile.y}) is unreachable, clear path.");
+
 					this.clearData();
-					m_motion.moveDirect = vec2i.zero;
+					m_motion.direct = vec2i.zero;
+
+					// 重新计算路径
+					// ...
 
 					return;
 				}
-				m_pathNodeList.RemoveAt(m_pathNodeList.Count - 1);
 
-				var dir = new vec2i(t.x, t.y) - m_motion.entity.coord;
-				m_motion.moveDirect = dir;
+				// 计算当前路径前往目标节点的方向
+				var moveDirect = new vec2i(nextTile.x, nextTile.y) - m_entity.coord;
+				m_motion.direct = moveDirect;
+				
+				m_pathNodeList.RemoveAt(m_pathNodeList.Count - 1);
 			}
 			else
 			{
-				m_motion.moveDirect = vec2i.zero;
+				// 在路点全部完成后, 清除移动方向
+				m_motion.direct = vec2i.zero;
 			}
 		}
 
-		public EntityMoveToward(Pathfind pathfind)
+		public Navigation(Pathfind pathfind)
 		{
 			m_pathfind = pathfind;
 			m_pathNodeList = new List<TileCell>();

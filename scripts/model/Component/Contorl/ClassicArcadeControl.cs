@@ -21,9 +21,9 @@ namespace urd
 			else if (Godot.Input.IsActionJustPressed("ui_right"))
 				m_cacheMoveDirect = vec2i.right;
 
-			if (!this.motion.processing)
+			if (!m_motion.processing)
 			{
-				this.motion.moveDirect = m_cacheMoveDirect;
+				m_motion.direct = m_cacheMoveDirect;
 			}
 		}
 	}

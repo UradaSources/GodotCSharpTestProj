@@ -7,7 +7,7 @@
 		{
 			base._update(dt);
 
-			if (!this.motion.processing)
+			if (!m_motion.processing)
 			{
 				var dir = vec2i.zero;
 				if (Godot.Input.IsActionPressed("ui_down"))
@@ -19,7 +19,7 @@
 				else if (Godot.Input.IsActionPressed("ui_right"))
 					dir = vec2i.right;
 
-				this.motion.moveDirect = dir;
+				m_motion.direct = dir;
 			}
 		}
 	}

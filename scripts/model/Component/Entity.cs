@@ -16,9 +16,12 @@ namespace urd
 
 		private LinkedListNode<Entity> _itor = null;
 
+		private string m_name;
+
 		private WorldGrid m_world;
 		private vec2i m_coord;
 
+		public string name { set => m_name = value; get => m_name; }
 		public WorldGrid world { get => m_world; }
 		public vec2i coord { get => m_coord; set => m_coord = value; }
 
@@ -46,10 +49,11 @@ namespace urd
 			return tile;
 		}
 
-		public Entity(WorldGrid world, vec2i coord)
+		public Entity(string name, WorldGrid world, vec2i coord)
 		{
-			this.m_world = world;
-			this.m_coord = coord;
+			m_name = name;
+			m_world = world;
+			m_coord = coord;
 
 			_itor = Entity._InstanceIndex.AddLast(this);
 		}

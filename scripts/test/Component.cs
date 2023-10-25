@@ -3,12 +3,6 @@ using System.Diagnostics;
 
 namespace urd
 {
-	[System.AttributeUsage(System.AttributeTargets.Field)]
-	public class BindComponentAttribute : System.Attribute
-	{
-		public BindComponentAttribute() { }
-	}
-
 	public abstract class Component
 	{
 		private static Dictionary<System.Type, ConfigComponent> _Config

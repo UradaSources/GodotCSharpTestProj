@@ -118,6 +118,10 @@ namespace urd
 			TileType floorTile = TileType.Create('_', color.FromHex(0x89493A), 0.8f);
 			TileType.Create('~', color.FromHex(0x4B80CA), 3.0f);
 
+			// 随机化地图
+			RandomNumberGenerator rng = new RandomNumberGenerator();
+			rng.Seed = m_seed;
+
 			if (File.Exists(WorldDataFilePath))
 			{
 				var json = File.ReadAllText(WorldDataFilePath);
@@ -128,10 +132,6 @@ namespace urd
 			else
 			{ 
 				m_world = new WorldGrid(20, 20, groundTile);
-
-				// 随机化地图
-				RandomNumberGenerator rng = new RandomNumberGenerator();
-				rng.Seed = m_seed;
 
 				for (int i = 1; i < m_world.tileCount - 1; i++)
 				{
@@ -149,18 +149,35 @@ namespace urd
 
 			m_player = new ComponentContainer();
 
-			m_player.addComponent(new Entity(m_world, vec2i.zero));
+			m_player.addComponent(new Entity("Player", m_world, vec2i.zero));
 			m_player.addComponent(new Movement(3.0f, vec2i.zero));
-			m_player.addComponent(new EntityMoveToward(m_pathfind));
+			m_player.addComponent(new Navigation(m_pathfind));
 
 			m_player.addComponent(new RandomWalkControl());
 
 			m_player._init();
+
+			for (int i = 0; i < 10; i++)
+			{
+				var enemy = new ComponentContainer();
+
+				int x = rng.RandiRange(0, m_world.width - 1);
+				int y = rng.RandiRange(0, m_world.height - 1);
+
+				enemy.addComponent(new Entity("Enemy", m_world, new vec2i(x, y)));
+				enemy.addComponent(new Movement(3.0f, vec2i.zero));
+				enemy.addComponent(new Navigation(m_pathfind));
+
+				enemy.addComponent(new FollowWalkControl()).target = m_player.getComponent<Entity>();
+
+				enemy._init();
+			}
 		}
 
 		public override void _Process(double delta)
 		{
-			m_player._update((float)delta);
+			foreach (var entity in Entity.IterateInstance())
+				entity.container._update((float)delta);
 
 			var mousePos = this.GetLocalMousePosition();
 			this.TrySelectTile(mousePos);
@@ -170,7 +187,7 @@ namespace urd
 			{
 				if (m_selectedTile != null && m_player.getComponent(typeof(BasicMotionControl)) == null)
 				{
-					var navigation = m_player.getComponent<EntityMoveToward>();
+					var navigation = m_player.getComponent<Navigation>();
 					navigation.setTarget(new vec2i(m_selectedTile.x, m_selectedTile.y));
 				}
 			}
@@ -209,24 +226,26 @@ namespace urd
 				this.DrawCharacterSprite(tile.x, tile.y, graph, color);
 			}
 
-			// 绘制角色本身
-			var entity = m_player.getComponent<Entity>();
-			this.DrawCharacterSprite(entity.coord.x, entity.coord.y, 'P');
-
-			// 绘制目标格子
-			var motion = m_player.getComponent<Movement>();
-			if (motion.processing)
+			foreach (var entity in Entity.IterateInstance())
 			{
-				var target = motion.targetCoord;
-				this.DrawCharacterSprite(target.x, target.y, 'x', new Color(0, 0.5f, 0, 0.5f));
-			}
+				// 绘制角色本身
+				this.DrawCharacterSprite(entity.coord.x, entity.coord.y, entity.name[0]);
 
-			// 绘制寻路路径
-			var navigation = m_player.getComponent<EntityMoveToward>();
-			for (int i = 0; i < navigation.pathNodeCount; i++)
-			{
-				var node = navigation.getPathNode(i);
-				this.DrawCharacterSprite(node.x, node.y, 'x', new Color(1, 1, 1, 0.5f));
+				// 绘制目标格子
+				var motion = entity.container.getComponent<Movement>();
+				if (motion.processing)
+				{
+					var target = entity.getNearTile(motion.currentDirect);
+					this.DrawCharacterSprite(target.x, target.y, 'x', new Color(0, 0.5f, 0, 0.5f));
+
+					// 绘制寻路路径
+					//var navigation = entity.container.getComponent<Navigation>();
+					//for (int i = 0; i < navigation.pathNodeCount; i++)
+					//{
+					//	var node = navigation.getPathNode(i);
+					//	this.DrawCharacterSprite(node.x, node.y, 'x', new Color(1, 1, 1, 0.5f));
+					//}
+				}
 			}
 
 			if (m_selectedTile != null)
