@@ -75,7 +75,7 @@ namespace urd
 		[Export] private float m_tileSize = 20;
 
 		private WorldGrid m_world;
-		private Pathfind m_pathfind;
+		private PathGenerator m_pathfind;
 
 		private TileCell m_selectedTile;
 
@@ -109,7 +109,7 @@ namespace urd
 			m_world.tryGetTile(x, y, out m_selectedTile);
 		}
 
-		private bool m_runingLoop;
+		private bool m_runingLoop = true;
 
 		public override void _Ready()
 		{
@@ -147,7 +147,7 @@ namespace urd
 				}
 			}
 
-			m_pathfind = new Pathfind(m_world);
+			m_pathfind = new PathGenerator(m_world);
 
 			m_player = new ComponentContainer();
 
@@ -159,7 +159,7 @@ namespace urd
 
 			m_player._init();
 
-			for (int i = 0; i < 1; i++)
+			for (int i = 0; i < 4; i++)
 			{
 				var enemy = new ComponentContainer();
 
@@ -167,7 +167,7 @@ namespace urd
 				int y = rng.RandiRange(0, m_world.height - 1);
 
 				enemy.addComponent(new Entity("Enemy", m_world, new vec2i(x, y)));
-				enemy.addComponent(new Movement(1.0f, vec2i.zero));
+				enemy.addComponent(new Movement(2.8f, vec2i.zero));
 				enemy.addComponent(new Navigation(m_pathfind));
 
 				enemy.addComponent(new FollowWalkControl()).target = m_player.getComponent<Entity>();

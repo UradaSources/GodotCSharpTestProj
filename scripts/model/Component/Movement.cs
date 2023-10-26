@@ -4,8 +4,7 @@ namespace urd
 {
 	public class Movement: Component
 	{
-		[BindComponent]
-		private Entity m_entity;
+		[BindComponent] private Entity m_entity;
 
 		private vec2i m_currentDirect;
 

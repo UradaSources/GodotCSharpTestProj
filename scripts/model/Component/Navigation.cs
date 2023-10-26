@@ -6,7 +6,7 @@ namespace urd
 {
 	public class Navigation : Component
 	{
-		private Pathfind m_pathfind;
+		private PathGenerator m_pathfind;
 
 		[BindComponent] private Entity m_entity;
 		[BindComponent] private Movement m_motion;
@@ -31,8 +31,8 @@ namespace urd
 
 				var world = m_entity.world;
 
-				var curTile = world.getTile(m_entity.coord.x, m_entity.coord.y);
-				var targetTile = world.getTile(target.x, target.y);
+				//var curTile = world.getTile(m_entity.coord.x, m_entity.coord.y);
+				//var targetTile = world.getTile(target.x, target.y);
 
 				// 清除旧目标
 				this.clearData();
@@ -40,7 +40,7 @@ namespace urd
 				Debug.WriteLine("reset path", m_entity.name);
 
 				m_target = target;
-				foreach (var tile in m_pathfind.getPath(curTile, targetTile))
+				foreach (var tile in m_pathfind.generatePath(m_entity.coord, target))
 					m_pathNodeList.Add(tile);
 
 				// 立即设置前进方向
@@ -52,8 +52,6 @@ namespace urd
 					m_motion.direct = moveDirect;
 					m_pathNodeList.RemoveAt(m_pathNodeList.Count - 1);
 				}
-
-				Debug.WriteLine($"reset path done, {curTile.x},{curTile.y} to {targetTile.x},{targetTile.y}. ({m_pathNodeList.Count})", m_entity.name);
 			}
 		}
 		public void clearData()
@@ -107,7 +105,7 @@ namespace urd
 			}
 		}
 
-		public Navigation(Pathfind pathfind)
+		public Navigation(PathGenerator pathfind)
 		{
 			m_pathfind = pathfind;
 			m_pathNodeList = new List<TileCell>();
