@@ -8,8 +8,8 @@ namespace urd
 	{
 		private PathGenerator m_pathfind;
 
-		[BindComponent] private Entity m_entity;
-		[BindComponent] private Movement m_motion;
+		[BindComponent] private Entity m_entity = null;
+		[BindComponent] private Movement m_motion = null;
 
 		private vec2i? m_target;
 		private List<TileCell> m_pathNodeList;
@@ -40,8 +40,7 @@ namespace urd
 				Debug.WriteLine("reset path", m_entity.name);
 
 				m_target = target;
-				foreach (var tile in m_pathfind.generatePath(m_entity.coord, target))
-					m_pathNodeList.Add(tile);
+				m_pathfind.generatePath(m_entity.coord, target, ref m_pathNodeList, StandardPathfindCost.Default);
 
 				// 立即设置前进方向
 				if (m_pathNodeList.Count > 0)

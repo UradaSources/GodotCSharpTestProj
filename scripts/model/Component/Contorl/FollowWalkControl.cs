@@ -6,7 +6,7 @@ namespace urd
 {
 	public class FollowWalkControl : BasicMotionControl
 	{
-		[BindComponent] private Navigation m_navigation;
+		[BindComponent] private Navigation m_navigation = null;
 
 		private vec2i m_targetLastCoord;
 
@@ -20,7 +20,7 @@ namespace urd
 			{
 				Debug.WriteLine($"entity is stop ({this.container.getComponent<Entity>().coord}) and update target coord to {m_targetLastCoord}");
 
-				m_navigation.setTarget(this.target.coord);
+				m_navigation.setTarget(this.target.coord + vec2i.right);
 				m_targetLastCoord = this.target.coord;
 			}
 		}

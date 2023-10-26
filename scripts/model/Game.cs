@@ -11,6 +11,7 @@ namespace urd
 	public partial class Game : Node2D
 	{
 		private const string WorldDataFilePath = "./save/world.json";
+		private const string TileTypeDataFilePath = "./save/tileTypes.json";
 	
 		public struct WorldData
 		{
@@ -118,7 +119,7 @@ namespace urd
 			TileType doorTile = TileType.Create('D', color.FromHex(0x819796), 3.0f);
 			TileType groundTile = TileType.Create('.', color.FromHex(0xA77B5B), 1.0f);
 			TileType floorTile = TileType.Create('_', color.FromHex(0x89493A), 0.8f);
-			TileType.Create('~', color.FromHex(0x4B80CA), 3.0f);
+			TileType.Create('`', color.FromHex(0x68C2D3), 3.0f);
 
 			// 随机化地图
 			RandomNumberGenerator rng = new RandomNumberGenerator();
@@ -159,7 +160,7 @@ namespace urd
 
 			m_player._init();
 
-			for (int i = 0; i < 4; i++)
+			for (int i = 0; i < 1; i++)
 			{
 				var enemy = new ComponentContainer();
 
@@ -167,7 +168,7 @@ namespace urd
 				int y = rng.RandiRange(0, m_world.height - 1);
 
 				enemy.addComponent(new Entity("Enemy", m_world, new vec2i(x, y)));
-				enemy.addComponent(new Movement(2.8f, vec2i.zero));
+				enemy.addComponent(new Movement(2.0f, vec2i.zero));
 				enemy.addComponent(new Navigation(m_pathfind));
 
 				enemy.addComponent(new FollowWalkControl()).target = m_player.getComponent<Entity>();
