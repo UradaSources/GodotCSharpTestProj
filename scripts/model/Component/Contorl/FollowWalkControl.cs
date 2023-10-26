@@ -6,34 +6,23 @@ namespace urd
 {
 	public class FollowWalkControl : BasicMotionControl
 	{
-		[BindComponent] private Entity m_entity;
-		[BindComponent] private Navigation m_moveToward;
+		[BindComponent] private Navigation m_navigation;
+
+		private vec2i m_targetLastCoord;
 
 		public Entity target { set; get; }
-
-		private Godot.RandomNumberGenerator m_rng;
-		private float m_timer = 0;
 
 		public override void _update(float dt)
 		{
 			if (m_motion.processing) return;
-			if (this.target != null)
+
+			if (this.target != null && m_targetLastCoord != this.target.coord)
 			{
-				if (m_timer > 0)
-				{
-					m_timer -= dt;
-					return;
-				}
+				Debug.WriteLine($"entity is stop ({this.container.getComponent<Entity>().coord}) and update target coord to {m_targetLastCoord}");
 
-				m_moveToward.setTarget(this.target.coord);
-				
-				m_timer = m_rng.RandfRange(0.5f, 1.0f);
+				m_navigation.setTarget(this.target.coord);
+				m_targetLastCoord = this.target.coord;
 			}
-		}
-
-		public FollowWalkControl()
-		{
-			m_rng = new Godot.RandomNumberGenerator();
 		}
 	}
 }

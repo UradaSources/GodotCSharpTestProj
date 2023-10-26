@@ -27,7 +27,7 @@ namespace urd
 		{
 			if (m_target != target)
 			{
-				Debug.WriteLine($"set path target {target}");
+				// Debug.WriteLine($"set path target {target}");
 
 				var world = m_entity.world;
 
@@ -37,32 +37,51 @@ namespace urd
 				// 清除旧目标
 				this.clearData();
 
+				Debug.WriteLine("reset path", m_entity.name);
+
 				m_target = target;
 				foreach (var tile in m_pathfind.getPath(curTile, targetTile))
 					m_pathNodeList.Add(tile);
+
+				// 立即设置前进方向
+				if (m_pathNodeList.Count > 0)
+				{
+					var nextTile = m_pathNodeList[m_pathNodeList.Count - 1];
+					// 计算当前路径前往目标节点的方向
+					var moveDirect = new vec2i(nextTile.x, nextTile.y) - m_entity.coord;
+					m_motion.direct = moveDirect;
+					m_pathNodeList.RemoveAt(m_pathNodeList.Count - 1);
+				}
+
+				Debug.WriteLine($"reset path done, {curTile.x},{curTile.y} to {targetTile.x},{targetTile.y}. ({m_pathNodeList.Count})", m_entity.name);
 			}
 		}
 		public void clearData()
 		{
+			Debug.WriteLine("clear data", m_entity.name);
+
 			m_target = null;
 			m_pathNodeList.Clear();
 		}
 
 		public override void _update(float delta)
 		{
-			DebugDisplay.Main.outObject(this);
-			DebugDisplay.Main.outString("pathcount", $"{m_pathNodeList.Count}");
+			if (m_entity.name[0] == 'E')
+			{
+				DebugDisplay.Main.outObject(m_entity.name, this);
+				DebugDisplay.Main.outString("pathcount", $"{m_pathNodeList.Count}");
+			}
 
 			// 等待当前运动完成
 			if (m_motion.processing) return;
 
-			// 设置下一个目的tile
+			// 设置下一个目的地
 			if (m_pathNodeList.Count > 0)
 			{
 				var nextTile = m_pathNodeList[m_pathNodeList.Count - 1];
 				if (nextTile.type.cost < 0) // 若下一个目标路点无效了, 则清除当前路径和移动方向
 				{
-					Debug.WriteLine($"next tile({nextTile.x},{nextTile.y}) is unreachable, clear path.");
+					Debug.WriteLine($"next tile({nextTile.x},{nextTile.y}) is unreachable, clear path.", m_entity.name);
 
 					this.clearData();
 					m_motion.direct = vec2i.zero;
@@ -81,6 +100,8 @@ namespace urd
 			}
 			else
 			{
+				Debug.WriteLine($"path dnoe {m_pathNodeList.Count}", m_entity.name);
+
 				// 在路点全部完成后, 清除移动方向
 				m_motion.direct = vec2i.zero;
 			}

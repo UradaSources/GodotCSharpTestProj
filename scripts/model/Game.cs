@@ -109,6 +109,8 @@ namespace urd
 			m_world.tryGetTile(x, y, out m_selectedTile);
 		}
 
+		private bool m_runingLoop;
+
 		public override void _Ready()
 		{
 			TileType treeTile = TileType.Create('T', color.FromHex(0x8AB969), 1.5f);
@@ -157,7 +159,7 @@ namespace urd
 
 			m_player._init();
 
-			for (int i = 0; i < 10; i++)
+			for (int i = 0; i < 1; i++)
 			{
 				var enemy = new ComponentContainer();
 
@@ -165,7 +167,7 @@ namespace urd
 				int y = rng.RandiRange(0, m_world.height - 1);
 
 				enemy.addComponent(new Entity("Enemy", m_world, new vec2i(x, y)));
-				enemy.addComponent(new Movement(3.0f, vec2i.zero));
+				enemy.addComponent(new Movement(1.0f, vec2i.zero));
 				enemy.addComponent(new Navigation(m_pathfind));
 
 				enemy.addComponent(new FollowWalkControl()).target = m_player.getComponent<Entity>();
@@ -176,8 +178,11 @@ namespace urd
 
 		public override void _Process(double delta)
 		{
-			foreach (var entity in Entity.IterateInstance())
-				entity.container._update((float)delta);
+			if (m_runingLoop)
+			{
+				foreach (var entity in Entity.IterateInstance())
+					entity.container._update((float)delta);
+			}
 
 			var mousePos = this.GetLocalMousePosition();
 			this.TrySelectTile(mousePos);
@@ -211,6 +216,10 @@ namespace urd
 				Debug.WriteLine($"save world data");
 			}
 
+			// 暂停或是运行游戏
+			if (Input.IsActionJustPressed("ui_stop"))
+				m_runingLoop = !m_runingLoop;
+
 			this.QueueRedraw();
 		}
 		public override void _Draw()
@@ -238,7 +247,7 @@ namespace urd
 					var target = entity.getNearTile(motion.currentDirect);
 					this.DrawCharacterSprite(target.x, target.y, 'x', new Color(0, 0.5f, 0, 0.5f));
 
-					// 绘制寻路路径
+					//// 绘制寻路路径
 					//var navigation = entity.container.getComponent<Navigation>();
 					//for (int i = 0; i < navigation.pathNodeCount; i++)
 					//{

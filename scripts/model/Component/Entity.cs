@@ -49,6 +49,11 @@ namespace urd
 			return tile;
 		}
 
+		public override void _update(float delta)
+		{
+			DebugDisplay.Main.outObject(this.name, this);
+		}
+
 		public Entity(string name, WorldGrid world, vec2i coord)
 		{
 			m_name = name;

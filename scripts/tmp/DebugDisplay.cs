@@ -52,11 +52,11 @@ public class DebugDisplay
 	public int recordCount => m_recordData.Count;
 
 	[Conditional("DEBUG")]
-	public void outObject(object obj, string title = null, bool field = true, bool property = false,
+	public void outObject(string category, object obj, string title = null, bool field = true, bool property = false,
 		[CallerLineNumber] int lineNumber = 0,
 		[CallerFilePath] string filePath = null)
 	{
-		string key = $"at line {lineNumber} in {filePath}";
+		string key = $"{category} at line {lineNumber} in {filePath}";
 		title ??= obj.GetType().Name;
 		
 		string fieldString = "";
@@ -77,7 +77,7 @@ public class DebugDisplay
 
 
 		string mesg = $"{fieldString}{propertyString}";
-		rawOut(key, title, mesg);
+		rawOut(key, $"{category}:{title}", mesg);
 	}
 
 	[Conditional("DEBUG")]
