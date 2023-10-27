@@ -32,11 +32,10 @@ namespace urd
 
 			if (cost >= 0)
 			{
-				var en = Entity.IterateInstance().FirstOrDefault((Entity e) => e.currentTile == target);
-				if (en != null)
+				foreach (var en in Entity.GetInstanceInTile(target))
 				{
-					DebugDisplay.Main.outString("en bra", $"{en.name} in {target}");
-					return -1;
+					if (en.block) 
+						return -1;
 				}
 			}
 			return cost;
