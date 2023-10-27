@@ -7,7 +7,8 @@ namespace urd
 	public class Entity : Component
 	{
 		private static LinkedList<Entity> _InstanceIndex = new LinkedList<Entity>();
-		private static Dictionary<TileCell, LinkedList<Entity>> _SpaceIndex;
+		private static Dictionary<TileCell, LinkedList<Entity>> _SpaceIndex 
+			= new Dictionary<TileCell, LinkedList<Entity>>();
 
 		public static IEnumerable<Entity> IterateInstance()
 		{
@@ -27,11 +28,12 @@ namespace urd
 		private LinkedListNode<Entity> _spaceItor = null;
 
 		private string m_name;
-
 		private WorldGrid m_world;
+		private bool m_block;
 		
 		public string name { set => m_name = value; get => m_name; }
 		public WorldGrid world { get => m_world; }
+		public bool block { set => m_block = value; get => m_block; }
 
 		private vec2i _coord;
 		public vec2i coord { 
@@ -40,14 +42,21 @@ namespace urd
 			{
 				if (value != _coord)
 				{
+					LinkedList<Entity> enSet;
+
 					// 删除旧位置的空间索引
 					if (_spaceItor != null)
-						_SpaceIndex[this.currentTile].Remove(_spaceItor);
+					{
+						enSet = _SpaceIndex[this.currentTile];
+						enSet.Remove(_spaceItor);
+
+						if (enSet.Count == 0)
+							_SpaceIndex.Remove(this.currentTile);
+					}
 
 					// 设置新位置的空间索引
 					_coord = value;
 
-					LinkedList<Entity> enSet;
 					if (!_SpaceIndex.TryGetValue(this.currentTile, out enSet))
 					{ 
 						enSet = new LinkedList<Entity>();
@@ -57,15 +66,13 @@ namespace urd
 				}
 			}
 		}
-		
-		public bool block { private set; get; }
 
 		// 当前所在的瓦片
 		public TileCell currentTile
 		{
 			get
 			{
-				this.world.tryGetTile(_coord.x, _coord.y, out var tile);
+				this.world.tryGetTile(this.coord.x, this.coord.y, out var tile);
 				return tile;
 			}
 		}

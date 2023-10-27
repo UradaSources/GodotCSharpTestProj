@@ -4,6 +4,6 @@
     <DebuggerFlavor>ProjectDebugger</DebuggerFlavor>
   </PropertyGroup>
   <PropertyGroup>
-    <ActiveDebugProfile>Godot 附加调试</ActiveDebugProfile>
+    <ActiveDebugProfile>Work Godot附加调试</ActiveDebugProfile>
   </PropertyGroup>
 </Project>
