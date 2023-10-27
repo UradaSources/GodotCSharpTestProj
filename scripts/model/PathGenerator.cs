@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using Godot;
 
 namespace urd
@@ -31,10 +32,10 @@ namespace urd
 
 			if (cost >= 0)
 			{
-				foreach (var en in Entity.GetInstanceInTile(target))
+				foreach (var en in Entity.IterateInstance()
+					.Where((Entity e)=>e.currentTile == target))
 				{
-					if (en.block) 
-						return -1;
+					if (en.block) return -1;
 				}
 			}
 			return cost;

@@ -2,8 +2,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using Godot;
 
 namespace urd
@@ -12,38 +10,6 @@ namespace urd
 	{
 		private const string WorldDataFilePath = "./save/world.json";
 		private const string TileTypeDataFilePath = "./save/tileTypes.json";
-	
-		public struct WorldData
-		{
-			[JsonInclude] public int width, height;
-			[JsonInclude] public int[] tile;
-		}
-
-		public static string ToJson(WorldGrid world)
-		{
-			var data = new WorldData();
-			data.width = world.width;
-			data.height = world.height;
-
-			data.tile = new int[data.width * data.height];
-			for (int i = 0; i < world.tileCount; i++)
-				data.tile[i] = world.rawGetTile(i).type.id;
-
-			return JsonSerializer.Serialize(data);
-		}
-		public static WorldGrid FromJson(string json)
-		{
-			var data = JsonSerializer.Deserialize<WorldData>(json);
-			WorldGrid world = new WorldGrid(data.width, data.height, TileType.GetFromId(0));
-
-			for (int i = 0; i < world.tileCount; i++)
-			{
-				int typeId = data.tile[i];
-				world.rawGetTile(i).type = TileType.GetFromId(typeId);
-			}
-
-			return world;
-		}
 
 		public static Color ToGDColor(color c)
 		{
@@ -124,11 +90,11 @@ namespace urd
 			// 随机化地图
 			RandomNumberGenerator rng = new RandomNumberGenerator();
 			rng.Seed = m_seed;
-
+	
 			if (File.Exists(WorldDataFilePath))
 			{
 				var json = File.ReadAllText(WorldDataFilePath);
-				m_world = FromJson(json);
+				m_world = WorldGridUtils.FromJson(json);
 
 				Debug.WriteLine("load world data from json");
 			}
@@ -205,14 +171,14 @@ namespace urd
 				{
 					int typeid = m_selectedTile.type.id;
 					typeid = (typeid + 1) % TileType.TypeCount;
-					m_selectedTile.type = TileType.GetFromId(typeid);
+					m_selectedTile.type = TileType.Get(typeid);
 				}
 			}
 
 			// 储存地图数据
 			if (Input.IsActionJustPressed("ui_save"))
 			{
-				var json = ToJson(m_world);
+				var json = WorldGridUtils.ToJson(m_world);
 				File.WriteAllText(WorldDataFilePath, json);
 				Debug.WriteLine($"save world data");
 			}

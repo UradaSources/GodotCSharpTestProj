@@ -5,6 +5,7 @@ using urd;
 
 public class TileType
 {
+	public static readonly TileType Default = new TileType(-1, ' ', color.white, -1);
 	private static List<TileType> _Types = new List<TileType>();
 
 	public static int TypeCount => _Types.Count;
@@ -16,9 +17,9 @@ public class TileType
 		_Types.Add(type);
 		return type;
 	}
-	public static TileType GetFromId(int id)
+	public static TileType Get(int id)
 	{
-		Debug.Assert(id >= 0 && id < _Types.Count, $"invaild tiletype id: {id}");
+		Debug.Assert(id >= 0 && id < _Types.Count, $"tile type({id}) does not exist");
 		return _Types[id];
 	}
 

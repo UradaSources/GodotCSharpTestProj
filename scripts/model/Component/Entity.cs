@@ -7,21 +7,11 @@ namespace urd
 	public class Entity : Component
 	{
 		private static LinkedList<Entity> _InstanceIndex = new LinkedList<Entity>();
-		private static Dictionary<TileCell, LinkedList<Entity>> _SpaceIndex 
-			= new Dictionary<TileCell, LinkedList<Entity>>();
 
 		public static IEnumerable<Entity> IterateInstance()
 		{
 			for (var it = _InstanceIndex.First; it != null; it = it.Next)
 				yield return it.Value;
-		}
-		public static IEnumerable<Entity> GetInstanceInTile(TileCell tile)
-		{
-			if (_SpaceIndex.TryGetValue(tile, out var set))
-			{ 
-				foreach(var en in set)
-					yield return en;
-			}
 		}
 
 		private LinkedListNode<Entity> _itor = null;
@@ -37,34 +27,8 @@ namespace urd
 
 		private vec2i _coord;
 		public vec2i coord { 
-			get => _coord; 
-			set 
-			{
-				if (value != _coord)
-				{
-					LinkedList<Entity> enSet;
-
-					// 删除旧位置的空间索引
-					if (_spaceItor != null)
-					{
-						enSet = _SpaceIndex[this.currentTile];
-						enSet.Remove(_spaceItor);
-
-						if (enSet.Count == 0)
-							_SpaceIndex.Remove(this.currentTile);
-					}
-
-					// 设置新位置的空间索引
-					_coord = value;
-
-					if (!_SpaceIndex.TryGetValue(this.currentTile, out enSet))
-					{ 
-						enSet = new LinkedList<Entity>();
-						_SpaceIndex[this.currentTile] = enSet;
-					}
-					_spaceItor = enSet.AddLast(this);
-				}
-			}
+			set => _coord = value;
+			get => _coord;
 		}
 
 		// 当前所在的瓦片
