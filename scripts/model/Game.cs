@@ -11,9 +11,9 @@ namespace urd
 		private const string WorldDataFilePath = "./save/world.json";
 		private const string TileTypeDataFilePath = "./save/tileTypes.json";
 
-		public static Color ToGDColor(color c)
+		public static Godot.Color ToGDColor(Color c)
 		{
-			return new Color((float)c.r / 255, (float)c.g / 255, (float)c.b / 255, (float)c.a / 255);
+			return new Godot.Color((float)c.r / 255, (float)c.g / 255, (float)c.b / 255, (float)c.a / 255);
 		}
 		public static Rect2I GetCharacterSpriteRect(int lineCount, int size, char c)
 		{
@@ -48,7 +48,7 @@ namespace urd
 
 		private ComponentContainer m_player;
 
-		public void DrawCharacterSprite(int x, int y, char c, Color? color = null)
+		public void DrawCharacterSprite(int x, int y, char c, Godot.Color? color = null)
 		{
 			color ??= Colors.White;
 
@@ -59,7 +59,7 @@ namespace urd
 
 			this.DrawTextureRectRegion(m_characterSheet, target, source, color);
 		}
-		public void DrawSelectBox(int x, int y, Color? color = null)
+		public void DrawSelectBox(int x, int y, Godot.Color? color = null)
 		{
 			color ??= Colors.White;
 
@@ -80,12 +80,12 @@ namespace urd
 
 		public override void _Ready()
 		{
-			TileType treeTile = TileType.Create('T', color.FromHex(0x8AB969), 1.5f);
-			TileType wallTile = TileType.Create('X', color.FromHex(0x3A3858), -1.0f);
-			TileType doorTile = TileType.Create('D', color.FromHex(0x819796), 3.0f);
-			TileType groundTile = TileType.Create('.', color.FromHex(0xA77B5B), 1.0f);
-			TileType floorTile = TileType.Create('_', color.FromHex(0x89493A), 0.8f);
-			TileType.Create('`', color.FromHex(0x68C2D3), 3.0f);
+			TileType treeTile = TileType.Create('T', Color.FromHex(0x8AB969), 1.5f);
+			TileType wallTile = TileType.Create('#', Color.FromHex(0x3A3858), -1.0f);
+			TileType doorTile = TileType.Create('D', Color.FromHex(0x819796), 3.0f);
+			TileType groundTile = TileType.Create('.', Color.FromHex(0xA77B5B), 1.0f);
+			TileType floorTile = TileType.Create('_', Color.FromHex(0x89493A), 0.8f);
+			TileType.Create('`', Color.FromHex(0x68C2D3), 3.0f);
 
 			// 随机化地图
 			RandomNumberGenerator rng = new RandomNumberGenerator();
@@ -100,7 +100,7 @@ namespace urd
 			}
 			else
 			{ 
-				m_world = new WorldGrid(20, 20, groundTile);
+				m_world = new WorldGrid(40, 40, groundTile);
 
 				for (int i = 1; i < m_world.tileCount - 1; i++)
 				{
@@ -157,7 +157,7 @@ namespace urd
 			// 设置目的地
 			if (Input.IsActionJustPressed("mouse_right"))
 			{
-				if (m_selectedTile != null && m_player.getComponent(typeof(BasicMotionControl)) == null)
+				if (m_selectedTile != null && m_player.findComponent(typeof(BasicMotionControl)) == null)
 				{
 					var navigation = m_player.getComponent<Navigation>();
 					navigation.setTarget(new vec2i(m_selectedTile.x, m_selectedTile.y));
@@ -212,7 +212,7 @@ namespace urd
 				if (motion.processing)
 				{
 					var target = entity.getNearTile(motion.currentDirect);
-					this.DrawCharacterSprite(target.x, target.y, 'x', new Color(0, 0.5f, 0, 0.5f));
+					this.DrawCharacterSprite(target.x, target.y, 'x', new Godot.Color(0, 0.5f, 0, 0.5f));
 
 					//// 绘制寻路路径
 					//var navigation = entity.container.getComponent<Navigation>();

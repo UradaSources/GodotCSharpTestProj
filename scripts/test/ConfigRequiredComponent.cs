@@ -12,7 +12,7 @@ namespace urd
 			for (int i = 0; i < m_require.Length; i++)
 			{
 				var type = m_require[i];
-				if (container.getComponent(type) == null)
+				if (container.findComponent(type) == null)
 				{
 					Debug.WriteLine($"required prefix type was not found: {type.Name}");
 					missRequired = true;

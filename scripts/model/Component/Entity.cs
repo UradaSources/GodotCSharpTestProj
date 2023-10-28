@@ -47,8 +47,8 @@ namespace urd
 			var coord = _coord + offset;
 			if (loop)
 			{
-				coord.x = Mathf.LoopIndex(coord.x, m_world.width);
-				coord.y = Mathf.LoopIndex(coord.y, m_world.height);
+				coord.x = mathf.loopIndex(coord.x, m_world.width);
+				coord.y = mathf.loopIndex(coord.y, m_world.height);
 			}
 
 			this.world.tryGetTile(coord.x, coord.y, out var tile);
