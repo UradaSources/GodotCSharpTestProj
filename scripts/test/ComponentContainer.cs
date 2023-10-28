@@ -18,7 +18,8 @@ namespace urd
 			else
 				return null;
 		}
-		public Component getComponent(System.Type type)
+
+		public Component findComponent(System.Type type)
 		{
 			Debug.Assert(type.IsInterface || type.IsSubclassOf(typeof(Component)),
 				"invalid type, must be an interface or inherited from component");
@@ -70,7 +71,7 @@ namespace urd
 						var bindOptions = field.GetCustomAttribute<BindComponentAttribute>();
 						if (bindOptions != null)
 						{
-							var dependent = this.getComponent(field.FieldType);
+							var dependent = this.findComponent(field.FieldType);
 							Debug.Assert(dependent != null || !bindOptions.require,
 								$"Unable to add component ({typeof(T).Name}) to the container, its dependent component ({field.DeclaringType.Name}) does not exist");
 								

@@ -7,6 +7,7 @@ namespace urd
 	public class Entity : Component
 	{
 		private static LinkedList<Entity> _InstanceIndex = new LinkedList<Entity>();
+
 		public static IEnumerable<Entity> IterateInstance()
 		{
 			for (var it = _InstanceIndex.First; it != null; it = it.Next)
@@ -45,8 +46,8 @@ namespace urd
 			var coord = m_coord + offset;
 			if (loop)
 			{
-				coord.x = Mathf.LoopIndex(coord.x, m_world.width);
-				coord.y = Mathf.LoopIndex(coord.y, m_world.height);
+				coord.x = mathf.loopIndex(coord.x, m_world.width);
+				coord.y = mathf.loopIndex(coord.y, m_world.height);
 			}
 
 			this.world.tryGetTile(coord.x, coord.y, out var tile);
@@ -63,7 +64,8 @@ namespace urd
 
 		public Entity(string name, WorldGrid world, vec2i coord, bool block = true)
 		{
-			this.name = name;
+			m_name = name;
+			this.name= name;
 			m_world = world;
 			
 			this.coord = coord;

@@ -5,20 +5,21 @@ using urd;
 
 public class TileType
 {
+	public static readonly TileType Default = new TileType(-1, ' ', Color.white, -1);
 	private static List<TileType> _Types = new List<TileType>();
 
 	public static int TypeCount => _Types.Count;
 
-	public static TileType Create(char graph, color color, float cost)
+	public static TileType Create(char graph, Color color, float cost)
 	{
 		int id = _Types.Count;
 		var type = new TileType(id, graph, color, cost);
 		_Types.Add(type);
 		return type;
 	}
-	public static TileType GetFromId(int id)
+	public static TileType Get(int id)
 	{
-		Debug.Assert(id >= 0 && id < _Types.Count, $"invaild tiletype id: {id}");
+		Debug.Assert(id >= 0 && id < _Types.Count, $"tile type({id}) does not exist");
 		return _Types[id];
 	}
 
@@ -36,9 +37,9 @@ public class TileType
 	public readonly float cost;
 
 	public readonly char graph;
-	public readonly color c;
+	public readonly Color c;
 
-	private TileType(int id, char graph, color c, float cost)
+	private TileType(int id, char graph, Color c, float cost)
 	{
 		this.id = id;
 		this.cost = cost;

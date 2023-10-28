@@ -42,7 +42,7 @@ namespace urd
 				}
 
 				var progressDelta = m_moveSpeed * delta / targetCost;
-				m_progress = Mathf.MoveTowards(m_progress, 1, progressDelta);
+				m_progress = mathf.moveTowards(m_progress, 1, progressDelta);
 
 				// 到达指定位置后重置标志
 				if (m_progress == 1)

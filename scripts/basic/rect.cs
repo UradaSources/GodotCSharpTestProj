@@ -1,4 +1,4 @@
-﻿namespace urd // Note: actual namespace depends on the project name.
+﻿namespace urd
 {
 	public struct rect
 	{
