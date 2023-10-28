@@ -8,7 +8,7 @@ namespace urd
 
 		// 用于计算h值的曼哈顿距离
 		public static float ManhattanDistance(TileCell a, TileCell b)
-			=> Mathf.Abs(a.x - b.x) + Mathf.Abs(a.y - b.y);
+			=> mathf.abs(a.x - b.x) + mathf.abs(a.y - b.y);
 
 		public readonly static StandardPathfindCost Default = new StandardPathfindCost();
 

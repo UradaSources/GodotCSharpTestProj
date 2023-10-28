@@ -3,7 +3,7 @@
 [ext_resource type="Script" path="res://scripts/tmp/UpdateDebugDisplay.cs" id="1_a4pel"]
 [ext_resource type="Script" path="res://scripts/model/Game.cs" id="1_trikb"]
 [ext_resource type="Texture2D" uid="uid://bp2c8sp6qeq05" path="res://art/soft-thick-dark.png" id="2_fi8re"]
-[ext_resource type="Script" path="res://scripts/model/ViewDrag.cs" id="4_auv3i"]
+[ext_resource type="Script" path="res://scripts/model/CameraControl.cs" id="3_j1pj3"]
 
 [node name="Root" type="Node2D"]
 texture_filter = 1
@@ -16,8 +16,7 @@ m_characterSheet = ExtResource("2_fi8re")
 
 [node name="Camera2D" type="Camera2D" parent="."]
 position = Vector2(569, 321)
-script = ExtResource("4_auv3i")
-m_zoomSpeed = 2.0
+script = ExtResource("3_j1pj3")
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 

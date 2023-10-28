@@ -27,17 +27,8 @@ namespace urd
 		{
 			if (m_target != target)
 			{
-				// Debug.WriteLine($"set path target {target}");
-
-				var world = m_entity.world;
-
-				//var curTile = world.getTile(m_entity.coord.x, m_entity.coord.y);
-				//var targetTile = world.getTile(target.x, target.y);
-
 				// 清除旧目标
 				this.clearData();
-
-				Debug.WriteLine("reset path", m_entity.name);
 
 				m_target = target;
 				m_pathfind.generatePath(m_entity.coord, target, ref m_pathNodeList, StandardPathfindCost.Default);
@@ -55,20 +46,12 @@ namespace urd
 		}
 		public void clearData()
 		{
-			Debug.WriteLine("clear data", m_entity.name);
-
 			m_target = null;
 			m_pathNodeList.Clear();
 		}
 
 		public override void _update(float delta)
 		{
-			if (m_entity.name[0] == 'E')
-			{
-				DebugDisplay.Main.outObject(m_entity.name, this);
-				DebugDisplay.Main.outString("pathcount", $"{m_pathNodeList.Count}");
-			}
-
 			// 等待当前运动完成
 			if (m_motion.processing) return;
 
@@ -97,8 +80,6 @@ namespace urd
 			}
 			else
 			{
-				Debug.WriteLine($"path dnoe {m_pathNodeList.Count}", m_entity.name);
-
 				// 在路点全部完成后, 清除移动方向
 				m_motion.direct = vec2i.zero;
 			}

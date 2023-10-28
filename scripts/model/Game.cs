@@ -6,6 +6,33 @@ using Godot;
 
 namespace urd
 {
+	public partial class WorldView : Node2D
+	{
+		public WorldGrid world { set; get; }
+
+		public void DrawCharacterSprite(int x, int y, char c, Godot.Color? color = null)
+		{
+			color ??= Colors.White;
+
+			var pos = new Vector2(x, y) * m_tileSize;
+			var target = new Rect2(pos, Vector2.One * m_tileSize);
+
+			var source = GetCharacterSpriteRect(16, 8, c);
+
+			this.DrawTextureRectRegion(m_characterSheet, target, source, color);
+		}
+		public void DrawSelectBox(int x, int y, Godot.Color? color = null)
+		{
+			color ??= Colors.White;
+
+			var pos = new Vector2(x, y) * m_tileSize;
+
+			var target = new Rect2(pos, Vector2.One * m_tileSize);
+			this.DrawRect(target, color.Value, false);
+		}
+
+	}
+
 	public partial class Game : Node2D
 	{
 		private const string WorldDataFilePath = "./save/world.json";
