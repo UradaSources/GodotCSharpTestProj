@@ -7,65 +7,27 @@ namespace urd
 	public class Entity : Component
 	{
 		private static LinkedList<Entity> _InstanceIndex = new LinkedList<Entity>();
-		private static Dictionary<TileCell, LinkedList<Entity>> _SpaceIndex 
-			= new Dictionary<TileCell, LinkedList<Entity>>();
-
 		public static IEnumerable<Entity> IterateInstance()
 		{
 			for (var it = _InstanceIndex.First; it != null; it = it.Next)
 				yield return it.Value;
 		}
-		public static IEnumerable<Entity> GetInstanceInTile(TileCell tile)
-		{
-			if (_SpaceIndex.TryGetValue(tile, out var set))
-			{ 
-				foreach(var en in set)
-					yield return en;
-			}
-		}
 
 		private LinkedListNode<Entity> _itor = null;
-		private LinkedListNode<Entity> _spaceItor = null;
+
+#if DEBUG
+		public bool debug_printDebugInfo = false;
+#endif
 
 		private string m_name;
 		private WorldGrid m_world;
+		private vec2i m_coord;
 		private bool m_block;
-		
+
 		public string name { set => m_name = value; get => m_name; }
 		public WorldGrid world { get => m_world; }
 		public bool block { set => m_block = value; get => m_block; }
-
-		private vec2i _coord;
-		public vec2i coord { 
-			get => _coord; 
-			set 
-			{
-				if (value != _coord)
-				{
-					LinkedList<Entity> enSet;
-
-					// 删除旧位置的空间索引
-					if (_spaceItor != null)
-					{
-						enSet = _SpaceIndex[this.currentTile];
-						enSet.Remove(_spaceItor);
-
-						if (enSet.Count == 0)
-							_SpaceIndex.Remove(this.currentTile);
-					}
-
-					// 设置新位置的空间索引
-					_coord = value;
-
-					if (!_SpaceIndex.TryGetValue(this.currentTile, out enSet))
-					{ 
-						enSet = new LinkedList<Entity>();
-						_SpaceIndex[this.currentTile] = enSet;
-					}
-					_spaceItor = enSet.AddLast(this);
-				}
-			}
-		}
+		public vec2i coord { set => m_coord = value; get => m_coord; }
 
 		// 当前所在的瓦片
 		public TileCell currentTile
@@ -80,7 +42,7 @@ namespace urd
 		// 获取附近的瓦片
 		public TileCell getNearTile(vec2i offset, bool loop = false)
 		{
-			var coord = _coord + offset;
+			var coord = m_coord + offset;
 			if (loop)
 			{
 				coord.x = Mathf.LoopIndex(coord.x, m_world.width);
@@ -91,19 +53,23 @@ namespace urd
 			return tile;
 		}
 
+#if DEBUG
 		public override void _update(float delta)
 		{
-			DebugDisplay.Main.outObject(this.name, this);
+			if (debug_printDebugInfo)
+				DebugDisplay.Main.outObject(this.name, this);
 		}
+#endif
 
 		public Entity(string name, WorldGrid world, vec2i coord, bool block = true)
 		{
-			m_name = name;
+			this.name = name;
 			m_world = world;
-
+			
 			this.coord = coord;
 			this.block = block;
 
+			Debug.WriteLine($"Entity {this.name} created", $"{this.GetType().Name}.Info");
 			_itor = Entity._InstanceIndex.AddLast(this);
 		}
 		~Entity()

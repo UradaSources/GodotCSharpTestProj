@@ -5,47 +5,6 @@ using Godot;
 
 namespace urd
 {
-	// 路径代价计算器
-	// 用于在寻路过程中计算gh值
-	public interface IPathfindCost
-	{
-		// 计算瓦片的通行代价
-		// 返回值应该是1为基准的标准值
-		float tileCost(TileCell cur, TileCell target);
-
-		// 计算h值
-		float hValue(TileCell cur, TileCell target);
-	}
-
-	public class StandardPathfindCost : IPathfindCost
-	{
-		// 用于计算h值的曼哈顿距离
-		public static float ManhattanDistance(TileCell a, TileCell b)
-			=> Mathf.Abs(a.x - b.x) + Mathf.Abs(a.y - b.y);
-
-		public readonly static StandardPathfindCost Default = new StandardPathfindCost();
-
-		public float tileCost(TileCell cur, TileCell target)
-		{
-			float cost = target.type.cost;
-
-			if (cost >= 0)
-			{
-				foreach (var en in Entity.GetInstanceInTile(target))
-				{
-					if (en.block) 
-						return -1;
-				}
-			}
-			return cost;
-		}
-
-		public float hValue(TileCell cur, TileCell target)
-		{
-			return StandardPathfindCost.ManhattanDistance(target, cur);
-		}
-	}
-
 	public class PathGenerator
 	{
 		private class Node
@@ -127,9 +86,19 @@ namespace urd
 			m_open.Clear();
 			m_closedNodeIndex.Clear();
 
+			costCalculator.init(m_grid, start, target);
+
 			// 检查起点和终点是否可到达
-			Debug.Assert(this.getOrBuildNode(start.x, start.y, out Node firstNode), $"invaild start({start})");
-			Debug.Assert(this.getOrBuildNode(target.x, target.y, out Node targetNode), $"invaild target({target})");
+			if (this.getOrBuildNode(start.x, start.y, out Node firstNode))
+			{
+				Debug.WriteLine($"invaild start({start})", $"{this.GetType().Name}.Warn");
+				return 0;
+			}
+			if (this.getOrBuildNode(target.x, target.y, out Node targetNode))
+			{ 
+				Debug.WriteLine($"invaild target({target})", $"{this.GetType().Name}.Warn");
+				return 0;
+			}
 
 			firstNode.g = 0;
 			firstNode.h = 0;
@@ -193,10 +162,12 @@ namespace urd
 				}
 				else
 				{
+#if DEBUG
 					Debug.WriteLine($"path generate success({start}-{target}):\n" +
 						$"open: {{{string.Join(", ", m_open.Values)}}}\n" +
 						$"closed index: {{{string.Join(", ", m_closedNodeIndex)}}}\n",
 						$"{this.GetType().Name}.Info");
+#endif
 
 					int count = path.Count;
 
@@ -211,10 +182,12 @@ namespace urd
 				}
 			}
 
+#if DEBUG
 			Debug.WriteLine($"path generate faild({start}-{target}): \n" +
 				$"open: {{{string.Join(", ", m_open.Values)}}}\n" +
 				$"closed index: {{{string.Join(", ", m_closedNodeIndex)}}}\n",
 				$"{this.GetType().Name}.Warn");
+#endif
 
 			return 0;
 		}

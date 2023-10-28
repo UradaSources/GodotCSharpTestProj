@@ -5,21 +5,27 @@ using Godot;
 
 namespace urd
 {
+	public interface BasicLineRenderer
+	{
+		void renderLine(vec2 a, vec2 b, color? c = null, float width = -1);
+	}
+
 	public static class DebugDrawingExtension
 	{
-		public static void DrawLine(this CanvasItem self, vec2 a, vec2 b, color? c = null, float width = -1)
+		public static BasicLineRenderer LineRenderer { set; get; }
+
+		public static void DrawLine(this vec2 a, vec2 b, color? c = null, float width = -1)
 		{
-			var _c = c ?? color.white;
-			self.DrawLine(new Vector2(a.x, a.y), new Vector2(b.x, b.y), new Color((float)_c.r/255, (float)_c.g/255, (float)_c.b/255, (float)_c.a/255));
+			LineRenderer.renderLine(a, b, c, width);
 		}
 
-		public static void DrawMark(CanvasItem self, vec2 pos, float size = 10.0f, color? c = null, float width = -1)
+		public static void DrawMark(vec2 pos, float size = 10.0f, color? c = null, float width = -1)
 		{
 			vec2 xOffset = size * vec2.right * 0.5f;
 			vec2 yOffset = size * vec2.up * 0.5f;
 
-			self.DrawLine(pos - xOffset, pos + xOffset, c, width);
-			self.DrawLine(pos - yOffset, pos + yOffset, c, width);
+			LineRenderer.renderLine(pos - xOffset, pos + xOffset, c, width);
+			LineRenderer.renderLine(pos - yOffset, pos + yOffset, c, width);
 		}
 
 		//public static void DrawArrow(ILineDrawing self, vec2 pos, vec2 vec, color? c = null, float width = -1)
@@ -45,12 +51,12 @@ namespace urd
 		//{
 		//}
 
-		public static void DrawRay(CanvasItem self, vec2 pos, vec2 dir, color? c = null, float width = -1)
+		public static void DrawRay(vec2 pos, vec2 dir, color? c = null, float width = -1)
 		{
-			self.DrawLine(pos, pos + dir, c: c, width: width);
+			LineRenderer.renderLine(pos, pos + dir, c: c, width: width);
 		}
 
-		public static void DrawLines(CanvasItem self, IEnumerable<vec2> points, bool isClosed = false, bool markPoint = false, color? c = null, float width = -1)
+		public static void DrawLines(IEnumerable<vec2> points, bool isClosed = false, bool markPoint = false, color? c = null, float width = -1)
 		{
 			bool recordFirst = false;
 			vec2 first = default;
@@ -60,7 +66,7 @@ namespace urd
 			foreach (var cur in points)
 			{
 				if (markPoint)
-					DebugDrawingExtension.DrawMark(self, cur, c: c, width: width);
+					DebugDrawingExtension.DrawMark(cur, c: c, width: width);
 
 				if (!recordFirst)
 				{
@@ -68,16 +74,15 @@ namespace urd
 					recordFirst = true;
 				}
 				else
-					self.DrawLine(previous, cur, c: c, width: width);
+					LineRenderer.renderLine(previous, cur, c: c, width: width);
 
 				previous = cur;
 			}
 
-			if (isClosed)
-				self.DrawLine(previous, first, c: c, width: width);
+			if (isClosed) LineRenderer.renderLine(previous, first, c: c, width: width);
 		}
 
-		public static void DrawBox(CanvasItem self, vec2 pos, vec2 size, color? c = null, float width = -1)
+		public static void DrawBox(vec2 pos, vec2 size, color? c = null, float width = -1)
 		{
 			float w = size.x * 0.5f;
 			float h = size.y * 0.5f;
@@ -93,7 +98,7 @@ namespace urd
 			self.DrawLine(p4, p1, c: c, width: width);
 		}
 
-		public static void DrawRange(CanvasItem self, vec2 min, vec2 max, color? c = null, float width = -1)
+		public static void DrawRange(vec2 min, vec2 max, color? c = null, float width = -1)
 		{
 			DebugDrawingExtension.DrawBox(self, vec2.Lerp(min, max, 0.5f), (max - min), c: c, width: width);
 
@@ -101,7 +106,7 @@ namespace urd
 			DebugDrawingExtension.DrawMark(self, max, c: c, width: width);
 		}
 
-		public static void DrawCircle(CanvasItem self, vec2 centre, float r, int sample = 32, color? c = null, float width = -1)
+		public static void DrawCircle(vec2 centre, float r, int sample = 32, color? c = null, float width = -1)
 		{
 			vec2 first = default;
 			vec2 previous = default;
@@ -128,7 +133,7 @@ namespace urd
 			}
 		}
 
-		public static void DrawCurve(CanvasItem self, System.Func<float, vec2> curve, int sample, bool isClosed = false, color? c = null, float width = -1)
+		public static void DrawCurve(System.Func<float, vec2> curve, int sample, bool isClosed = false, color? c = null, float width = -1)
 		{
 			vec2 first = default;
 			vec2 previous = default;
