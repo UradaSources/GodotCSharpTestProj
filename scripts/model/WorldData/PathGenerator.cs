@@ -89,12 +89,12 @@ namespace urd
 			costCalculator.init(m_grid, start, target);
 
 			// 检查起点和终点是否可到达
-			if (this.getOrBuildNode(start.x, start.y, out Node firstNode))
+			if (!this.getOrBuildNode(start.x, start.y, out Node firstNode))
 			{
 				Debug.WriteLine($"invaild start({start})", $"{this.GetType().Name}.Warn");
 				return 0;
 			}
-			if (this.getOrBuildNode(target.x, target.y, out Node targetNode))
+			if (!this.getOrBuildNode(target.x, target.y, out Node targetNode))
 			{ 
 				Debug.WriteLine($"invaild target({target})", $"{this.GetType().Name}.Warn");
 				return 0;

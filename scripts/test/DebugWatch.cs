@@ -6,12 +6,12 @@ using System.Diagnostics;
 
 public class DebugWatch
 {
-	public struct Message
+	public struct RecordMesg
 	{
 		public string key;
-		public string title;
-		public string msg;
-		public System.DateTime time;
+		public string tag;
+		public string constnet;
+		public string time;
 	}
 
 	private static DebugWatch _Main;
@@ -46,72 +46,67 @@ public class DebugWatch
 		}
 	}
 
-	private List<Message> m_recordData = new List<Message>(); 
+	private List<RecordMesg> m_recordData = new List<RecordMesg>(); 
 	private Dictionary<string, int> m_indexMap = new Dictionary<string, int>();
 
 	public int recordCount => m_recordData.Count;
 
 	[Conditional("DEBUG")]
-	public void outObject(string category, object obj, string title = null, bool field = true, bool property = false,
+	public void watchObject(object obj, string tag = null, bool property = false,
 		[CallerLineNumber] int lineNumber = 0,
 		[CallerFilePath] string filePath = null)
 	{
-		string key = $"{category} at line {lineNumber} in {filePath}";
-		title ??= obj.GetType().Name;
+		string key = $"{filePath}:{lineNumber}";
+		string category = $"{obj.GetType().Name}.Info";
 		
-		string fieldString = "";
-		if (field)
-		{
-			fieldString = "Field:\n";
-			foreach (var (name, value) in GetFields(obj))
-				fieldString += $"{name,-18} |{value}\n";
-		}
+		string fieldString = "[b]field:[/b]\n";
+		foreach (var (name, value) in GetFields(obj))
+			fieldString += $"{name,-18} |{value}\n";
 
 		string propertyString = "";
 		if (property)
 		{
-			propertyString = "Property:\n";
+			propertyString = "[b]property:[/b]\n";
 			foreach (var (name, value) in GetProperties(obj))
 				propertyString += $"{name,-18} |{value}\n";
 		}
 
-
-		string mesg = $"{fieldString}{propertyString}";
-		rawOut(key, $"{category}:{title}", mesg);
+		string content = $"{fieldString}{propertyString}";
+		rawOut(key, $"{category}:{tag}", content);
 	}
 
 	[Conditional("DEBUG")]
-	public void outString(string title, string message,
+	public void watchValue(string tag, string message,
 		[CallerLineNumber] int lineNumber = 0,
 		[CallerFilePath] string filePath = null)
 	{
-		string key = $"at line {lineNumber} in {filePath}";
-		rawOut(key, title, message);
+		string key = $"{filePath}:{lineNumber}";
+		rawOut(key, tag, message);
 	}
 
 	[Conditional("DEBUG")]
-	public void rawOut(string key, string title, string msg)
+	public void rawOut(string key, string tag, string msg)
 	{
-		if (m_indexMap.TryGetValue(key, out int index))
+		if (m_indexMap.TryGetValue(key + tag, out int index))
 		{
 			var record = m_recordData[index];
 
-			record.title = title;
-			record.msg = msg;
-			record.time = System.DateTime.Now;
+			record.tag = tag;
+			record.constnet = msg;
+			record.time = System.DateTime.Now.ToString("HH:mm:ss");
 
 			m_recordData[index] = record;
 		}
 		else
 		{
-			var record = new Message
+			var record = new RecordMesg
 			{
-				title = title,
-				msg = msg,
-				time = System.DateTime.Now
+				tag = tag,
+				constnet = msg,
+				time = System.DateTime.Now.ToString("HH:mm:ss")
 			};
 
-			m_indexMap[key] = m_indexMap.Count;
+			m_indexMap[key + tag] = m_indexMap.Count;
 			m_recordData.Add(record);
 
 			Debug.Assert(m_indexMap.Count <= 200, "Too many data record");
@@ -125,7 +120,7 @@ public class DebugWatch
 		m_recordData.Clear();
 	}
 
-	public Message getRecord(int index)
+	public RecordMesg getRecord(int index)
 	{ 
 		return m_recordData[index];
 	}

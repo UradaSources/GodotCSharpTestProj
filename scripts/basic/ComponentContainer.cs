@@ -49,46 +49,51 @@ namespace urd
 			var com = new T();
 			return this.addComponent(com, autoBindComponent);
 		}
+		public void tryEmplaceComponents(bool autoBindComponet, params System.Type[] types)
+		{
+			for (int i = 0; i < types.Length; i++)
+			{
+				if (m_indexMap.ContainsKey(types[i])) continue;
+
+				Debug.Assert(types[i].IsSubclassOf(typeof(Component)));
+				var com = (Component)System.Activator.CreateInstance(types[i]);
+
+				this.addComponent(com, autoBindComponet);
+			}
+		}
+
 		public T addComponent<T>(T com, bool autoBindComponent = true)
 			where T : Component
 		{
 			Debug.Assert(!this.hasComponent<T>());
 
-			var config = Component.GetTypeConfig<T>();
-			if (config == null || config.beforeJoinContainer(com, this))
+			// 使用反射绑定需要的组件
+			if (autoBindComponent)
 			{
-				com._onAddToContainer(this, m_components.Count);
+				var flag = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
+				var fields = typeof(T).GetFields(flag);
 
-				// 使用反射绑定需要的组件
-				if (autoBindComponent)
+				// 遍历字段并查找具有CustomAttribute的字段
+				foreach (var field in fields)
 				{
-					var flag = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
-					var fields = typeof(T).GetFields(flag);
-
-					// 遍历字段并查找具有CustomAttribute的字段
-					foreach (var field in fields)
+					var bindOptions = field.GetCustomAttribute<BindComponentAttribute>();
+					if (bindOptions != null)
 					{
-						var bindOptions = field.GetCustomAttribute<BindComponentAttribute>();
-						if (bindOptions != null)
-						{
-							var dependent = this.findComponent(field.FieldType);
-							Debug.Assert(dependent != null || !bindOptions.require,
-								$"Unable to add component ({typeof(T).Name}) to the container, its dependent component ({field.DeclaringType.Name}) does not exist");
-								
-							if (dependent != null) field.SetValue(com, dependent);
-						}
+						var dependent = this.findComponent(field.FieldType);
+						Debug.Assert(dependent != null || !bindOptions.require,
+							$"Unable to add component ({typeof(T).Name}) to the container, its dependent component ({field.DeclaringType.Name}) does not exist");
+
+						if (dependent != null) field.SetValue(com, dependent);
 					}
 				}
+			}
 
-				var it = m_components.AddLast(com);
-				m_indexMap.Add(typeof(T), it);
-				return com;
-			}
-			else
-			{
-				Debug.WriteLine($"add compnent {typeof(T).Name} faild", $"{this.GetType().Name}.Warn");
-				return null;
-			}
+			var it = m_components.AddLast(com);
+			m_indexMap.Add(typeof(T), it);
+
+			com._onAddToContainer(this);
+
+			return com;
 		}
 
 		public T removeComponent<T>()

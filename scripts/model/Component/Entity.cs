@@ -6,36 +6,31 @@ namespace urd
 {
 	public class Entity : Component
 	{
-		private static LinkedList<Entity> _InstanceIndex = new LinkedList<Entity>();
-
+		private static LinkedList<Entity> _Instances = new LinkedList<Entity>();
 		public static IEnumerable<Entity> IterateInstance()
 		{
-			for (var it = _InstanceIndex.First; it != null; it = it.Next)
+			for (var it = _Instances.First; it != null; it = it.Next)
 				yield return it.Value;
 		}
 
-		private LinkedListNode<Entity> _itor = null;
+		private readonly LinkedListNode<Entity> _itor = null;
 
-#if DEBUG
-		public bool debug_printDebugInfo = false;
-#endif
-
-		private string m_name;
-		private WorldGrid m_world;
+		private WorldGrid m_grid;
 		private vec2i m_coord;
+
 		private bool m_block;
 
-		public string name { set => m_name = value; get => m_name; }
-		public WorldGrid world { get => m_world; }
-		public bool block { set => m_block = value; get => m_block; }
+		public WorldGrid grid { set => m_grid = value; get => m_grid; }
 		public vec2i coord { set => m_coord = value; get => m_coord; }
+
+		public bool block { set => m_block = value; get => m_block; }
 
 		// 当前所在的瓦片
 		public TileCell currentTile
 		{
 			get
 			{
-				this.world.tryGetTile(this.coord.x, this.coord.y, out var tile);
+				this.grid.tryGetTile(this.coord.x, this.coord.y, out var tile);
 				return tile;
 			}
 		}
@@ -46,37 +41,27 @@ namespace urd
 			var coord = m_coord + offset;
 			if (loop)
 			{
-				coord.x = mathf.loopIndex(coord.x, m_world.width);
-				coord.y = mathf.loopIndex(coord.y, m_world.height);
+				coord.x = mathf.loopIndex(coord.x, m_grid.width);
+				coord.y = mathf.loopIndex(coord.y, m_grid.height);
 			}
 
-			this.world.tryGetTile(coord.x, coord.y, out var tile);
+			this.grid.tryGetTile(coord.x, coord.y, out var tile);
 			return tile;
 		}
 
-#if DEBUG
-		public override void _update(float delta)
+		public Entity(WorldGrid world, vec2i coord, bool block = true)
 		{
-			if (debug_printDebugInfo)
-				DebugWatch.Main.outObject(this.name, this);
-		}
-#endif
-
-		public Entity(string name, WorldGrid world, vec2i coord, bool block = true)
-		{
-			m_name = name;
-			this.name= name;
-			m_world = world;
+			m_grid = world;
 			
 			this.coord = coord;
 			this.block = block;
 
 			Debug.WriteLine($"Entity {this.name} created", $"{this.GetType().Name}.Info");
-			_itor = Entity._InstanceIndex.AddLast(this);
+			_itor = Entity._Instances.AddLast(this);
 		}
 		~Entity()
 		{
-			Entity._InstanceIndex.Remove(_itor);
+			Entity._Instances.Remove(_itor);
 		}
 	}
 }

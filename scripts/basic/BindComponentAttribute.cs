@@ -1,4 +1,4 @@
-﻿namespace urd
+﻿ namespace urd
 {
 	[System.AttributeUsage(System.AttributeTargets.Field)]
 	public class BindComponentAttribute : System.Attribute

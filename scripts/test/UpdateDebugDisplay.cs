@@ -12,7 +12,7 @@ public partial class UpdateDebugDisplay : RichTextLabel
 		for (int i = 0; i < DebugWatch.Main.recordCount; i++)
 		{
 			var record = DebugWatch.Main.getRecord(i);
-			build.AppendLine($"[Color=green]{record.title} -{record.time.ToString("HH:mm:ss")}[/Color]\n{record.msg}");
+			build.AppendLine($"[color=green][b]{record.tag} -{record.time}[/b][/color]\n{record.constnet}");
 		}
 
 		this.Text = build.ToString();
