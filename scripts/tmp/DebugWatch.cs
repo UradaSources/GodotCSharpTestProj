@@ -4,7 +4,7 @@ using System.Runtime.CompilerServices;
 using System.Reflection;
 using System.Diagnostics;
 
-public class DebugDisplay
+public class DebugWatch
 {
 	public struct Message
 	{
@@ -14,12 +14,12 @@ public class DebugDisplay
 		public System.DateTime time;
 	}
 
-	private static DebugDisplay _Main;
-	public static DebugDisplay Main
+	private static DebugWatch _Main;
+	public static DebugWatch Main
 	{
 		get
 		{
-			if (_Main == null) _Main = new DebugDisplay();
+			if (_Main == null) _Main = new DebugWatch();
 			return _Main;
 		}
 	}

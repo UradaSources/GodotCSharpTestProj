@@ -24,7 +24,7 @@ namespace urd
 		public override void _update(float delta)
 		{
 			if (m_entity.name[0] == 'E')
-				DebugDisplay.Main.outObject(m_entity.name, this);
+				DebugWatch.Main.outObject(m_entity.name, this);
 
 			// 若当前正在移动中, 则更新位置
 			if (this.processing)

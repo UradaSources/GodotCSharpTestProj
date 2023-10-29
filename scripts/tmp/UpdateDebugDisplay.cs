@@ -9,9 +9,9 @@ public partial class UpdateDebugDisplay : RichTextLabel
 
 		build.AppendLine($"fps: {1/delta:0.0}\tdelta: {delta:0.000}\n");
 
-		for (int i = 0; i < DebugDisplay.Main.recordCount; i++)
+		for (int i = 0; i < DebugWatch.Main.recordCount; i++)
 		{
-			var record = DebugDisplay.Main.getRecord(i);
+			var record = DebugWatch.Main.getRecord(i);
 			build.AppendLine($"[Color=green]{record.title} -{record.time.ToString("HH:mm:ss")}[/Color]\n{record.msg}");
 		}
 

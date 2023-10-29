@@ -58,7 +58,7 @@ namespace urd
 		public override void _update(float delta)
 		{
 			if (debug_printDebugInfo)
-				DebugDisplay.Main.outObject(this.name, this);
+				DebugWatch.Main.outObject(this.name, this);
 		}
 #endif
 
