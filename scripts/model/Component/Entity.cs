@@ -6,6 +6,21 @@ namespace urd
 {
 	public class Entity : Component
 	{
+		public struct ChangeWorldEventArgs
+		{
+			public WorldGrid origWorld;
+			public vec2i origCoord;
+
+			public WorldGrid world;
+			public vec2i coord;
+		}
+
+		public delegate void ChangeWorldEventHandler(ChangeWorldEventArgs args);
+		public delegate void MoveCoordEventHandler(vec2i origCoord, vec2i coord);
+
+		public event ChangeWorldEventHandler onChangeWorld;
+		public event MoveCoordEventHandler onMoveCoord;
+
 		private static LinkedList<Entity> _Instances = new LinkedList<Entity>();
 		public static IEnumerable<Entity> IterateInstance()
 		{
@@ -15,13 +30,25 @@ namespace urd
 
 		private readonly LinkedListNode<Entity> _itor = null;
 
-		private WorldGrid m_grid;
+		private WorldGrid m_world;
 		private vec2i m_coord;
 
 		private bool m_block;
 
-		public WorldGrid grid { set => m_grid = value; get => m_grid; }
-		public vec2i coord { set => m_coord = value; get => m_coord; }
+		public WorldGrid world => m_world;
+		public vec2i coord 
+		{
+			set
+			{
+				if (m_coord == value) return;
+
+				var origCoord = m_coord;
+				m_coord = value;
+
+				this.onMoveCoord?.Invoke(origCoord, m_coord);
+			}
+			get => m_coord; 
+		}
 
 		public bool block { set => m_block = value; get => m_block; }
 
@@ -30,9 +57,26 @@ namespace urd
 		{
 			get
 			{
-				this.grid.tryGetTile(this.coord.x, this.coord.y, out var tile);
+				this.world.tryGetTile(this.coord.x, this.coord.y, out var tile);
 				return tile;
 			}
+		}
+
+		public void setWorld(WorldGrid world, vec2i coord)
+		{
+			var origWorld = m_world;
+			var origCoord = m_coord;
+
+			m_world = world;
+			m_coord = coord;
+
+			this.onChangeWorld.Invoke(new ChangeWorldEventArgs
+			{
+				origWorld = origWorld,
+				origCoord = origCoord,
+				world = world,
+				coord = coord
+			});
 		}
 
 		// 获取附近的瓦片
@@ -41,18 +85,18 @@ namespace urd
 			var coord = m_coord + offset;
 			if (loop)
 			{
-				coord.x = mathf.loopIndex(coord.x, m_grid.width);
-				coord.y = mathf.loopIndex(coord.y, m_grid.height);
+				coord.x = mathf.loopIndex(coord.x, m_world.width);
+				coord.y = mathf.loopIndex(coord.y, m_world.height);
 			}
 
-			this.grid.tryGetTile(coord.x, coord.y, out var tile);
+			this.world.tryGetTile(coord.x, coord.y, out var tile);
 			return tile;
 		}
 
 		public Entity(WorldGrid world, vec2i coord, bool block = true)
 		{
-			m_grid = world;
-			
+			m_world = world;
+
 			this.coord = coord;
 			this.block = block;
 

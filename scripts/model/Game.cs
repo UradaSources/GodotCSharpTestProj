@@ -7,7 +7,7 @@ namespace urd
 {
 	public partial class Game : Node2D
 	{
-		private const string WorldDataFilePath = "./save/grid.json";
+		private const string WorldDataFilePath = "./save/world.json";
 		private const string TileTypeDataFilePath = "./save/tileTypes.json";
 
 		public static bool Metronome(int frequency, float offset = 0)
@@ -43,14 +43,14 @@ namespace urd
 				var json = File.ReadAllText(WorldDataFilePath);
 				m_world = WorldGridUtils.FromJson(json);
 
-				Debug.WriteLine("load grid data from json");
+				Debug.WriteLine("load world data from json");
 			}
 
 			m_pathfind = new PathGenerator(m_world);
 
 			m_player = new ComponentContainer();
 
-			m_player.addComponent(new Entity("Player", m_world, vec2i.zero));
+			m_player.addComponent(new Entity(m_world, vec2i.zero));
 			m_player.addComponent(new Movement(3.0f, vec2i.zero));
 			m_player.addComponent(new Navigation(m_pathfind));
 			m_player.addComponent(new RandomWalkControl());
@@ -67,7 +67,7 @@ namespace urd
 				int x = rng.RandiRange(0, m_world.width - 1);
 				int y = rng.RandiRange(0, m_world.height - 1);
 
-				enemy.addComponent(new Entity("Enemy", m_world, new vec2i(x, y)));
+				enemy.addComponent(new Entity(m_world, new vec2i(x, y)));
 				enemy.addComponent(new Movement(2.0f, vec2i.zero));
 				enemy.addComponent(new Navigation(m_pathfind));
 				enemy.addComponent(new FollowWalkControl()).target = m_player.getComponent<Entity>();
@@ -114,7 +114,7 @@ namespace urd
 			{
 				var json = WorldGridUtils.ToJson(m_world);
 				File.WriteAllText(WorldDataFilePath, json);
-				Debug.WriteLine($"save grid data");
+				Debug.WriteLine($"save world data");
 			}
 
 			// 暂停或是运行游戏

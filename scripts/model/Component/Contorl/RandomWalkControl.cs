@@ -21,7 +21,7 @@ namespace urd
 				return;
 			}
 
-			var world = m_entity.grid;
+			var world = m_entity.world;
 
 			TileCell tile;
 			do
