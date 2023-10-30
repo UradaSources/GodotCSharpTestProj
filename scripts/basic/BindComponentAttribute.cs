@@ -1,4 +1,7 @@
-﻿ namespace urd
+﻿using System.Reflection;
+using System.Diagnostics;
+
+namespace urd
 {
 	[System.AttributeUsage(System.AttributeTargets.Field)]
 	public class BindComponentAttribute : System.Attribute
@@ -14,11 +17,16 @@
 	[System.AttributeUsage(System.AttributeTargets.Method)]
 	public class BindEventAttribute : System.Attribute
 	{
-		public readonly string eventName;
+		public readonly object target;
+		public readonly EventInfo eventInfo;
 
-		public BindEventAttribute()
+		public BindEventAttribute(object target, string eventName)
 		{
-			this.require = require;
+			this.target = target;
+			this.eventInfo = target.GetType().GetEvent(eventName);
+
+			Debug.Assert(this.eventInfo != null, 
+				$"non-existent event {eventName} from {target}");
 		}
 	}
 }

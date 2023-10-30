@@ -41,15 +41,15 @@ namespace urd
 			return m_indexMap.ContainsKey(typeof(T));
 		}
 
-		public T emplaceComponent<T>(bool autoBindComponent = true)
+		public T emplaceComponent<T>(bool autoBind = true)
 			where T : Component, new()
 		{
 			Debug.Assert(!this.hasComponent<T>());
 
 			var com = new T();
-			return this.addComponent(com, autoBindComponent);
+			return this.addComponent(com, autoBind);
 		}
-		public void tryEmplaceComponents(bool autoBindComponet, params System.Type[] types)
+		public void tryEmplaceComponents(bool autoBind, params System.Type[] types)
 		{
 			for (int i = 0; i < types.Length; i++)
 			{
@@ -58,23 +58,21 @@ namespace urd
 				Debug.Assert(types[i].IsSubclassOf(typeof(Component)));
 				var com = (Component)System.Activator.CreateInstance(types[i]);
 
-				this.addComponent(com, autoBindComponet);
+				this.addComponent(com, autoBind);
 			}
 		}
 
-		public T addComponent<T>(T com, bool autoBindComponent = true)
+		public T addComponent<T>(T com, bool autoBind = true)
 			where T : Component
 		{
 			Debug.Assert(!this.hasComponent<T>());
 
 			// 使用反射绑定需要的组件
-			if (autoBindComponent)
+			if (autoBind)
 			{
-				var flag = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
-				var fields = typeof(T).GetFields(flag);
-
-				// 遍历字段并查找具有CustomAttribute的字段
-				foreach (var field in fields)
+				// 注入组件
+				var fieldFilter = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
+				foreach (var field in typeof(T).GetFields(fieldFilter))
 				{
 					var bindOptions = field.GetCustomAttribute<BindComponentAttribute>();
 					if (bindOptions != null)
@@ -84,6 +82,20 @@ namespace urd
 							$"Unable to add component ({typeof(T).Name}) to the container, its dependent component ({field.DeclaringType.Name}) does not exist");
 
 						if (dependent != null) field.SetValue(com, dependent);
+					}
+				}
+
+				// 绑定事件
+				var methodFilter = BindingFlags.Public | BindingFlags.NonPublic;
+				foreach (var method in typeof(T).GetMethods(methodFilter))
+				{
+					var bindOptions = method.GetCustomAttribute<BindEventAttribute>();
+					if (bindOptions != null)
+					{
+						var info = bindOptions.target.GetType().GetEvent(bindOptions.eventName);
+						Debug.Assert(info != null, $"{com} attempts to bind non-existent event {bindOptions.eventName} from {bindOptions.target}");
+
+						info.AddEventHandler(bindOptions.target, System.Delegate.CreateDelegate(typeof(T), method));
 					}
 				}
 			}
