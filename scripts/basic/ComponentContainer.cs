@@ -7,6 +7,29 @@ namespace urd
 {
 	public class ComponentContainer
 	{
+		public static void BindComponent<T>(T com)
+			where T : Component
+		{
+			Debug.Assert(com.container != null);
+
+			var flag = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
+			var fields = typeof(T).GetFields(flag);
+
+			// 遍历字段并查找具有CustomAttribute的字段
+			foreach (var field in fields)
+			{
+				var bindOptions = field.GetCustomAttribute<BindComponentAttribute>();
+				if (bindOptions != null)
+				{
+					var dependent = com.container.findComponent(field.FieldType);
+					Debug.Assert(dependent != null || !bindOptions.require,
+						$"Unable to add component ({typeof(T).Name}) to the container, its dependent component ({field.FieldType.Name}) does not exist");
+
+					if (dependent != null) field.SetValue(com, dependent);
+				}
+			}
+		}
+
 		private LinkedList<Component> m_components;
 		private Dictionary<System.Type, LinkedListNode<Component>> m_indexMap;
 

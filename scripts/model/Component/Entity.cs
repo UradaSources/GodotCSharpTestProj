@@ -16,10 +16,10 @@ namespace urd
 		}
 
 		public delegate void ChangeWorldEventHandler(ChangeWorldEventArgs args);
-		public delegate void MoveCoordEventHandler(vec2i origCoord, vec2i coord);
+		public delegate void ChangeCoordEventHandler(vec2i origCoord, vec2i coord);
 
 		public event ChangeWorldEventHandler onChangeWorld;
-		public event MoveCoordEventHandler onMoveCoord;
+		public event ChangeCoordEventHandler onChangeCoord;
 
 		private static LinkedList<Entity> _Instances = new LinkedList<Entity>();
 		public static IEnumerable<Entity> IterateInstance()
@@ -45,7 +45,7 @@ namespace urd
 				var origCoord = m_coord;
 				m_coord = value;
 
-				this.onMoveCoord?.Invoke(origCoord, m_coord);
+				this.onChangeCoord?.Invoke(origCoord, m_coord);
 			}
 			get => m_coord; 
 		}
@@ -100,7 +100,6 @@ namespace urd
 			this.coord = coord;
 			this.block = block;
 
-			Debug.WriteLine($"Entity {this.name} created", $"{this.GetType().Name}.Info");
 			_itor = Entity._Instances.AddLast(this);
 		}
 		~Entity()

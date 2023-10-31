@@ -23,7 +23,7 @@ public class TileType
 		return _Types[id];
 	}
 
-	public static void InitFromJson(string jsonData)
+	public static void InitSetFromJson(string jsonData)
 	{
 		Debug.Assert(_Types.Count == 0, "cannot init tiletype form json.");
 		_Types = JsonSerializer.Deserialize<List<TileType>>(jsonData);

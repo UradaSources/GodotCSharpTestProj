@@ -4,8 +4,6 @@ namespace urd
 {
 	public partial class RenderFunc : Node2D
 	{
-		public static CanvasItem Canvas { set; get; }
-		
 		private static Godot.Color GDColor(Color c)
 		{
 			return new Godot.Color((float)c.r / 255, (float)c.g / 255, (float)c.b / 255, (float)c.a / 255);
@@ -25,22 +23,18 @@ namespace urd
 
 		public void drawCharSprite(int x, int y, char c, Color? color = null)
 		{
-			if (Canvas == null) return;
-
 			var pos = new Vector2(x, y) * m_tileSize;
 			var target = new Rect2(pos, Vector2.One * m_tileSize);
 
 			var source = GetCharSpriteRect(16, 8, c);
-			Canvas.DrawTextureRectRegion(m_charSheet, target, source, GDColor(color ?? Color.white));
+			this.DrawTextureRectRegion(m_charSheet, target, source, GDColor(color ?? Color.white));
 		}
 		public void drawBox(int x, int y, Color? color = null, bool fill = false)
 		{
-			if (Canvas == null) return;
-
 			var pos = new Vector2(x, y) * m_tileSize;
 
 			var target = new Rect2(pos, Vector2.One * m_tileSize);
-			Canvas.DrawRect(target, GDColor(color ?? Color.white), fill);
+			this.DrawRect(target, GDColor(color ?? Color.white), fill);
 		}
 
 		public vec2i mapToCoord(vec2 pos)
@@ -56,7 +50,7 @@ namespace urd
 
 		public vec2 mousePosition()
 		{
-			var pos = Canvas.GetLocalMousePosition();
+			var pos = this.GetLocalMousePosition();
 			return new vec2(pos.X, pos.Y);
 		}
 

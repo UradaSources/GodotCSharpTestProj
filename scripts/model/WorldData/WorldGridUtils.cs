@@ -27,9 +27,17 @@ namespace urd
 
 			return JsonSerializer.Serialize(data);
 		}
-		public static WorldGrid FromJson(string json, WorldGrid target = null)
+		public static WorldGrid TryFromJson(string json, WorldGrid target = null)
 		{
 			var data = JsonSerializer.Deserialize<WorldSerializeData>(json);
+			if (data.width == 0 || data.height == 0)
+			{
+				Debug.WriteLine($"serialized data corruption",
+					$"{typeof(WorldGridUtils).Name}.Error");
+
+				return null;
+			}
+
 			if (target != null && (target.width != data.width || target.height != data.height))
 			{
 				Debug.WriteLine($"serialized data provides {data.width}x{data.height} data, while the target is {target.width}x{target.height}",

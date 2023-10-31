@@ -1,77 +1,40 @@
-﻿using System.IO;
-using System.Collections;
+﻿using System.Collections;
 using System.Diagnostics;
+using System.Linq;
 using Godot;
+using urd;
 
-namespace urd
-{
 	public partial class Game : Node2D
 	{
-		private const string WorldDataFilePath = "./save/world.json";
-		private const string TileTypeDataFilePath = "./save/tileTypes.json";
+		private bool m_mainLoop = true;
 
-		public static bool Metronome(int frequency, float offset = 0)
-		{
-			switch (frequency)
-			{
-				case -1: return true;
-				case 0: return false;
-			}
-
-			float t = offset + Time.GetTicksMsec() * 0.001f;
-			return (int)(t * 2 * frequency) % 2 == 0;
-		}
-
-		private WorldGrid m_world;
-		private PathGenerator m_pathfind;
-
-		private ComponentContainer m_player;
-
-		private bool m_runingLoop = true;
+		[Export] private World m_mainWorld;
 
 		public override void _Ready()
 		{
-			TileType.Create('T', Color.FromHex(0x8AB969), 1.5f);
-			TileType.Create('#', Color.FromHex(0x3A3858), -1.0f);
-			TileType.Create('D', Color.FromHex(0x819796), 3.0f);
-			TileType.Create('.', Color.FromHex(0xA77B5B), 1.0f);
-			TileType.Create('_', Color.FromHex(0x89493A), 0.8f);
-			TileType.Create('`', Color.FromHex(0x68C2D3), 3.0f);
-	
-			if (File.Exists(WorldDataFilePath))
-			{
-				var json = File.ReadAllText(WorldDataFilePath);
-				m_world = WorldGridUtils.FromJson(json);
+			var player = new ComponentContainer();
 
-				Debug.WriteLine("load world data from json");
-			}
+			player.addComponent(new Entity(m_mainWorld.model, vec2i.zero));
+			player.addComponent(new Navigation(m_mainWorld.pathGenerator));
 
-			m_pathfind = new PathGenerator(m_world);
+			player.addComponent(new Movement(3.0f, vec2i.zero));
+			player.addComponent(new RandomWalkControl());
 
-			m_player = new ComponentContainer();
-
-			m_player.addComponent(new Entity(m_world, vec2i.zero));
-			m_player.addComponent(new Movement(3.0f, vec2i.zero));
-			m_player.addComponent(new Navigation(m_pathfind));
-			m_player.addComponent(new RandomWalkControl());
-			//m_player.addComponent(new CharacterView('P', false));
-
-			m_player._init();
+			player._init();
 
 			var rng = new RandomNumberGenerator();
-
 			for (int i = 0; i < 3; i++)
 			{
 				var enemy = new ComponentContainer();
 
-				int x = rng.RandiRange(0, m_world.width - 1);
-				int y = rng.RandiRange(0, m_world.height - 1);
+				int x = rng.RandiRange(0, m_mainWorld.model.width - 1);
+				int y = rng.RandiRange(0, m_mainWorld.model.height - 1);
 
-				enemy.addComponent(new Entity(m_world, new vec2i(x, y)));
+				enemy.addComponent(new Entity(m_mainWorld.model, new vec2i(x, y)));
+				enemy.addComponent(new Navigation(m_mainWorld.pathGenerator));
+
 				enemy.addComponent(new Movement(2.0f, vec2i.zero));
-				enemy.addComponent(new Navigation(m_pathfind));
-				enemy.addComponent(new FollowWalkControl()).target = m_player.getComponent<Entity>();
-				//enemy.addComponent(new CharacterView('E', true));
+				enemy.addComponent(new FollowWalkControl()).target = player.getComponent<Entity>();
 
 				enemy._init();
 			}
@@ -79,10 +42,13 @@ namespace urd
 
 		public override void _Process(double delta)
 		{
-			if (m_runingLoop)
+			if (m_mainLoop)
 			{
-				foreach (var entity in Entity.IterateInstance())
+				foreach (var entity in Entity.IterateInstance()
+					.Where((Entity en)=>en.container != null))
+				{ 
 					entity.container._update((float)delta);
+				}
 			}
 
 			var mousePos = this.GetLocalMousePosition();
@@ -98,48 +64,14 @@ namespace urd
 			//	}
 			//}
 
-			//// 设置图块
-			//if (Input.IsActionJustPressed("mouse_left"))
-			//{
-			//	if (m_selectedTile != null)
-			//	{
-			//		int typeid = m_selectedTile.type.id;
-			//		typeid = (typeid + 1) % TileType.TypeCount;
-			//		m_selectedTile.type = TileType.Get(typeid);
-			//	}
-			//}
-
-			// 储存地图数据
-			if (Input.IsActionJustPressed("ui_save"))
-			{
-				var json = WorldGridUtils.ToJson(m_world);
-				File.WriteAllText(WorldDataFilePath, json);
-				Debug.WriteLine($"save world data");
-			}
-
 			// 暂停或是运行游戏
 			if (Input.IsActionJustPressed("ui_stop"))
-				m_runingLoop = !m_runingLoop;
+				m_mainLoop = !m_mainLoop;
 
 			this.QueueRedraw();
 		}
 		public override void _Draw()
 		{
-			RenderFunc.Canvas = this;
-
-			// 绘制地图
-			for (int i = 0; i < m_world.tileCount; i++)
-			{
-				var tile = m_world.rawGetTile(i);
-				RenderFunc.drawCharSprite(tile.x, tile.y, tile.type.graph, tile.type.c);
-			}
-
-			//if (m_runingLoop)
-			//{
-			//	foreach (var renderer in Renderer.IterateInstance())
-			//		renderer._draw();
-			//}
-
 			//foreach (var entity in Entity.IterateInstance())
 			//{
 			//	// 绘制角色本身
@@ -166,4 +98,3 @@ namespace urd
 			//	this.DrawSelectBox(m_selectedTile.x, m_selectedTile.y, Colors.Red);
 		}
 	}
-}
