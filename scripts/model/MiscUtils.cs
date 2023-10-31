@@ -4,6 +4,22 @@ namespace urd
 {
 	public static class MiscUtils
 	{
+		public static Color FromHex(int hex)
+		{
+			float red = ((hex >> 16) & 0xFF) / 255.0f;
+			float green = ((hex >> 8) & 0xFF) / 255.0f;
+			float blue = (hex & 0xFF) / 255.0f;
+			return new Color(red, green, blue, 255);
+		}
+		public static Color FromHexIncludeAlpha(int hex)
+		{
+			float red = ((hex >> 16) & 0xFF) / 255.0f;
+			float green = ((hex >> 8) & 0xFF) / 255.0f;
+			float blue = (hex & 0xFF) / 255.0f;
+			float alpha = (hex & 0xFF) / 255.0f;
+			return new Color(red, green, blue, alpha);
+		}
+
 		public static T CreateRootNode<T>(string name)
 			where T : Node, new()
 		{
@@ -15,7 +31,6 @@ namespace urd
 
 			return node;
 		}
-
 		public static bool Metronome(int frequency, float offset = 0)
 		{
 			switch (frequency)

@@ -61,7 +61,8 @@ namespace urd
 				var nextTile = m_pathNodeList[m_pathNodeList.Count - 1];
 				if (nextTile.type.cost < 0) // 若下一个目标路点无效了, 则清除当前路径和移动方向
 				{
-					Debug.WriteLine($"next tile({nextTile.x},{nextTile.y}) is unreachable, clear path.", m_entity.name);
+					Debug.WriteLine($"next tile({nextTile.x},{nextTile.y}) is unreachable, clear path.", 
+						m_entity.GetHashCode().ToString());
 
 					this.clearData();
 					m_motion.direct = vec2i.zero;

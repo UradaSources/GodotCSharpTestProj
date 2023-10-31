@@ -157,5 +157,10 @@
 		{
 			return System.HashCode.Combine(x, y);
 		}
+
+#if GODOT
+		public static implicit operator Godot.Vector2(vec2 self)
+			=> new Godot.Vector2(self.x, self.y);
+#endif
 	}
 }

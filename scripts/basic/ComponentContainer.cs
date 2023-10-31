@@ -29,6 +29,20 @@ namespace urd
 				}
 			}
 		}
+		public static void BindEvent<T>(T com)
+			where T : Component
+		{
+			var methodFilter = BindingFlags.Public | BindingFlags.NonPublic;
+			foreach (var method in typeof(T).GetMethods(methodFilter))
+			{
+				var bindOptions = method.GetCustomAttribute<BindEventAttribute>();
+				if (bindOptions != null)
+				{
+					var handler = System.Delegate.CreateDelegate(typeof(T), method);
+					bindOptions.eventInfo.AddEventHandler(bindOptions.target, handler);
+				}
+			}
+		}
 
 		private LinkedList<Component> m_components;
 		private Dictionary<System.Type, LinkedListNode<Component>> m_indexMap;
@@ -93,32 +107,20 @@ namespace urd
 			// 使用反射绑定需要的组件
 			if (autoBind)
 			{
-				// 注入组件
-				var fieldFilter = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
-				foreach (var field in typeof(T).GetFields(fieldFilter))
+				var flag = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
+				var fields = typeof(T).GetFields(flag);
+
+				// 遍历字段并查找具有CustomAttribute的字段
+				foreach (var field in fields)
 				{
 					var bindOptions = field.GetCustomAttribute<BindComponentAttribute>();
 					if (bindOptions != null)
 					{
 						var dependent = this.findComponent(field.FieldType);
 						Debug.Assert(dependent != null || !bindOptions.require,
-							$"Unable to add component ({typeof(T).Name}) to the container, its dependent component ({field.DeclaringType.Name}) does not exist");
+							$"Unable to add component ({typeof(T).Name}) to the container, its dependent component ({field.FieldType.Name}) does not exist");
 
 						if (dependent != null) field.SetValue(com, dependent);
-					}
-				}
-
-				// 绑定事件
-				var methodFilter = BindingFlags.Public | BindingFlags.NonPublic;
-				foreach (var method in typeof(T).GetMethods(methodFilter))
-				{
-					var bindOptions = method.GetCustomAttribute<BindEventAttribute>();
-					if (bindOptions != null)
-					{
-						var info = bindOptions.target.GetType().GetEvent(bindOptions.eventName);
-						Debug.Assert(info != null, $"{com} attempts to bind non-existent event {bindOptions.eventName} from {bindOptions.target}");
-
-						info.AddEventHandler(bindOptions.target, System.Delegate.CreateDelegate(typeof(T), method));
 					}
 				}
 			}

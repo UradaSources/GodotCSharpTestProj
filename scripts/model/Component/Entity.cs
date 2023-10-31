@@ -106,5 +106,12 @@ namespace urd
 		{
 			Entity._Instances.Remove(_itor);
 		}
+
+		public override void _update(float delta)
+		{
+			base._update(delta);
+
+			DebugWatch.Main.watchObject(this);
+		}
 	}
 }

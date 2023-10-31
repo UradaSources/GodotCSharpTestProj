@@ -1,11 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text.Json;
-using urd;
+using Godot;
 
 public class TileType
 {
-	public static readonly TileType Default = new TileType(-1, ' ', Color.white, -1);
+	public static readonly TileType Default = new TileType(-1, ' ', Colors.White, -1);
 	private static List<TileType> _Types = new List<TileType>();
 
 	public static int TypeCount => _Types.Count;

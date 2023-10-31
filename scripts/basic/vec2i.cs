@@ -83,5 +83,10 @@
 		{
 			return System.HashCode.Combine(x, y);
 		}
+
+#if GODOT
+		public static implicit operator Godot.Vector2I(vec2i self)
+			=> new Godot.Vector2I(self.x, self.y);
+#endif
 	}
 }
