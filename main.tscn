@@ -1,10 +1,11 @@
-[gd_scene load_steps=6 format=3 uid="uid://daqieuw0gwxy3"]
+[gd_scene load_steps=7 format=3 uid="uid://daqieuw0gwxy3"]
 
 [ext_resource type="Script" path="res://scripts/model/Game.cs" id="1_trikb"]
 [ext_resource type="Script" path="res://scripts/model/World.cs" id="2_xl8y7"]
 [ext_resource type="Script" path="res://scripts/model/CameraControl.cs" id="3_j1pj3"]
 [ext_resource type="Texture2D" uid="uid://bp2c8sp6qeq05" path="res://art/soft-thick-dark.png" id="3_xhfdl"]
 [ext_resource type="Script" path="res://scripts/test/UpdateDebugDisplay.cs" id="4_u21w8"]
+[ext_resource type="Script" path="res://scripts/basic/HorizontalLayout.cs" id="6_v8wt3"]
 
 [node name="Root" type="Node2D"]
 texture_filter = 1
@@ -39,9 +40,32 @@ offset_bottom = 640.0
 bbcode_enabled = true
 script = ExtResource("4_u21w8")
 
-[node name="LineEdit" type="LineEdit" parent="CanvasLayer/UI"]
+[node name="Control" type="Control" parent="CanvasLayer/UI"]
+anchors_preset = 0
+offset_right = 309.0
+offset_bottom = 324.0
+script = ExtResource("6_v8wt3")
+
+[node name="Control" type="Control" parent="CanvasLayer/UI/Control"]
+anchors_preset = 0
+offset_right = 10.0
+offset_bottom = 67.0
+
+[node name="Control2" type="Control" parent="CanvasLayer/UI/Control"]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 231.0
+offset_bottom = 165.0
+
+[node name="Panel" type="Panel" parent="CanvasLayer/UI/Control"]
 layout_mode = 0
-offset_left = 6.0
-offset_top = 604.0
-offset_right = 291.0
-offset_bottom = 639.0
+offset_right = 87.0
+offset_bottom = 76.0
+
+[node name="Panel2" type="Panel" parent="CanvasLayer/UI/Control"]
+offset_right = 87.0
+offset_bottom = 76.0
+
+[node name="Panel3" type="Panel" parent="CanvasLayer/UI/Control"]
+offset_right = 87.0
+offset_bottom = 76.0

@@ -35,12 +35,17 @@ namespace urd
 		{
 			switch (frequency)
 			{
-				case -1: return true;
-				case 0: return false;
+			case -1: return true;
+			case 0: return false;
 			}
 
 			float t = offset + Time.GetTicksMsec() * 0.001f;
 			return (int)(t * 2 * frequency) % 2 == 0;
 		}
+
+		public static Vector2 Max(Vector2 a, Vector2 b)
+			=> new Vector2(Mathf.Max(a.X, b.X), Mathf.Max(a.Y, b.Y));
+		public static Vector2 Min(Vector2 a, Vector2 b)
+			=> new Vector2(Mathf.Min(a.X, b.X), Mathf.Min(a.Y, b.Y));
 	}
 }
