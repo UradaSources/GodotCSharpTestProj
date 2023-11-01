@@ -4,68 +4,73 @@
 [ext_resource type="Script" path="res://scripts/model/World.cs" id="2_xl8y7"]
 [ext_resource type="Script" path="res://scripts/model/CameraControl.cs" id="3_j1pj3"]
 [ext_resource type="Texture2D" uid="uid://bp2c8sp6qeq05" path="res://art/soft-thick-dark.png" id="3_xhfdl"]
+[ext_resource type="Script" path="res://scripts/model/WorldSelector.cs" id="4_5e22y"]
 [ext_resource type="Script" path="res://scripts/test/UpdateDebugDisplay.cs" id="4_u21w8"]
-[ext_resource type="Script" path="res://scripts/basic/HorizontalLayout.cs" id="6_v8wt3"]
 
 [node name="Root" type="Node2D"]
 texture_filter = 1
 
-[node name="Game" type="Node2D" parent="." node_paths=PackedStringArray("m_mainWorld")]
-position = Vector2(0, 6)
+[node name="Game" type="Node2D" parent="." node_paths=PackedStringArray("m_mainWorld", "m_selector", "m_colorPicker", "m_inputField")]
 script = ExtResource("1_trikb")
 m_mainWorld = NodePath("World")
+m_selector = NodePath("World/Selector")
+m_colorPicker = NodePath("../CanvasLayer/UI/Panel/ColorPicker")
+m_inputField = NodePath("../CanvasLayer/UI/Panel/LineEdit")
 
 [node name="World" type="Node2D" parent="Game"]
 script = ExtResource("2_xl8y7")
 m_charSheet = ExtResource("3_xhfdl")
 
+[node name="Selector" type="Node2D" parent="Game/World"]
+script = ExtResource("4_5e22y")
+
 [node name="Camera2D" type="Camera2D" parent="."]
 position = Vector2(569, 321)
 script = ExtResource("3_j1pj3")
+m_zoomSpeed = 1.5
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 
 [node name="UI" type="Control" parent="CanvasLayer"]
 layout_mode = 3
-anchors_preset = 0
-offset_right = 485.0
-offset_bottom = 647.0
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 
-[node name="RichTextLabel" type="RichTextLabel" parent="CanvasLayer/UI"]
+[node name="Panel" type="Panel" parent="CanvasLayer/UI"]
 layout_mode = 1
-offset_left = 33.0
-offset_top = 1.0
-offset_right = 441.0
-offset_bottom = 640.0
+offset_right = 419.0
+offset_bottom = 648.0
+
+[node name="RichTextLabel" type="RichTextLabel" parent="CanvasLayer/UI/Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+focus_mode = 2
 bbcode_enabled = true
+selection_enabled = true
 script = ExtResource("4_u21w8")
 
-[node name="Control" type="Control" parent="CanvasLayer/UI"]
-anchors_preset = 0
-offset_right = 309.0
-offset_bottom = 324.0
-script = ExtResource("6_v8wt3")
-
-[node name="Control" type="Control" parent="CanvasLayer/UI/Control"]
-anchors_preset = 0
-offset_right = 10.0
-offset_bottom = 67.0
-
-[node name="Control2" type="Control" parent="CanvasLayer/UI/Control"]
-layout_mode = 3
-anchors_preset = 0
-offset_right = 231.0
-offset_bottom = 165.0
-
-[node name="Panel" type="Panel" parent="CanvasLayer/UI/Control"]
+[node name="ColorPicker" type="ColorPicker" parent="CanvasLayer/UI/Panel"]
 layout_mode = 0
-offset_right = 87.0
-offset_bottom = 76.0
+offset_left = 426.0
+offset_top = 408.0
+offset_right = 773.0
+offset_bottom = 789.0
+scale = Vector2(0.5, 0.5)
+edit_alpha = false
+color_modes_visible = false
+sliders_visible = false
+presets_visible = false
 
-[node name="Panel2" type="Panel" parent="CanvasLayer/UI/Control"]
-offset_right = 87.0
-offset_bottom = 76.0
-
-[node name="Panel3" type="Panel" parent="CanvasLayer/UI/Control"]
-offset_right = 87.0
-offset_bottom = 76.0
+[node name="LineEdit" type="LineEdit" parent="CanvasLayer/UI/Panel"]
+layout_mode = 0
+offset_left = 423.0
+offset_top = 605.0
+offset_right = 599.0
+offset_bottom = 640.0

@@ -25,6 +25,8 @@ public partial class World : Node2D
 	public WorldGrid model { private set; get; }
 	public PathGenerator pathGenerator { private set; get; }
 
+	public float tileSize => m_tileSize;
+
 	public void initTileType(string path)
 	{
 		bool loadFromSavedSuccess = false;
@@ -65,20 +67,20 @@ public partial class World : Node2D
 		this.pathGenerator = new PathGenerator(this.model);
 	}
 
-	private void drawCharSprite(int x, int y, char c, Color? color = null)
+	public void drawCharSprite(CanvasItem canvas, int x, int y, char c, Color? color = null)
 	{
 		var pos = new Vector2(x, y) * m_tileSize;
 		var target = new Rect2(pos, Vector2.One * m_tileSize);
 
 		var source = GetCharSpriteRect(16, 8, c);
-		this.DrawTextureRectRegion(m_charSheet, target, source, color ?? Colors.White);
+		canvas.DrawTextureRectRegion(m_charSheet, target, source, color ?? Colors.White);
 	}
-	private void drawBox(int x, int y, Color? color = null, bool fill = false)
+	public void drawBox(CanvasItem canvas, int x, int y, Color? color = null, bool fill = false)
 	{
 		var pos = new Vector2(x, y) * m_tileSize;
 
 		var target = new Rect2(pos, Vector2.One * m_tileSize);
-		this.DrawRect(target, color ?? Colors.White, fill);
+		canvas.DrawRect(target, color ?? Colors.White, fill);
 	}
 
 	public Vector2I mapToCoord(Vector2 pos)
@@ -134,14 +136,15 @@ public partial class World : Node2D
 		for (int i = 0; i < this.model.tileCount; i++)
 		{
 			var tile = this.model.rawGetTile(i);
-			this.drawCharSprite(tile.x, tile.y, tile.type.graph, tile.type.c);
+			this.drawCharSprite(this, tile.x, tile.y, tile.type.graph, tile.type.c);
 		}
 
 		// 绘制所有处于活动状态且位于本地图上的实体
 		foreach (var en in Entity.IterateInstance()
 			.Where((Entity e) => e.container != null && e.world == this.model))
 		{
-			this.drawCharSprite(en.coord.x, en.coord.y, 'C');
+			var graph = en.container.getComponent<Graph>();
+			if (graph != null) this.drawCharSprite(this, en.coord.x, en.coord.y, graph.graph, graph.color);
 		}
 	}
 }

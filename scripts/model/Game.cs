@@ -9,6 +9,12 @@ public partial class Game : Node2D
 	private bool m_mainLoop = true;
 
 	[Export] private World m_mainWorld;
+	[Export] private WorldSelector m_selector;
+
+	[Export] private ColorPicker m_colorPicker;
+	[Export] private LineEdit m_inputField;
+
+	private Graph m_sample;
 
 	public override void _Ready()
 	{
@@ -18,11 +24,12 @@ public partial class Game : Node2D
 		player.addComponent(new Movement(3.0f, vec2i.zero));
 		player.addComponent(new Navigation(m_mainWorld.pathGenerator));
 		player.addComponent(new RandomWalkControl());
+		player.addComponent(new Graph('C', Colors.White));
 
 		player._init();
 
 		var rng = new RandomNumberGenerator();
-		for (int i = 0; i < 0; i++)
+		for (int i = 0; i < 1; i++)
 		{
 			var enemy = new ComponentContainer();
 
@@ -33,9 +40,18 @@ public partial class Game : Node2D
 			enemy.addComponent(new Movement(2.0f, vec2i.zero));
 			enemy.addComponent(new Navigation(m_mainWorld.pathGenerator));
 			enemy.addComponent(new FollowWalkControl()).target = player.getComponent<Entity>();
+			enemy.addComponent(new Graph('E', Colors.White));
 
 			enemy._init();
 		}
+
+		var sample = new ComponentContainer();
+
+		sample.addComponent(new Entity(m_mainWorld.model, vec2i.one));
+		m_sample = sample.addComponent(new Graph(' ', Colors.White));
+
+		m_inputField.TextSubmitted += (string str) => m_sample.graph = str.Length >= 1 ? str[0] : ' ';
+		m_colorPicker.ColorChanged += (Color c) => m_sample.color = c;
 	}
 
 	public override void _Process(double delta)
@@ -62,6 +78,8 @@ public partial class Game : Node2D
 		//	}
 		//}
 
+		DebugWatch.Main.watchValue("sample", $"{m_sample.graph}, {m_sample.color.ToHtml()}");
+		
 		// 暂停或是运行游戏
 		if (Input.IsActionJustPressed("ui_stop"))
 			m_mainLoop = !m_mainLoop;
