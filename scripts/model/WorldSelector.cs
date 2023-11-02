@@ -3,7 +3,7 @@ using urd;
 
 public partial class WorldSelector : Node2D
 {
-	private World m_world;
+	private WorldNode m_world;
 
 	private TileCell m_selectedTile;
 
@@ -15,7 +15,7 @@ public partial class WorldSelector : Node2D
 	{
 		base._Ready();
 
-		m_world = this.GetParent<World>();
+		m_world = this.GetParent<WorldNode>();
 	}
 
 	public override void _Process(double delta)

@@ -128,7 +128,7 @@ namespace urd
 			var it = m_components.AddLast(com);
 			m_indexMap.Add(typeof(T), it);
 
-			com._onAddToContainer(this);
+			com._enable(this);
 
 			return com;
 		}

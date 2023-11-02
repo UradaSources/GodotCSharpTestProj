@@ -62,7 +62,8 @@ namespace urd
 			start = vec2i.Max(start, vec2i.zero);
 			end = vec2i.Min(end, grid.size - vec2i.one);
 
-			Debug.Assert(start.x < end.x && start.y < end.y, $"invaild start and end coord {start},{end}");
+			Debug.Assert(start.x < end.x && start.y < end.y, 
+				$"invaild start and end coord {start},{end}");
 
 			for (int y = start.y; y <= end.y; y++)
 			{

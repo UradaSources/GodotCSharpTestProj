@@ -4,7 +4,7 @@ using System.Diagnostics;
 
 namespace urd
 {
-	public class Entity : Component
+	public class Entity : BehaviorComponent
 	{
 		public struct ChangeWorldEventArgs
 		{
@@ -110,8 +110,8 @@ namespace urd
 		public override void _update(float delta)
 		{
 			base._update(delta);
-
 			DebugWatch.Main.watchObject(this);
 		}
+		public override void _lateUpdate(float delta) { }
 	}
 }

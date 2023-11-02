@@ -1,10 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics;
+using System.Security.Cryptography.X509Certificates;
 using Godot;
 
 namespace urd
 {
-	public class Navigation : Component
+	public class Navigation : BehaviorComponent
 	{
 		private PathGenerator m_pathfind;
 
@@ -85,6 +86,7 @@ namespace urd
 				m_motion.direct = vec2i.zero;
 			}
 		}
+		public override void _lateUpdate(float delta) { }
 
 		public Navigation(PathGenerator pathfind)
 		{

@@ -1,13 +1,26 @@
 ﻿using Godot;
 using System.Diagnostics;
 
+[Tool, GlobalClass]
 public partial class HorizontalLayout : Control
 {
-
 	private bool m_relayout = true;
 
 	public void setRelayoutFlag()
 		=> m_relayout = true;
+
+	private void updateLayout()
+	{
+		var pos = new Vector2();
+		for (int i = 0; i < this.GetChildCount(); i++)
+		{
+			if (this.GetChild(i) is Control child)
+			{
+				child.Position = pos;
+				pos += new Vector2(child.Size.X, 0);
+			}
+		}
+	}
 
 	public override void _EnterTree()
 	{
@@ -15,14 +28,12 @@ public partial class HorizontalLayout : Control
 
 		this.ChildEnteredTree += (Node child) =>
 		{
-			Debug.WriteLine($"get {child.Name}");
-			if (child is Control control)
+			if (child is Control control) 
 				control.Resized += this.setRelayoutFlag;
 		};
 		this.ChildExitingTree += (Node child) =>
 		{
-			Debug.WriteLine($"lost {child.Name}");
-			if (child is Control control)
+			if (child is Control control) 
 				control.Resized -= this.setRelayoutFlag;
 		};
 	}
@@ -31,18 +42,17 @@ public partial class HorizontalLayout : Control
 	{
 		base._Process(delta);
 
-		if (m_relayout)
+		if (Engine.IsEditorHint())
 		{
-			var pos = new Vector2();
-			for (int i = 0; i < this.GetChildCount(); i++)
+			this.updateLayout();
+		}
+		else
+		{
+			if (m_relayout)
 			{
-				if (this.GetChild(i) is Control child)
-				{
-					child.Position = pos;
-					pos += new Vector2(child.Size.X, 0);
-				}
+				this.updateLayout();
+				m_relayout = false;
 			}
-			m_relayout = false;
 		}
 	}
 }

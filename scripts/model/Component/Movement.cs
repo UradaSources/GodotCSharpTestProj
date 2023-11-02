@@ -2,7 +2,7 @@
 
 namespace urd
 {
-	public class Movement: Component
+	public class Movement: BehaviorComponent
 	{
 		[BindComponent] private Entity m_entity = null;
 
@@ -64,6 +64,7 @@ namespace urd
 				}
 			}
 		}
+		public override void _lateUpdate(float delta) { }
 
 		public Movement(float moveSpeed, vec2i moveDirect)
 		{

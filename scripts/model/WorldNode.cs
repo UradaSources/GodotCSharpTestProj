@@ -3,7 +3,7 @@ using System.Linq;
 using Godot;
 using urd;
 
-public partial class World : Node2D
+public partial class WorldNode : Node2D
 {
 	private const string WorldSavePath = "./save/world.json";
 	private const string TileTypeSavePath = "./save/tileTypes.json";

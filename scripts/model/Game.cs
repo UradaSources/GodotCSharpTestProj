@@ -4,11 +4,26 @@ using System.Linq;
 using Godot;
 using urd;
 
+namespace urd
+{
+	public class FunctionBlock
+	{ 
+		
+	}
+
+	public class Character : Component
+	{
+		[BindComponent] private Entity m_entity;
+
+
+	}
+}
+
 public partial class Game : Node2D
 {
 	private bool m_mainLoop = true;
 
-	[Export] private World m_mainWorld;
+	[Export] private WorldNode m_mainWorld;
 	[Export] private WorldSelector m_selector;
 
 	[Export] private ColorPicker m_colorPicker;

@@ -52,7 +52,7 @@ public class DebugWatch
 	public int recordCount => m_recordData.Count;
 
 	[Conditional("DEBUG")]
-	public void watchObject(object obj, string tag = null, bool property = false,
+	public void watchObject(object obj, string tag = null, bool includeProperty = false,
 		[CallerLineNumber] int lineNumber = 0,
 		[CallerFilePath] string filePath = null)
 	{
@@ -64,7 +64,7 @@ public class DebugWatch
 			fieldString += $"{name,-18} |{value}\n";
 
 		string propertyString = "";
-		if (property)
+		if (includeProperty)
 		{
 			propertyString = "[b]property:[/b]\n";
 			foreach (var (name, value) in GetProperties(obj))

@@ -162,7 +162,7 @@ namespace urd
 				}
 				else
 				{
-#if DEBUG
+#if false && DEBUG
 					Debug.WriteLine($"path generate success({start}-{target}):\n" +
 						$"open: {{{string.Join(", ", m_open.Values)}}}\n" +
 						$"closed index: {{{string.Join(", ", m_closedNodeIndex)}}}\n",
@@ -182,7 +182,7 @@ namespace urd
 				}
 			}
 
-#if DEBUG
+#if false && DEBUG
 			Debug.WriteLine($"path generate faild({start}-{target}): \n" +
 				$"open: {{{string.Join(", ", m_open.Values)}}}\n" +
 				$"closed index: {{{string.Join(", ", m_closedNodeIndex)}}}\n",
