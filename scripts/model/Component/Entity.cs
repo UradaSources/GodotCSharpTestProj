@@ -8,9 +8,8 @@ namespace urd
 	{
 		public struct ChangeWorldEventArgs
 		{
-			public WorldGrid origWorld;
-			public vec2i origCoord;
-
+			public WorldGrid oldWorld;
+			public vec2i oldCoord;
 			public WorldGrid world;
 			public vec2i coord;
 		}
@@ -72,8 +71,8 @@ namespace urd
 
 			this.onChangeWorld.Invoke(new ChangeWorldEventArgs
 			{
-				origWorld = origWorld,
-				origCoord = origCoord,
+				oldWorld = origWorld,
+				oldCoord = origCoord,
 				world = world,
 				coord = coord
 			});

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection;
+using System.Reflection.Emit;
 
 namespace urd
 {
@@ -26,20 +27,6 @@ namespace urd
 						$"Unable to add component ({typeof(T).Name}) to the container, its dependent component ({field.FieldType.Name}) does not exist");
 
 					if (dependent != null) field.SetValue(com, dependent);
-				}
-			}
-		}
-		public static void BindEvent<T>(T com)
-			where T : Component
-		{
-			var methodFilter = BindingFlags.Public | BindingFlags.NonPublic;
-			foreach (var method in typeof(T).GetMethods(methodFilter))
-			{
-				var bindOptions = method.GetCustomAttribute<BindEventAttribute>();
-				if (bindOptions != null)
-				{
-					var handler = System.Delegate.CreateDelegate(typeof(T), method);
-					bindOptions.eventInfo.AddEventHandler(bindOptions.target, handler);
 				}
 			}
 		}
@@ -156,7 +143,10 @@ namespace urd
 		public virtual void _update(float delta)
 		{
 			for (var it = m_components.First; it != null; it = it.Next)
-				it.Value._update(delta);
+			{
+				if (it.Value is BehaviorComponent com)
+					com._update(delta);
+			}
 		}
 
 		public ComponentContainer()
