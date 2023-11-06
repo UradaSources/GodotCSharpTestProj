@@ -1,83 +1,56 @@
 ﻿using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using Godot;
 using urd;
 
-namespace urd
-{
-	public class FunctionBlock
-	{ 
-		
-	}
-
-	public class Character : Component
-	{
-		[BindComponent] private Entity m_entity;
-
-
-	}
-}
-
 public partial class Game : Node2D
 {
 	private bool m_mainLoop = true;
 
-	[Export] private WorldNode m_mainWorld;
-	[Export] private WorldSelector m_selector;
+	private WorldGrid m_mainWorld;
+	private PathGenerator m_pathGenerator;
+	private WorldSelector m_selector;
 
 	[Export] private ColorPicker m_colorPicker;
 	[Export] private LineEdit m_inputField;
 
-	private Graph m_sample;
-
 	public override void _Ready()
 	{
-		var player = new ComponentContainer();
+		var player = new Entity("player");
 
-		player.addComponent(new Entity(m_mainWorld.model, vec2i.zero));
-		player.addComponent(new Movement(3.0f, vec2i.zero));
-		player.addComponent(new Navigation(m_mainWorld.pathGenerator));
-		player.addComponent(new RandomWalkControl());
-		player.addComponent(new Graph('C', Colors.White));
-
-		player._init();
+		player.add(new InWorld(m_mainWorld, vec2i.zero));
+		player.add(new Movement(3.0f, vec2i.zero));
+		player.add(new Navigation(m_pathGenerator));
+		player.add(new RandomWalkControl());
 
 		var rng = new RandomNumberGenerator();
 		for (int i = 0; i < 1; i++)
 		{
-			var enemy = new ComponentContainer();
+			int x = rng.RandiRange(0, m_mainWorld.width - 1);
+			int y = rng.RandiRange(0, m_mainWorld.height - 1);
+			
+			var enemy = new Entity("enemy");
 
-			int x = rng.RandiRange(0, m_mainWorld.model.width - 1);
-			int y = rng.RandiRange(0, m_mainWorld.model.height - 1);
-
-			enemy.addComponent(new Entity(m_mainWorld.model, new vec2i(x, y)));
-			enemy.addComponent(new Movement(2.0f, vec2i.zero));
-			enemy.addComponent(new Navigation(m_mainWorld.pathGenerator));
-			enemy.addComponent(new FollowWalkControl()).target = player.getComponent<Entity>();
-			enemy.addComponent(new Graph('E', Colors.White));
-
-			enemy._init();
+			enemy.add(new InWorld(m_mainWorld, new vec2i(x, y)));
+			enemy.add(new Movement(2.0f, vec2i.zero));
+			enemy.add(new Navigation(m_pathGenerator));
+			enemy.add(new FollowWalkControl()).target = player.get<InWorld>();
 		}
-
-		var sample = new ComponentContainer();
-
-		sample.addComponent(new Entity(m_mainWorld.model, vec2i.one));
-		m_sample = sample.addComponent(new Graph(' ', Colors.White));
-
-		m_inputField.TextSubmitted += (string str) => m_sample.graph = str.Length >= 1 ? str[0] : ' ';
-		m_colorPicker.ColorChanged += (Color c) => m_sample.color = c;
 	}
 
 	public override void _Process(double delta)
 	{
 		if (m_mainLoop)
 		{
-			foreach (var entity in Entity.IterateInstance()
-				.Where((Entity en)=>en.container != null))
-			{ 
-				entity.container._update((float)delta);
-			}
+			foreach (var en in Object.IterateObject<Entity>()
+				.Where((Entity e) => e.enable))
+				en.update((float)delta);
+
+			foreach (var en in Object.IterateObject<Entity>()
+				.Where((Entity e) => e.enable))
+				en.lateUpdate((float)delta);
 		}
 
 		var mousePos = this.GetLocalMousePosition();
@@ -93,8 +66,6 @@ public partial class Game : Node2D
 		//	}
 		//}
 
-		DebugWatch.Main.watchValue("sample", $"{m_sample.graph}, {m_sample.color.ToHtml()}");
-		
 		// 暂停或是运行游戏
 		if (Input.IsActionJustPressed("ui_stop"))
 			m_mainLoop = !m_mainLoop;
@@ -103,29 +74,40 @@ public partial class Game : Node2D
 	}
 	public override void _Draw()
 	{
-		//foreach (var entity in Entity.IterateInstance())
+		//if (m_mainLoop)
 		//{
-		//	// 绘制角色本身
-		//	this.DrawCharacterSprite(entity.coord.x, entity.coord.y, entity.name[0]);
-
-		//	// 绘制目标格子
-		//	var motion = entity.container.getComponent<Movement>();
-		//	if (motion.processing)
+		//	for (int i = 0; i < m_mainWorld.tileCount; i++)
 		//	{
-		//		var target = entity.getNearTile(motion.currentDirect);
-		//		this.DrawCharacterSprite(target.x, target.y, 'x', new Godot.Color(0, 0.5f, 0, 0.5f));
-
-		//		//// 绘制寻路路径
-		//		//var navigation = entity.container.getComponent<Navigation>();
-		//		//for (int i = 0; i < navigation.pathNodeCount; i++)
-		//		//{
-		//		//	var node = navigation.getPathNode(i);
-		//		//	this.DrawCharacterSprite(node.x, node.y, 'x', new Color(1, 1, 1, 0.5f));
-		//		//}
+		//		var tile = m_mainWorld.rawGetTile(i);
+		//		this.drawCharSprite(this, tile.x, tile.y, tile.tile.graph, tile.tile.color);
 		//	}
-		//}
 
-		//if (m_selectedTile != null)
-		//	this.DrawSelectBox(m_selectedTile.x, m_selectedTile.y, Colors.Red);
-	}
+		//	foreach (var en in m_objects)
+		//		en.render();
+		//}
+			//foreach (var entity in Entity.IterateInstance())
+			//{
+			//	// 绘制角色本身
+			//	this.DrawCharacterSprite(entity.coord.x, entity.coord.y, entity.name[0]);
+
+			//	// 绘制目标格子
+			//	var motion = entity.container.getComponent<Movement>();
+			//	if (motion.processing)
+			//	{
+			//		var target = entity.getNearTile(motion.currentDirect);
+			//		this.DrawCharacterSprite(target.x, target.y, 'x', new Godot.Color(0, 0.5f, 0, 0.5f));
+
+			//		//// 绘制寻路路径
+			//		//var navigation = entity.container.getComponent<Navigation>();
+			//		//for (int i = 0; i < navigation.pathNodeCount; i++)
+			//		//{
+			//		//	var node = navigation.getPathNode(i);
+			//		//	this.DrawCharacterSprite(node.x, node.y, 'x', new Color(1, 1, 1, 0.5f));
+			//		//}
+			//	}
+			//}
+
+			//if (m_selectedTile != null)
+			//	this.DrawSelectBox(m_selectedTile.x, m_selectedTile.y, Colors.Red);
+		}
 }

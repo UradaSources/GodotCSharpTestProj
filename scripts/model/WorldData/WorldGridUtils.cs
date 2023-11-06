@@ -23,7 +23,7 @@ namespace urd
 
 			data.tile = new int[data.width * data.height];
 			for (int i = 0; i < world.tileCount; i++)
-				data.tile[i] = world.rawGetTile(i).type.id;
+				data.tile[i] = world.rawGetTile(i).tile.id;
 
 			return JsonSerializer.Serialize(data);
 		}
@@ -46,12 +46,12 @@ namespace urd
 				return null;
 			}
 
-			var world = target ?? new WorldGrid(data.width, data.height, TileType.Default);
+			var world = target ?? new WorldGrid("", data.width, data.height);
 
 			for (int i = 0; i < world.tileCount; i++)
 			{
 				int typeId = data.tile[i];
-				world.rawGetTile(i).type = TileType.Get(typeId);
+				world.rawGetTile(i).tile = Tile.Get(typeId);
 			}
 
 			return world;
@@ -71,7 +71,7 @@ namespace urd
 					yield return grid.rawGetTile(grid.toIndex(x, y));
 			}
 		}
-		public static int OverrideTileType(IEnumerable<TileType> types, IEnumerable<TileCell> target)
+		public static int OverrideTileType(IEnumerable<Tile> types, IEnumerable<TileCell> target)
 		{
 			int count = 0;
 
@@ -80,7 +80,7 @@ namespace urd
 			{
 				if (itor.MoveNext())
 				{
-					cell.type = itor.Current;
+					cell.tile = itor.Current;
 					count += 1;
 				}
 			}

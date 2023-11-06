@@ -26,5 +26,7 @@ namespace urd
 				m_motion.direct = m_cacheMoveDirect;
 			}
 		}
+
+		public ClassicArcadeControl() : base("ClassicArcadeControl") { }
 	}
 }

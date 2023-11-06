@@ -3,6 +3,51 @@ using System.Linq;
 using Godot;
 using urd;
 
+public class GameManager
+{
+
+	public void initTileType(string path)
+	{
+		bool loadFromSavedSuccess = false;
+		if (File.Exists(path))
+		{
+			var json = File.ReadAllText(path);
+			Tile.InitSetFromJson(json);
+
+			loadFromSavedSuccess = Tile.TypeCount > 0;
+		}
+
+		// 加载失败时使用默认值
+		if (!loadFromSavedSuccess)
+		{
+			Tile.Create('T', MiscUtils.FromHex(0x8AB969), 1.5f);
+			Tile.Create('#', MiscUtils.FromHex(0x3A3858), -1.0f);
+			Tile.Create('D', MiscUtils.FromHex(0x819796), 3.0f);
+			Tile.Create('.', MiscUtils.FromHex(0xA77B5B), 1.0f);
+			Tile.Create('_', MiscUtils.FromHex(0x89493A), 0.8f);
+			Tile.Create('`', MiscUtils.FromHex(0x68C2D3), 3.0f);
+		}
+	}
+	public void initModel(string path)
+	{
+		bool loadFromSavedSuccess = false;
+		if (File.Exists(path))
+		{
+			var json = File.ReadAllText(path);
+			this.model = WorldGridUtils.TryFromJson(json);
+			loadFromSavedSuccess = this.model != null && this.model.tileCount > 0;
+		}
+
+		// 加载失败时使用默认值
+		if (!loadFromSavedSuccess)
+			this.model = new WorldGrid(20, 20, Tile.Get(0));
+
+		// 创建导航网格
+		this.pathGenerator = new PathGenerator(this.model);
+	}
+
+}
+
 public partial class WorldNode : Node2D
 {
 	private const string WorldSavePath = "./save/world.json";
@@ -18,7 +63,6 @@ public partial class WorldNode : Node2D
 		return new Rect2I(new Vector2I(x * size, y * size), new Vector2I(size, size));
 	}
 
-	[ExportGroup("params")]
 	[Export] private Texture2D m_charSheet;
 	[Export] private float m_tileSize = 20;
 
@@ -33,20 +77,20 @@ public partial class WorldNode : Node2D
 		if (File.Exists(path))
 		{
 			var json = File.ReadAllText(path);
-			TileType.InitSetFromJson(json);
+			Tile.InitSetFromJson(json);
 
-			loadFromSavedSuccess = TileType.TypeCount > 0;
+			loadFromSavedSuccess = Tile.TypeCount > 0;
 		}
 
 		// 加载失败时使用默认值
 		if (!loadFromSavedSuccess)
 		{
-			TileType.Create('T', MiscUtils.FromHex(0x8AB969), 1.5f);
-			TileType.Create('#', MiscUtils.FromHex(0x3A3858), -1.0f);
-			TileType.Create('D', MiscUtils.FromHex(0x819796), 3.0f);
-			TileType.Create('.', MiscUtils.FromHex(0xA77B5B), 1.0f);
-			TileType.Create('_', MiscUtils.FromHex(0x89493A), 0.8f);
-			TileType.Create('`', MiscUtils.FromHex(0x68C2D3), 3.0f);
+			Tile.Create('T', MiscUtils.FromHex(0x8AB969), 1.5f);
+			Tile.Create('#', MiscUtils.FromHex(0x3A3858), -1.0f);
+			Tile.Create('D', MiscUtils.FromHex(0x819796), 3.0f);
+			Tile.Create('.', MiscUtils.FromHex(0xA77B5B), 1.0f);
+			Tile.Create('_', MiscUtils.FromHex(0x89493A), 0.8f);
+			Tile.Create('`', MiscUtils.FromHex(0x68C2D3), 3.0f);
 		}
 	}
 	public void initModel(string path)
@@ -61,7 +105,7 @@ public partial class WorldNode : Node2D
 
 		// 加载失败时使用默认值
 		if (!loadFromSavedSuccess)
-			this.model = new WorldGrid(20, 20, TileType.Get(0));
+			this.model = new WorldGrid(20, 20, Tile.Get(0));
 
 		// 创建导航网格
 		this.pathGenerator = new PathGenerator(this.model);
@@ -136,14 +180,14 @@ public partial class WorldNode : Node2D
 		for (int i = 0; i < this.model.tileCount; i++)
 		{
 			var tile = this.model.rawGetTile(i);
-			this.drawCharSprite(this, tile.x, tile.y, tile.type.graph, tile.type.c);
+			this.drawCharSprite(this, tile.x, tile.y, tile.tile.graph, tile.tile.color);
 		}
 
 		// 绘制所有处于活动状态且位于本地图上的实体
-		foreach (var en in Entity.IterateInstance()
-			.Where((Entity e) => e.container != null && e.world == this.model))
+		foreach (var en in Identifier.IterateInstance()
+			.Where((Identifier e) => e.entity != null && e.world == this.model))
 		{
-			var graph = en.container.getComponent<Graph>();
+			var graph = en.container.get<Graph>();
 			if (graph != null) this.drawCharSprite(this, en.coord.x, en.coord.y, graph.graph, graph.color);
 		}
 	}

@@ -1,0 +1,8 @@
+[gd_scene load_steps=3 format=3 uid="uid://dxuurpygs3ste"]
+
+[ext_resource type="Script" path="res://scripts/model/GodotTextRenderTest.cs" id="1_lonm1"]
+[ext_resource type="FontFile" uid="uid://bmv7667hrglkd" path="res://art/SourceHanSansCN-VF-2.otf" id="2_jav53"]
+
+[node name="Node2D" type="Node2D"]
+script = ExtResource("1_lonm1")
+m_realFont = ExtResource("2_jav53")

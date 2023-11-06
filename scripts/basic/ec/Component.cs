@@ -1,22 +1,39 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics;
 
 namespace urd
 {
-	public abstract class Component
+	public interface IBehavior
 	{
-		private ComponentContainer m_container;
-		public ComponentContainer container => m_container;
+		public bool actived { get; }
+		void _update(float delta);
+		void _lateUpdate(float delta);
+	}
 
-		public virtual void _enable(ComponentContainer container)
+	public interface IRender
+	{
+		bool rendering { get; }
+		void _draw();
+	}
+
+	public abstract class Component : Object
+	{
+		private Entity m_entity = null;
+
+		public Entity entity => m_entity;
+
+		public virtual void _init(Entity entity)
 		{
-			Debug.Assert(m_container == null && container != null);
-			m_container = container;
+			Debug.Assert(m_entity == null && entity != null);
+			m_entity = entity;
 		}
-		public virtual void _disable()
+		public virtual void _clear() 
 		{
-			Debug.Assert(m_container != null);
-			m_container = null;
+			Debug.Assert(m_entity != null);
+			m_entity = null;
 		}
+
+		protected Component(string name) : base(name) { }
 	}
 }

@@ -14,12 +14,12 @@ namespace urd
 
 		public float tileCost(TileCell cur, TileCell target)
 		{
-			float cost = target.type.cost;
+			float cost = target.tile.cost;
 
 			if (cost >= 0)
 			{
-				foreach (var en in Entity.IterateInstance()
-					.Where((Entity e) => e.currentTile == target))
+				foreach (var en in Identifier.IterateInstance()
+					.Where((Identifier e) => e.currentTile == target))
 				{
 					if (en.block) 
 						return -1;

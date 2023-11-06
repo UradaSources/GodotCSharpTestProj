@@ -6,7 +6,7 @@ namespace urd
 {
 	public class RandomWalkControl : BasicMotionControl
 	{
-		[BindComponent] private Entity m_entity = null;
+		[BindComponent] private InWorld m_inWorld = null;
 		[BindComponent] private Navigation m_moveToward = null;
 
 		private Godot.RandomNumberGenerator m_rng;
@@ -21,7 +21,7 @@ namespace urd
 				return;
 			}
 
-			var world = m_entity.world;
+			var world = m_inWorld.world;
 
 			TileCell tile;
 			do
@@ -29,7 +29,7 @@ namespace urd
 				int i = m_rng.RandiRange(0, world.tileCount - 1);
 				tile = world.rawGetTile(i);
 			}
-			while (tile.type.cost < 0);
+			while (tile.tile.cost < 0);
 
 			var target = new vec2i(tile.x, tile.y);
 			m_moveToward.setTarget(target);
@@ -37,7 +37,7 @@ namespace urd
 			m_timer = m_rng.RandfRange(0.0f, 4.0f);
 		}
 
-		public RandomWalkControl()
+		public RandomWalkControl() : base("RandomWalkControl")
 		{
 			m_rng = new Godot.RandomNumberGenerator();
 		}

@@ -2,9 +2,9 @@
 
 namespace urd
 {
-	public class Movement: BehaviorComponent
+	public class Movement : Component, IBehavior
 	{
-		[BindComponent] private Entity m_entity = null;
+		[BindComponent] private InWorld m_inWorld = null;
 
 		private vec2i m_currentDirect;
 
@@ -12,6 +12,8 @@ namespace urd
 		private vec2i m_direct;
 
 		private float m_progress;
+
+		public bool actived { set; get; } = true;
 
 		public vec2i currentDirect => m_currentDirect;
 
@@ -21,15 +23,15 @@ namespace urd
 		public float progress => m_progress;
 		public bool processing => m_progress >= 0;
 
-		public override void _update(float delta)
+		public void _update(float delta)
 		{
-			DebugWatch.Main.watchObject(this, m_entity.GetHashCode().ToString());
+			DebugWatch.Main.watchObject(this, m_inWorld.GetHashCode().ToString());
 
 			// 若当前正在移动中, 则更新位置
 			if (this.processing)
 			{
-				var targetTile = m_entity.getNearTile(this.currentDirect, loop: true);
-				var targetCost = targetTile.type.cost;
+				var targetTile = m_inWorld.getNearTile(this.currentDirect, loop: true);
+				var targetCost = targetTile.tile.cost;
 				
 				// 若块在移动过程中突然无法通过, 回退到原先的块
 				if (targetCost < 0)
@@ -46,7 +48,7 @@ namespace urd
 				// 到达指定位置后重置标志
 				if (m_progress == 1)
 				{
-					m_entity.coord = new vec2i(targetTile.x, targetTile.y);
+					m_inWorld.coord = new vec2i(targetTile.x, targetTile.y);
 					m_currentDirect = vec2i.zero;
 
 					m_progress = -1;
@@ -56,17 +58,18 @@ namespace urd
 			else if(m_direct != vec2i.zero)
 			{
 				// 尝试检查目标方向的下一个块是否可达
-				var nextTile = m_entity.getNearTile(m_direct, loop: true);
-				if (nextTile != null && nextTile.type.cost >= 0)
+				var nextTile = m_inWorld.getNearTile(m_direct, loop: true);
+				if (nextTile != null && nextTile.tile.cost >= 0)
 				{
 					m_currentDirect = m_direct;
 					m_progress = 0;
 				}
 			}
 		}
-		public override void _lateUpdate(float delta) { }
+		public void _lateUpdate(float delta) { }
 
 		public Movement(float moveSpeed, vec2i moveDirect)
+			: base("Movement")
 		{
 			m_moveSpeed = moveSpeed;
 			m_direct = moveDirect;
