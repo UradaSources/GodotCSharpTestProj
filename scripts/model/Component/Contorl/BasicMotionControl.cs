@@ -1,10 +1,10 @@
 ﻿namespace urd
 {
-	public abstract class BasicMotionControl : Component, IBehavior
+	public abstract class BasicMotionControl : Component, IComponentBehavior
 	{
 		[BindComponent] protected Movement m_motion;
 
-		public bool actived { set; get; } = true;
+		public bool enable { set; get; } = true;
 
 		public virtual void _update(float delta) { }
 		public virtual void _lateUpdate(float delta) { }

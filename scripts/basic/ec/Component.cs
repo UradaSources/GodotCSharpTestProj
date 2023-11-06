@@ -1,22 +1,10 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Diagnostics;
 
 namespace urd
 {
-	public interface IBehavior
-	{
-		public bool actived { get; }
-		void _update(float delta);
-		void _lateUpdate(float delta);
-	}
-
-	public interface IRender
-	{
-		bool rendering { get; }
-		void _draw();
-	}
-
 	public abstract class Component : Object
 	{
 		private Entity m_entity = null;
@@ -35,5 +23,23 @@ namespace urd
 		}
 
 		protected Component(string name) : base(name) { }
+
+		public override string ToString()
+		{
+			return $"Component {this.GetType().Name}";
+		}
+	}
+
+	public interface IComponentBehavior
+	{
+		public bool enable { get; }
+		void _update(float delta);
+		void _lateUpdate(float delta);
+	}
+
+	public interface IRenderComponent
+	{
+		bool rendering { get; }
+		void _draw();
 	}
 }

@@ -3,7 +3,7 @@ using System.Diagnostics;
 
 namespace urd
 {
-	public class Navigation : Component, IBehavior
+	public class Navigation : Component, IComponentBehavior
 	{
 		private PathGenerator m_pathfind;
 
@@ -13,7 +13,7 @@ namespace urd
 		private vec2i? m_target;
 		private List<TileCell> m_pathNodeList;
 
-		public bool actived { set; get; } = true;
+		public bool enable { set; get; } = true;
 
 		public vec2i? target => m_target;
 		public int pathNodeCount => m_pathNodeList.Count;

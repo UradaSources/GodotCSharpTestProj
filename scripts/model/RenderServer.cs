@@ -56,10 +56,13 @@ public partial class RenderServer : Node2D
 		base._EnterTree();
 		Instance = this;
 	}
-
+	public override void _Process(double delta)
+	{
+		base._Process(delta);
+		this.QueueRedraw();
+	}
 	public override void _Draw()
 	{
 		base._Draw();
-
 	}
 }

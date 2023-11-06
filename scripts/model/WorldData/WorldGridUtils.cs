@@ -23,7 +23,7 @@ namespace urd
 
 			data.tile = new int[data.width * data.height];
 			for (int i = 0; i < world.tileCount; i++)
-				data.tile[i] = world.rawGetTile(i).tile.id;
+				data.tile[i] = world.rawGetTile(i).tile.instanceId;
 
 			return JsonSerializer.Serialize(data);
 		}
@@ -51,7 +51,7 @@ namespace urd
 			for (int i = 0; i < world.tileCount; i++)
 			{
 				int typeId = data.tile[i];
-				world.rawGetTile(i).tile = Tile.Get(typeId);
+				// world.rawGetTile(i).tile = Tile.Get(typeId);
 			}
 
 			return world;

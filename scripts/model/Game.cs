@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using Godot;
 using urd;
+using Newtonsoft.Json;
 
 public partial class Game : Node2D
 {
@@ -11,10 +12,15 @@ public partial class Game : Node2D
 
 	private WorldGrid m_mainWorld;
 	private PathGenerator m_pathGenerator;
-	private WorldSelector m_selector;
 
 	[Export] private ColorPicker m_colorPicker;
 	[Export] private LineEdit m_inputField;
+
+	struct SerTest
+	{
+		private int id;
+		public string name;
+	}
 
 	public override void _Ready()
 	{
@@ -45,11 +51,11 @@ public partial class Game : Node2D
 		if (m_mainLoop)
 		{
 			foreach (var en in Object.IterateObject<Entity>()
-				.Where((Entity e) => e.enable))
+				.Where((Entity e) => e.active))
 				en.update((float)delta);
 
 			foreach (var en in Object.IterateObject<Entity>()
-				.Where((Entity e) => e.enable))
+				.Where((Entity e) => e.active))
 				en.lateUpdate((float)delta);
 		}
 

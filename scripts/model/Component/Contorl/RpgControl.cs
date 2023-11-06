@@ -22,5 +22,7 @@
 				m_motion.direct = dir;
 			}
 		}
+
+		public RpgControl() : base("RpgControl") { }
 	}
 }

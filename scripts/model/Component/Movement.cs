@@ -2,7 +2,7 @@
 
 namespace urd
 {
-	public class Movement : Component, IBehavior
+	public class Movement : Component, IComponentBehavior
 	{
 		[BindComponent] private InWorld m_inWorld = null;
 
@@ -13,7 +13,7 @@ namespace urd
 
 		private float m_progress;
 
-		public bool actived { set; get; } = true;
+		public bool enable { set; get; } = true;
 
 		public vec2i currentDirect => m_currentDirect;
 

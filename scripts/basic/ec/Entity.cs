@@ -10,10 +10,10 @@ namespace urd
 		private LinkedList<Component> m_components;
 		private Dictionary<System.Type, LinkedListNode<Component>> m_index;
 
-		private bool m_enable = true;
+		private bool m_active = true;
 		private ulong m_tags = 0;
 
-		public bool enable { set => m_enable = value; get => m_enable; }
+		public bool active { set => m_active = value; get => m_active; }
 		public ulong tags { set => m_tags = value; get => m_tags; }
 
 		private void componentInjection<T>(T com)
@@ -38,6 +38,28 @@ namespace urd
 				}
 			}
 		}
+		private void bindEvent<T>(T com)
+		{
+			var type=  typeof(T);
+
+			var flag = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
+			var members = type.GetMembers(flag);
+
+			// 遍历字段并查找具有CustomAttribute的字段
+			foreach (var member in members)
+			{
+				var bindOptions = member.GetCustomAttribute<BindEventAttribute>();
+				if (bindOptions != null)
+				{
+					var handler = System.Delegate.CreateDelegate(
+						bindOptions.eventInfo.EventHandlerType, 
+						com,
+						member as MethodInfo,
+						true);
+					bindOptions.eventInfo.AddEventHandler(com, handler);
+				}
+			}
+		}
 
 		public T get<T>() where T : Component
 		{
@@ -46,7 +68,6 @@ namespace urd
 			else
 				return null;
 		}
-
 		public bool find(System.Type type, out Component com)
 		{
 			LinkedListNode<Component> itor;
@@ -83,11 +104,15 @@ namespace urd
 			}
 
 			// 使用反射绑定需要的组件
-			if (autoBind) this.componentInjection(com);
+			if (autoBind)
+			{
+				this.componentInjection(com);
+				this.bindEvent(com);
+			}
 
 			var it = m_components.AddLast(com);
 			m_index.Add(typeof(T), it);
-
+			
 			com._init(this);
 
 			return com;
@@ -111,7 +136,7 @@ namespace urd
 			for (var it = m_components.First; it != null; it = it.Next)
 			{
 				var com = it.Value;
-				if (com is IBehavior behavior && behavior.actived)
+				if (com is IComponentBehavior behavior && behavior.enable)
 					behavior._update(delta);
 			}
 		}
@@ -120,20 +145,20 @@ namespace urd
 			for (var it = m_components.First; it != null; it = it.Next)
 			{
 				var com = it.Value;
-				if (com is IBehavior behavior && behavior.actived)
+				if (com is IComponentBehavior behavior && behavior.enable)
 					behavior._lateUpdate(delta);
 			}
 		}
 
-		public void render()
-		{
-			for (var it = m_components.First; it != null; it = it.Next)
-			{
-				var com = it.Value;
-				if (com is IRender renderer && renderer.rendering)
-					renderer._draw();
-			}
-		}
+		//public void render()
+		//{
+		//	for (var it = m_components.First; it != null; it = it.Next)
+		//	{
+		//		var com = it.Value;
+		//		if (com is IRenderComponent renderer && renderer.rendering)
+		//			renderer._draw();
+		//	}
+		//}
 
 		public IEnumerator<Component> GetEnumerator() { return m_components.GetEnumerator(); }
 		IEnumerator IEnumerable.GetEnumerator() { return this.GetEnumerator(); }
@@ -142,6 +167,11 @@ namespace urd
 		{
 			m_components = new LinkedList<Component>();
 			m_index = new Dictionary<System.Type, LinkedListNode<Component>>();
+		}
+
+		public override string ToString()
+		{
+			return $"Entity {this.name} ({m_components.Count})";
 		}
 	}
 }

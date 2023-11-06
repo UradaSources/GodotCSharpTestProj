@@ -52,7 +52,6 @@ public partial class GodotTextRenderTest : Node2D
 	public override void _Draw()
 	{
 		base._Draw();
-
 		m_textServer.ShapedTextDraw(m_text, this.GetCanvasItem(), new Vector2(100, 100));
 	}
 }

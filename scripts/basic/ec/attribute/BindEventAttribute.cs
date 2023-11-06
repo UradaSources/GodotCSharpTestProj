@@ -12,9 +12,11 @@ namespace urd
 		public BindEventAttribute(object target, string eventName)
 		{
 			var type = target.GetType();
+			
 			this.target = target;
 			this.eventInfo = type.GetEvent(eventName);
-			Debug.Assert(eventInfo != null);
+
+			Debug.Assert(eventInfo != null, $"{type.Name} does not request binding event {eventName}");
 		}
 	}
 }

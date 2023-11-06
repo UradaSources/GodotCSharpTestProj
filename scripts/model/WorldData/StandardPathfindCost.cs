@@ -18,11 +18,11 @@ namespace urd
 
 			if (cost >= 0)
 			{
-				foreach (var en in Identifier.IterateInstance()
-					.Where((Identifier e) => e.currentTile == target))
+				foreach (var obj in Object.IterateObject<InWorld>()
+					.Where((InWorld t) => t.currentTile == target))
 				{
-					if (en.block) 
-						return -1;
+					if (obj.cost < 0) return -1;
+					else return obj.cost + cost;
 				}
 			}
 			return cost;
@@ -33,5 +33,4 @@ namespace urd
 			return StandardPathfindCost.ManhattanDistance(target, cur);
 		}
 	}
-
 }
