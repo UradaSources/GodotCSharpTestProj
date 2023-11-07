@@ -23,10 +23,10 @@ public class GameLoop
 
 	public void createTileTypes()
 	{
-		m_tileTypeList.Add(new TileType("ground", new Sprite("ground", '.', byteColor.white), 1, (ulong)TileType.BuiltinTags.Ground));
-		m_tileTypeList.Add(new TileType("wall", new Sprite("wall", '#', byteColor.white), -1, (ulong)TileType.BuiltinTags.Wall));
-		m_tileTypeList.Add(new TileType("floor", new Sprite("floor", '-', byteColor.white), 1, (ulong)TileType.BuiltinTags.Floor));
-		m_tileTypeList.Add(new TileType("river", new Sprite("river", '`', byteColor.blue), 5, (ulong)TileType.BuiltinTags.Water));
+		m_tileTypeList.Add(new TileType("ground", new Sprite("ground", '.', byteColor.FromHex(0xA77B5B)), 1, (ulong)TileType.BuiltinTags.Ground));
+		m_tileTypeList.Add(new TileType("wall", new Sprite("wall", '#', byteColor.FromHex(0xF2F015)), -1, (ulong)TileType.BuiltinTags.Wall));
+		m_tileTypeList.Add(new TileType("floor", new Sprite("floor", '-', byteColor.FromHex(0x80493A)), 1, (ulong)TileType.BuiltinTags.Floor));
+		m_tileTypeList.Add(new TileType("river", new Sprite("river", '`', byteColor.FromHex(0x4B80CA)), 5, (ulong)TileType.BuiltinTags.Water));
 	}
 
 	public void createWorld(int w, int h, int seed)
@@ -38,13 +38,8 @@ public class GameLoop
 			m_mainWorld.rawGetTile(i).tile = m_tileTypeList[0];
 
 		// 生成河流
-		var random = new System.Random(seed);
-
-		var riverStart = new vec2i(random.Next(w), random.Next(h));
-		vec2i riverEnd;
-		do
-			riverEnd = new vec2i(random.Next(w), random.Next(h));
-		while (riverEnd.x == riverStart.x || riverEnd.y == riverStart.y);
+		var riverStart = new vec2i(mathf.random(1, m_mainWorld.width / 2), 0);
+		var riverEnd = m_mainWorld.size - vec2i.one;
 
 		var riverPath = new List<TileCell>();
 		m_pathGenerator.generatePath(riverStart, riverEnd, ref riverPath, StandardPathfindCost.Default);

@@ -10,7 +10,8 @@ namespace urd
 
 		// 用于计算h值的曼哈顿距离
 		public static float ManhattanDistance(TileCell a, TileCell b)
-			=> mathf.abs(a.x - b.x) + mathf.abs(a.y - b.y);
+			=> (new vec2(b.x, b.y) - new vec2(a.x, a.y)).magnitude();
+			//=> mathf.abs(a.x - b.x) + mathf.abs(a.y - b.y);
 
 		public readonly static StandardPathfindCost Default = new StandardPathfindCost();
 

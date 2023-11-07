@@ -2,6 +2,8 @@
 {
 	public static class mathf
 	{
+		private static System.Random _Random = new System.Random();
+
 		public const float Epsilon = 0.00001f;
 		public const float EpsilonNormalSqrt = 1e-15f;
 		public const float Rad2Deg = 360.0f / (3.1415926f * 2.0f);
@@ -14,11 +16,15 @@
 		public static float max(float a, float b) { return System.Math.Max(a, b); }
 		public static int max(int a, int b) { return System.Math.Max(a, b); }
 
-		public static float sqrt(float v) { return (float)System.Math.Sqrt(v); }
+		public static float sqrt(float t) { return (float)System.Math.Sqrt(t); }
 
-		public static float sin(float v) { return (float)System.Math.Sin(v); }
-		public static float cos(float v) { return (float)System.Math.Cos(v); }
-		public static float acos(float v) { return (float)System.Math.Acos(v); }
+		public static float sin(float t) { return (float)System.Math.Sin(t); }
+		public static float cos(float t) { return (float)System.Math.Cos(t); }
+		public static float tan(float t) { return (float)System.Math.Tan(t); }
+
+		public static float asin(float t) { return (float)System.Math.Asin(t); }
+		public static float acos(float t) { return (float)System.Math.Acos(t); }
+		public static float atan(float t) { return (float)System.Math.Atan(t); }
 
 		public static float moveTowards(float from, float target, float maxDelta)
 		{
@@ -56,13 +62,37 @@
 			}
 			else return v;
 		}
-		public static float loopValue(float v, float max)
-			=> loopValue(v, max, 0);
-
 		public static int loopIndex(int i, int length)
 		{
 			if (i < 0) i = length + (i % length);
 			return i % length;
+		}
+
+		public static float lerpUnclamp(float a, float b, float t)
+		{
+			return (b - a) * t + a;
+		}
+		public static float lerp(float a, float b, float t)
+		{
+			return (b - a) * mathf.clamp01(t) + a;
+		}
+
+		public static void randomSeed(int seed)
+		{
+			_Random = new System.Random(seed);
+		}
+
+		public static float random01()
+		{ 
+			return (float)_Random.NextDouble();
+		}
+		public static float random(float min, float max) 
+		{
+			return mathf.lerpUnclamp(min, max, mathf.random01());
+		}
+		public static int random(int min, int max)
+		{
+			return _Random.Next(min, max);
 		}
 	}
 }
