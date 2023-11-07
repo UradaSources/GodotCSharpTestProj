@@ -1,6 +1,13 @@
-[gd_scene load_steps=2 format=3 uid="uid://dxuurpygs3ste"]
+[gd_scene load_steps=4 format=3 uid="uid://dxuurpygs3ste"]
 
-[ext_resource type="Script" path="res://Run.cs" id="1_umiqg"]
+[ext_resource type="Script" path="res://scripts/model/Game.cs" id="1_yimwq"]
+[ext_resource type="Script" path="res://scripts/model/RenderServer.cs" id="2_anjur"]
+[ext_resource type="Texture2D" uid="uid://bp2c8sp6qeq05" path="res://art/soft-thick-dark.png" id="3_d3meu"]
 
 [node name="Node2D" type="Node2D"]
-script = ExtResource("1_umiqg")
+script = ExtResource("1_yimwq")
+
+[node name="Node2D" type="Node2D" parent="."]
+texture_filter = 1
+script = ExtResource("2_anjur")
+m_charSheet = ExtResource("3_d3meu")

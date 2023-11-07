@@ -71,7 +71,7 @@ namespace urd
 					yield return grid.rawGetTile(grid.toIndex(x, y));
 			}
 		}
-		public static int OverrideTileType(IEnumerable<Tile> types, IEnumerable<TileCell> target)
+		public static int OverrideTileType(IEnumerable<TileType> types, IEnumerable<TileCell> target)
 		{
 			int count = 0;
 

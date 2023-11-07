@@ -4,7 +4,7 @@ namespace urd
 {
 	public class Movement : Component, IComponentBehavior
 	{
-		[BindComponent] private InWorld m_inWorld = null;
+		[BindComponent] private WorldEntity m_inWorld = null;
 
 		private vec2i m_currentDirect;
 

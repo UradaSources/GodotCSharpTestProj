@@ -1,4 +1,6 @@
-﻿using System.Linq;
+﻿using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace urd
 {
@@ -16,15 +18,15 @@ namespace urd
 		{
 			float cost = target.tile.cost;
 
-			if (cost >= 0)
-			{
-				foreach (var obj in Object.IterateObject<InWorld>()
-					.Where((InWorld t) => t.currentTile == target))
-				{
-					if (obj.cost < 0) return -1;
-					else return obj.cost + cost;
-				}
-			}
+			//if (cost >= 0)
+			//{
+			//	foreach (var obj in Object.IterateObject<WorldEntity>()
+			//		.Where((WorldEntity t) => t.currentTile == target))
+			//	{
+			//		if (obj.cost < 0) return -1;
+			//		else return obj.cost + cost;
+			//	}
+			//}
 			return cost;
 		}
 

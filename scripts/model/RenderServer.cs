@@ -22,13 +22,13 @@ public partial class RenderServer : Node2D
 	[Export] private Texture2D m_charSheet;
 	[Export] private float m_tileSize = 20;
 
-	public void drawCharSprite(vec2i coord, char c, byteColor? color = null)
+	public void drawCharSprite(vec2i coord, Sprite sprite)
 	{
 		var pos = (vec2)coord * m_tileSize;
 		var target = new Rect2(pos, Vector2.One * m_tileSize);
 
-		var source = GetCharSpriteRect(16, 8, c);
-		this.DrawTextureRectRegion(m_charSheet, target, source, GdColor(color ?? byteColor.white));
+		var source = GetCharSpriteRect(16, 8, sprite.graph);
+		this.DrawTextureRectRegion(m_charSheet, target, source, GdColor(sprite.color));
 	}
 	public void drawBox(vec2i coord, byteColor? color = null, bool fill = false)
 	{
@@ -64,5 +64,6 @@ public partial class RenderServer : Node2D
 	public override void _Draw()
 	{
 		base._Draw();
+		GameLoop.Instance.draw();
 	}
 }

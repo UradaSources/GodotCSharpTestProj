@@ -10,7 +10,7 @@ namespace urd
 
 		private vec2i m_targetLastCoord;
 
-		public InWorld target { set; get; }
+		public WorldEntity target { set; get; }
 
 		public override void _update(float dt)
 		{

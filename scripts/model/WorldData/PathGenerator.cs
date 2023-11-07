@@ -29,14 +29,14 @@ namespace urd
 
 			public override string ToString()
 			{
-				return $"{id} :({tile.x},{tile.y}) :g={g} h={h}: f={this.f}: parent={parent?.id}";
+				return $"{id} :({tile.x},{tile.y}) :g={g} h={h} :f={this.f} :parent={parent?.id}";
 			}
 		}
 
 		private readonly static Vector2I[] NearDirect = new Vector2I[] {
 			Vector2I.Up, Vector2I.Down, Vector2I.Left, Vector2I.Right };
 
-		private WorldGrid m_grid;
+		private WorldGrid m_world;
 
 		private SortedList<int, Node> m_nodeSet = new SortedList<int, Node>();
 
@@ -45,12 +45,12 @@ namespace urd
 
 		private bool getOrBuildNode(int x, int y, out Node result)
 		{
-			if (m_grid.vaildCoord(x, y))
+			if (m_world.vaildCoord(x, y))
 			{
-				int id = m_grid.toIndex(x, y);
+				int id = m_world.toIndex(x, y);
 				if (!m_nodeSet.TryGetValue(id, out result))
 				{
-					var tile = m_grid.getTile(x, y);
+					var tile = m_world.getTile(x, y);
 
 					Node node = new Node(id, tile);
 					m_nodeSet.Add(node.id, node);
@@ -86,7 +86,7 @@ namespace urd
 			m_open.Clear();
 			m_closedNodeIndex.Clear();
 
-			costCalculator.init(m_grid, start, target);
+			costCalculator.init(m_world, start, target);
 
 			// 检查起点和终点是否可到达
 			if (!this.getOrBuildNode(start.x, start.y, out Node firstNode))
@@ -196,7 +196,7 @@ namespace urd
 		{
 			Debug.Assert(grid != null);
 
-			m_grid = grid;
+			m_world = grid;
 		}
 	}
 

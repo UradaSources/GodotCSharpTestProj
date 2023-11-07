@@ -6,7 +6,7 @@ namespace urd
 {
 	public class RandomWalkControl : BasicMotionControl
 	{
-		[BindComponent] private InWorld m_inWorld = null;
+		[BindComponent] private WorldEntity m_inWorld = null;
 		[BindComponent] private Navigation m_moveToward = null;
 
 		private Godot.RandomNumberGenerator m_rng;

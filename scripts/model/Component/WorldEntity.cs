@@ -2,7 +2,7 @@
 
 namespace urd
 {
-	public class InWorld : Component
+	public class WorldEntity : Component
 	{
 		public struct ChangeWorldEventArgs
 		{
@@ -19,10 +19,8 @@ namespace urd
 		public event WorldChangedEventHandler onWorldChanged;
 		public event CoordChangedEventHandler onCoordChanged;
 
-		private WorldGrid m_world;
-		private float m_cost;
-
-		public WorldGrid world => m_world;
+		private WorldGrid _world;
+		public WorldGrid world => _world;
 
 		private vec2i _coord;
 		public vec2i coord
@@ -39,7 +37,8 @@ namespace urd
 			get => _coord;
 		}
 
-		public float cost { set => m_cost = value; get => m_cost; }
+		private float _cost;
+		public float cost { set => _cost = value; get => _cost; }
 
 		// 当前所在的瓦片
 		public TileCell currentTile
@@ -56,13 +55,13 @@ namespace urd
 			Debug.Assert(world != null, "world cannot be null");
 			Debug.Assert(world.vaildCoord(coord.x, coord.y), "inviald init coord");
 
-			var origWorld = m_world;
-			var origCoord = _coord;
+			var origWorld = this.world;
+			var origCoord = this.coord;
 
-			m_world = world;
+			_world = world;
 			_coord = coord;
 
-			this.onWorldChanged.Invoke(new ChangeWorldEventArgs
+			this.onWorldChanged?.Invoke(new ChangeWorldEventArgs
 			{
 				oldWorld = origWorld,
 				oldCoord = origCoord,
@@ -75,19 +74,19 @@ namespace urd
 		// 获取附近的瓦片
 		public TileCell getNearTile(vec2i offset, bool loop = false)
 		{
-			var coord = _coord + offset;
+			var coord = this.coord + offset;
 			if (loop)
 			{
-				coord.x = mathf.loopIndex(coord.x, m_world.width);
-				coord.y = mathf.loopIndex(coord.y, m_world.height);
+				coord.x = mathf.loopIndex(coord.x, this.world.width);
+				coord.y = mathf.loopIndex(coord.y, this.world.height);
 			}
 
 			this.world.tryGetTile(coord.x, coord.y, out var tile);
 			return tile;
 		}
 
-		public InWorld(WorldGrid world, vec2i coord, float cost = 0)
-			: base("InWorld")
+		public WorldEntity(WorldGrid world, vec2i coord, float cost = 0)
+			: base("WorldEntity")
 		{
 			this.setWorld(world, coord);
 			this.cost = cost;

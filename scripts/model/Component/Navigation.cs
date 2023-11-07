@@ -5,13 +5,24 @@ namespace urd
 {
 	public class Navigation : Component, IComponentBehavior
 	{
+		public delegate void StartEventHandler(vec2i target);
+		public delegate void InterruptEventHandler(vec2i target);
+		public delegate void CompletionEventHandler(vec2i target);
+
+		public event StartEventHandler onStart;
+		public event CompletionEventHandler onCompletion;
+		public event InterruptEventHandler onInterrupt;
+
 		private PathGenerator m_pathfind;
 
-		[BindComponent] private InWorld m_inWorld = null;
-		[BindComponent] private Movement m_motion = null;
+		[BindComponent] private WorldEntity m_worldEntity = null;
+		[BindComponent] private Movement m_movement = null;
 
 		private vec2i? m_target;
 		private List<TileCell> m_pathNodeList;
+
+		public WorldEntity worldEntity => m_worldEntity;
+		public Movement movement => m_movement;
 
 		public bool enable { set; get; } = true;
 
@@ -34,16 +45,19 @@ namespace urd
 				this.clear();
 
 				m_target = target;
-				m_pathfind.generatePath(m_inWorld.coord, target, ref m_pathNodeList, StandardPathfindCost.Default);
+				m_pathfind.generatePath(m_worldEntity.coord, target, ref m_pathNodeList, StandardPathfindCost.Default);
 
 				// 立即设置前进方向
 				if (m_pathNodeList.Count > 0)
 				{
-					var nextTile = m_pathNodeList[m_pathNodeList.Count - 1];
 					// 计算当前路径前往目标节点的方向
-					var moveDirect = new vec2i(nextTile.x, nextTile.y) - m_inWorld.coord;
-					m_motion.direct = moveDirect;
+					var nextTile = m_pathNodeList[m_pathNodeList.Count - 1];
+					var moveDirect = new vec2i(nextTile.x, nextTile.y) - m_worldEntity.coord;
+					
+					m_movement.direct = moveDirect;
 					m_pathNodeList.RemoveAt(m_pathNodeList.Count - 1);
+					
+					this.onStart?.Invoke(m_target.Value);
 				}
 			}
 		}
@@ -56,7 +70,7 @@ namespace urd
 		public void _update(float delta)
 		{
 			// 等待当前运动完成
-			if (m_motion.processing) return;
+			if (m_movement.processing) return;
 
 			// 设置下一个目的地
 			if (m_pathNodeList.Count > 0)
@@ -64,28 +78,31 @@ namespace urd
 				var nextTile = m_pathNodeList[m_pathNodeList.Count - 1];
 				if (nextTile.tile.cost < 0) // 若下一个目标路点无效了, 则清除当前路径和移动方向
 				{
-					Debug.WriteLine($"next tile({nextTile.x},{nextTile.y}) is unreachable, clear path.", 
-						m_inWorld.GetHashCode().ToString());
+					var _target = m_target;
 
 					this.clear();
-					m_motion.direct = vec2i.zero;
+					m_movement.direct = vec2i.zero;
 
-					// 重新计算路径
-					// ...
+					this.onStart?.Invoke(_target.Value);
 
 					return;
 				}
 
 				// 计算当前路径前往目标节点的方向
-				var moveDirect = new vec2i(nextTile.x, nextTile.y) - m_inWorld.coord;
-				m_motion.direct = moveDirect;
+				var moveDirect = new vec2i(nextTile.x, nextTile.y) - m_worldEntity.coord;
+				m_movement.direct = moveDirect;
 				
 				m_pathNodeList.RemoveAt(m_pathNodeList.Count - 1);
 			}
-			else
+			else if(m_target.HasValue) // 在路点全部执行完成后进行清理
 			{
 				// 在路点全部完成后, 清除移动方向
-				m_motion.direct = vec2i.zero;
+				var _target = m_target;
+
+				m_target = null;
+				m_movement.direct = vec2i.zero;
+
+				this.onCompletion?.Invoke(_target.Value);
 			}
 		}
 		public void _lateUpdate(float delta) { }
