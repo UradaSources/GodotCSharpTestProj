@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace urd
+﻿namespace urd
 {
 	public struct byteColor
 	{

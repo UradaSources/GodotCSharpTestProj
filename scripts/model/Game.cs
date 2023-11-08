@@ -21,14 +21,50 @@ public class GameLoop
 
 	private Sprite m_entitySprite;
 	private Sprite m_targetCellSprite;
+
 	private Sprite m_treeSprite;
+	private Sprite m_treeSprite2;
+
+	private float[,] m_noiseValue;
 
 	public void createTileTypes()
 	{
 		m_tileTypeList.Add(new TileType("ground", new Sprite("ground", '.', byteColor.FromHex(0xA77B5B)), 1, (ulong)TileType.BuiltinTags.Ground));
-		m_tileTypeList.Add(new TileType("wall", new Sprite("wall", '#', byteColor.FromHex(0xF2F015)), -1, (ulong)TileType.BuiltinTags.Wall));
+		m_tileTypeList.Add(new TileType("grass", new Sprite("grass", '.', byteColor.FromHex(0x567b79)), 1.1f, (ulong)TileType.BuiltinTags.Ground));
+		m_tileTypeList.Add(new TileType("wall", new Sprite("wall", 'X', byteColor.FromHex(0x45444f)), -1, (ulong)TileType.BuiltinTags.Wall));
 		m_tileTypeList.Add(new TileType("floor", new Sprite("floor", '-', byteColor.FromHex(0x80493A)), 1, (ulong)TileType.BuiltinTags.Floor));
 		m_tileTypeList.Add(new TileType("river", new Sprite("river", '`', byteColor.FromHex(0x4B80CA)), 5, (ulong)TileType.BuiltinTags.Water));
+		m_tileTypeList.Add(new TileType("deep_river", new Sprite("deep_river", '`', byteColor.FromHex(0x3a3858)), -1, (ulong)TileType.BuiltinTags.Water));
+	}
+
+	// 地形生成
+	public void terrain()
+	{
+		// 生成河流
+		var riverStart = new vec2i(mathf.random(1, m_mainWorld.width / 2), 0);
+		var riverEnd = m_mainWorld.size - vec2i.one;
+
+		var riverPath = new List<TileCell>();
+		m_pathGenerator.generatePath(riverStart, riverEnd, ref riverPath, StandardPathfindCost.Default);
+
+		foreach (var cell in riverPath)
+			cell.tile = m_tileTypeList[3];
+
+		for (int i = 0; i < mathf.random(0, m_mainWorld.tileCount / 3); i++)
+		{
+			int x, y;
+			do
+			{
+				x = mathf.random(0, m_mainWorld.width - 1);
+				y = mathf.random(0, m_mainWorld.height - 1);
+			}
+			while (m_mainWorld.getTile(x, y).tile.tags != (ulong)TileType.BuiltinTags.Ground);
+
+			var tree = new Entity("tree");
+			tree.add(new WorldEntity(m_mainWorld, new vec2i(x, y)));
+
+			m_entityList.Add(tree);
+		}
 	}
 
 	public void createWorld(int w, int h, int seed)
@@ -38,65 +74,47 @@ public class GameLoop
 		m_mainWorld = new WorldGrid("main world", w, h);
 		m_pathGenerator = new PathGenerator(m_mainWorld);
 
+		var noise = new FastNoiseLite();
+		noise.Seed = 12345;
+		noise.NoiseType = FastNoiseLite.NoiseTypeEnum.Perlin;
+
+		float nosicScale = 3.0f;
+		float nosicOffset = 20.0f;
+
 		for (int i = 0; i < m_mainWorld.tileCount; i++)
-			m_mainWorld.rawGetTile(i).tile = m_tileTypeList[0];
+		{
+			var tile = m_mainWorld.rawGetTile(i);
 
-		// 生成河流
-		var riverStart = new vec2i(mathf.random(1, m_mainWorld.width / 2), 0);
-		var riverEnd = m_mainWorld.size - vec2i.one;
+			var nosicCoord = new Vector2(tile.x, tile.y) * nosicScale + Vector2.One * nosicOffset;
+			var tr = noise.GetNoise2Dv(nosicCoord);
 
-		var riverPath = new List<TileCell>();
-		m_pathGenerator.generatePath(riverStart, riverEnd, ref riverPath, StandardPathfindCost.Default);
+			if (tr < 0.005f)
+				tile.tile = m_tileTypeList[5];
+			else if (tr < 0.1f)
+				tile.tile = m_tileTypeList[4];
+			else if (tr < 0.2f)
+				tile.tile = m_tileTypeList[1];
+			else if (tr > 0.4f)
+				tile.tile = m_tileTypeList[2];
+			else
+				tile.tile = m_tileTypeList[0];
+		}
 
-		Debug.WriteLine($"生成河流从{riverStart}到{riverEnd}, 共{riverPath.Count}");
+		for (int i = 0; i < m_mainWorld.tileCount / 15; i++)
+		{
+			int x, y;
+			do
+			{
+				x = mathf.random(0, m_mainWorld.width - 1);
+				y = mathf.random(0, m_mainWorld.height - 1);
+			}
+			while (m_mainWorld.getTile(x, y).tile.tags != (ulong)TileType.BuiltinTags.Ground);
 
-		foreach (var cell in riverPath) 
-			cell.tile = m_tileTypeList[3];
+			var tree = new Entity("tree");
+			tree.add(new WorldEntity(m_mainWorld, new vec2i(x, y)));
 
-		// 随机创建房屋
-		//for (int roomId = 0; roomId < 2;)
-		//{
-		//	vec2i roomSize = new vec2i(random.Next(4, 6), random.Next(4, 6));
-		//	vec2i roomMin = new vec2i(random.Next(m_mainWorld.width - roomSize.x),
-		//		random.Next(m_mainWorld.height - roomSize.y));
-
-		//	// 检查时多向外检查一圈
-		//	for (int y = roomMin.y - 1; y <= roomMin.y + roomSize.y; y++)
-		//	{
-		//		for (int x = roomMin.x - 1; x <= roomMin.x + roomSize.x; x++)
-		//		{
-		//			if (!m_mainWorld.vaildCoord(x, y)) continue;
-
-		//			int index = m_mainWorld.toIndex(x, y);
-		//			var cell = m_mainWorld.rawGetTile(index);
-
-		//			// 必须为地面
-		//			if ((cell.tile.tags | (ulong)TileType.BuiltinTags.Ground) == 0)
-		//			{
-		//				// 重新生成
-		//				continue;
-		//			}
-		//		}
-		//	}
-
-		//	// 设置墙
-		//	for (int x = roomMin.x; x < roomMin.x + roomSize.x; x++)
-		//	{
-		//		var cell = m_mainWorld.rawGetTile(m_mainWorld.toIndex(x, roomMin.y));
-		//		cell.tile = m_tileTypeList[1];
-
-		//		cell = m_mainWorld.rawGetTile(m_mainWorld.toIndex(x, roomMin.y + roomSize.y - 1));
-		//		cell.tile = m_tileTypeList[1];
-		//	}
-		//	for (int y = roomMin.y; y < roomMin.y + roomSize.y; y++)
-		//	{
-		//		var cell = m_mainWorld.rawGetTile(m_mainWorld.toIndex(x, roomMin.y));
-		//		cell.tile = m_tileTypeList[1];
-
-		//		cell = m_mainWorld.rawGetTile(m_mainWorld.toIndex(x, roomMin.y + roomSize.y - 1));
-		//		cell.tile = m_tileTypeList[1];
-		//	}
-		//}
+			m_entityList.Add(tree);
+		}
 	}
 
 	public void initEntity()
@@ -124,22 +142,6 @@ public class GameLoop
 
 			m_entityList.Add(enemy);
 		}
-
-		for (int i = 0; i < mathf.random(0, m_mainWorld.tileCount / 3); i++)
-		{
-			int x, y;
-			do
-			{
-				x = mathf.random(0, m_mainWorld.width - 1);
-				y = mathf.random(0, m_mainWorld.height - 1);
-			}
-			while (m_mainWorld.getTile(x, y).tile.tags != (ulong)TileType.BuiltinTags.Ground);
-
-			var tree = new Entity("tree");
-			tree.add(new WorldEntity(m_mainWorld, new vec2i(x, y)));
-
-			m_entityList.Add(tree);
-		}
 	}
 
 	public void init()
@@ -147,12 +149,14 @@ public class GameLoop
 		Instance = this;
 
 		this.createTileTypes();
-		this.createWorld(20, 20, 1234);
+		this.createWorld(40, 40, 12345);
 		this.initEntity();
 
 		m_entitySprite = new Sprite("entity", 'C', byteColor.white);
 		m_targetCellSprite = new Sprite("target_cell", 'x', new byteColor(0, 126, 0, 126));
+
 		m_treeSprite = new Sprite("tree", 'T', byteColor.FromHex(0x75A743));
+		m_treeSprite2 = new Sprite("tree", 't', byteColor.FromHex(0x75A743));
 	}
 
 	public void update(float delta)
@@ -179,8 +183,6 @@ public class GameLoop
 			context.drawCharSprite(new vec2i(cell.x, cell.y), cell.tile.sprite);
 		}
 
-
-
 		foreach (var entity in m_entityList)
 		{
 		 	var worldEn = entity.get<WorldEntity>();
@@ -188,7 +190,9 @@ public class GameLoop
 			{
 				// 绘制角色本身
 				if (entity.name == "tree")
+				{ 
 					context.drawCharSprite(worldEn.coord, m_treeSprite);
+				}
 				else
 					context.drawCharSprite(worldEn.coord, m_entitySprite);
 
@@ -209,6 +213,16 @@ public class GameLoop
 				}
 			}
 		}
+
+		//for (int y = 0; y < m_noiseValue.GetLength(1); y++)
+		//{
+		//	for (int x = 0; x < m_noiseValue.GetLength(0); x++)
+		//	{
+		//		var c = (byte)(m_noiseValue[x, y] * 255);
+		//		context.drawBox(new vec2i(x, y), new byteColor(c, c, c), true);
+		//		context.drawString(new vec2i(x, y), ((int)(m_noiseValue[x, y] *10)).ToString(), 12);
+		//	}
+		//}
 	}
 }
 
