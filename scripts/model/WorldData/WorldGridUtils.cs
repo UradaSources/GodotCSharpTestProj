@@ -8,56 +8,7 @@ namespace urd
 {
 	public static class WorldGridUtils
 	{
-		[System.Serializable]
-		private struct WorldSerializeData
-		{
-			[JsonInclude] public int width, height;
-			[JsonInclude] public int[] tile;
-		}
-
-		public static string ToJson(WorldGrid world)
-		{
-			var data = new WorldSerializeData();
-			data.width = world.width;
-			data.height = world.height;
-
-			data.tile = new int[data.width * data.height];
-			for (int i = 0; i < world.tileCount; i++)
-				data.tile[i] = world.rawGetTile(i).tile.instanceId;
-
-			return JsonSerializer.Serialize(data);
-		}
-		public static WorldGrid TryFromJson(string json, WorldGrid target = null)
-		{
-			var data = JsonSerializer.Deserialize<WorldSerializeData>(json);
-			if (data.width == 0 || data.height == 0)
-			{
-				Debug.WriteLine($"serialized data corruption",
-					$"{typeof(WorldGridUtils).Name}.Error");
-
-				return null;
-			}
-
-			if (target != null && (target.width != data.width || target.height != data.height))
-			{
-				Debug.WriteLine($"serialized data provides {data.width}x{data.height} data, while the target is {target.width}x{target.height}",
-					$"{typeof(WorldGridUtils).Name}.Error");
-
-				return null;
-			}
-
-			var world = target ?? new WorldGrid("", data.width, data.height);
-
-			for (int i = 0; i < world.tileCount; i++)
-			{
-				int typeId = data.tile[i];
-				// world.rawGetTile(i).tile = Tile.Get(typeId);
-			}
-
-			return world;
-		}
-
-		public static IEnumerable<TileCell> IterateTileCells(WorldGrid grid, vec2i start, vec2i end)
+		public static IEnumerable<TileCell> IterateArea(WorldGrid grid, vec2i start, vec2i end)
 		{
 			start = vec2i.Max(start, vec2i.zero);
 			end = vec2i.Min(end, grid.size - vec2i.one);

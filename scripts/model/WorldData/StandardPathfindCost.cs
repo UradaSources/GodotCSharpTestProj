@@ -1,6 +1,5 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace urd
 {
@@ -10,7 +9,7 @@ namespace urd
 
 		// 用于计算h值的曼哈顿距离
 		public static float ManhattanDistance(TileCell a, TileCell b)
-			=> (new vec2(b.x, b.y) - new vec2(a.x, a.y)).magnitude();
+			=> (new vec2(b.x, b.y) - new vec2(a.x, a.y)).magnitude() * mathf.random(0.8f, 1.2f);
 			//=> mathf.abs(a.x - b.x) + mathf.abs(a.y - b.y);
 
 		public readonly static StandardPathfindCost Default = new StandardPathfindCost();

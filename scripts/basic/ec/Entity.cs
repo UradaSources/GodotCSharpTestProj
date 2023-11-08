@@ -5,6 +5,7 @@ using System.Reflection;
 
 namespace urd
 {
+	[RecordObject]
 	public class Entity : Object, IEnumerable<Component>
 	{
 		private LinkedList<Component> m_components;

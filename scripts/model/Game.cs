@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel.Design;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -20,6 +21,7 @@ public class GameLoop
 
 	private Sprite m_entitySprite;
 	private Sprite m_targetCellSprite;
+	private Sprite m_treeSprite;
 
 	public void createTileTypes()
 	{
@@ -31,6 +33,8 @@ public class GameLoop
 
 	public void createWorld(int w, int h, int seed)
 	{
+		mathf.randomSeed(seed);
+
 		m_mainWorld = new WorldGrid("main world", w, h);
 		m_pathGenerator = new PathGenerator(m_mainWorld);
 
@@ -106,11 +110,10 @@ public class GameLoop
 
 		m_entityList.Add(player);
 
-		var rng = new RandomNumberGenerator();
 		for (int i = 0; i < 1; i++)
 		{
-			int x = rng.RandiRange(0, m_mainWorld.width - 1);
-			int y = rng.RandiRange(0, m_mainWorld.height - 1);
+			int x = mathf.random(0, m_mainWorld.width - 1);
+			int y = mathf.random(0, m_mainWorld.height - 1);
 
 			var enemy = new Entity("enemy");
 
@@ -120,6 +123,22 @@ public class GameLoop
 			enemy.add(new FollowWalkControl()).target = player.get<WorldEntity>();
 
 			m_entityList.Add(enemy);
+		}
+
+		for (int i = 0; i < mathf.random(0, m_mainWorld.tileCount / 3); i++)
+		{
+			int x, y;
+			do
+			{
+				x = mathf.random(0, m_mainWorld.width - 1);
+				y = mathf.random(0, m_mainWorld.height - 1);
+			}
+			while (m_mainWorld.getTile(x, y).tile.tags != (ulong)TileType.BuiltinTags.Ground);
+
+			var tree = new Entity("tree");
+			tree.add(new WorldEntity(m_mainWorld, new vec2i(x, y)));
+
+			m_entityList.Add(tree);
 		}
 	}
 
@@ -133,6 +152,7 @@ public class GameLoop
 
 		m_entitySprite = new Sprite("entity", 'C', byteColor.white);
 		m_targetCellSprite = new Sprite("target_cell", 'x', new byteColor(0, 126, 0, 126));
+		m_treeSprite = new Sprite("tree", 'T', byteColor.FromHex(0x75A743));
 	}
 
 	public void update(float delta)
@@ -159,13 +179,18 @@ public class GameLoop
 			context.drawCharSprite(new vec2i(cell.x, cell.y), cell.tile.sprite);
 		}
 
+
+
 		foreach (var entity in m_entityList)
 		{
 		 	var worldEn = entity.get<WorldEntity>();
 			if (worldEn != null)
 			{
 				// 绘制角色本身
-				context.drawCharSprite(worldEn.coord, m_entitySprite);
+				if (entity.name == "tree")
+					context.drawCharSprite(worldEn.coord, m_treeSprite);
+				else
+					context.drawCharSprite(worldEn.coord, m_entitySprite);
 
 				// 绘制目标格子
 				var motion = entity.get<Movement>();
