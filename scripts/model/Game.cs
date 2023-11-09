@@ -23,9 +23,6 @@ public class GameLoop
 	private Sprite m_targetCellSprite;
 
 	private Sprite m_treeSprite;
-	private Sprite m_treeSprite2;
-
-	private float[,] m_noiseValue;
 
 	public void createTileTypes()
 	{
@@ -35,36 +32,7 @@ public class GameLoop
 		m_tileTypeList.Add(new TileType("floor", new Sprite("floor", '-', byteColor.FromHex(0x80493A)), 1, (ulong)TileType.BuiltinTags.Floor));
 		m_tileTypeList.Add(new TileType("river", new Sprite("river", '`', byteColor.FromHex(0x4B80CA)), 5, (ulong)TileType.BuiltinTags.Water));
 		m_tileTypeList.Add(new TileType("deep_river", new Sprite("deep_river", '`', byteColor.FromHex(0x3a3858)), -1, (ulong)TileType.BuiltinTags.Water));
-	}
-
-	// 地形生成
-	public void terrain()
-	{
-		// 生成河流
-		var riverStart = new vec2i(mathf.random(1, m_mainWorld.width / 2), 0);
-		var riverEnd = m_mainWorld.size - vec2i.one;
-
-		var riverPath = new List<TileCell>();
-		m_pathGenerator.generatePath(riverStart, riverEnd, ref riverPath, StandardPathfindCost.Default);
-
-		foreach (var cell in riverPath)
-			cell.tile = m_tileTypeList[3];
-
-		for (int i = 0; i < mathf.random(0, m_mainWorld.tileCount / 3); i++)
-		{
-			int x, y;
-			do
-			{
-				x = mathf.random(0, m_mainWorld.width - 1);
-				y = mathf.random(0, m_mainWorld.height - 1);
-			}
-			while (m_mainWorld.getTile(x, y).tile.tags != (ulong)TileType.BuiltinTags.Ground);
-
-			var tree = new Entity("tree");
-			tree.add(new WorldEntity(m_mainWorld, new vec2i(x, y)));
-
-			m_entityList.Add(tree);
-		}
+		m_tileTypeList.Add(new TileType("gravel", new Sprite("deep_river", '.', byteColor.FromHex(0x45444f)), 2, (ulong)TileType.BuiltinTags.Ground));
 	}
 
 	public void createWorld(int w, int h, int seed)
@@ -86,16 +54,19 @@ public class GameLoop
 			var tile = m_mainWorld.rawGetTile(i);
 
 			var nosicCoord = new Vector2(tile.x, tile.y) * nosicScale + Vector2.One * nosicOffset;
-			var tr = noise.GetNoise2Dv(nosicCoord);
+			var tr = mathf.map01(noise.GetNoise2Dv(nosicCoord), 0.5f, 0);
+			// Debug.WriteLine($"{tile.x},{tile.y}={tr}");
 
-			if (tr < 0.005f)
+			if (tr < 0.1f)
 				tile.tile = m_tileTypeList[5];
-			else if (tr < 0.1f)
-				tile.tile = m_tileTypeList[4];
 			else if (tr < 0.2f)
+				tile.tile = m_tileTypeList[4];
+			else if (tr < 0.3f)
 				tile.tile = m_tileTypeList[1];
-			else if (tr > 0.4f)
+			else if (tr > 0.7f)
 				tile.tile = m_tileTypeList[2];
+			else if (tr > 0.6f)
+				tile.tile = m_tileTypeList[6];
 			else
 				tile.tile = m_tileTypeList[0];
 		}
@@ -149,14 +120,12 @@ public class GameLoop
 		Instance = this;
 
 		this.createTileTypes();
-		this.createWorld(40, 40, 12345);
+		this.createWorld(80, 80, 12345);
 		this.initEntity();
 
 		m_entitySprite = new Sprite("entity", 'C', byteColor.white);
 		m_targetCellSprite = new Sprite("target_cell", 'x', new byteColor(0, 126, 0, 126));
-
 		m_treeSprite = new Sprite("tree", 'T', byteColor.FromHex(0x75A743));
-		m_treeSprite2 = new Sprite("tree", 't', byteColor.FromHex(0x75A743));
 	}
 
 	public void update(float delta)
