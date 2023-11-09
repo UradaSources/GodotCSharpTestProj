@@ -1,11 +1,36 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using System.ComponentModel.Design;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using Godot;
 using urd;
+
+public abstract class Job { };
+
+public class Cultivate : Job
+{
+	private float m_progress;
+	private TileCell m_target;
+
+	public bool done;
+
+	public void init(TileCell target)
+	{
+		m_target = target;
+		m_progress = target.tile.cost;
+	}
+
+	public void update(Character c, float dt)
+	{
+		m_progress -= dt;
+		if (m_progress <= 0)
+		{
+			m_target.tile = 
+			done = true;
+		}
+	}
+}
 
 public class GameLoop
 {
@@ -23,18 +48,17 @@ public class GameLoop
 	private Sprite m_targetCellSprite;
 
 	private Sprite m_treeSprite;
-	private Sprite m_treeSprite2;
-
-	private float[,] m_noiseValue;
 
 	public void createTileTypes()
 	{
 		m_tileTypeList.Add(new TileType("ground", new Sprite("ground", '.', byteColor.FromHex(0xA77B5B)), 1, (ulong)TileType.BuiltinTags.Ground));
 		m_tileTypeList.Add(new TileType("grass", new Sprite("grass", '.', byteColor.FromHex(0x567b79)), 1.1f, (ulong)TileType.BuiltinTags.Ground));
-		m_tileTypeList.Add(new TileType("wall", new Sprite("wall", 'X', byteColor.FromHex(0x45444f)), -1, (ulong)TileType.BuiltinTags.Wall));
+		m_tileTypeList.Add(new TileType("rock", new Sprite("rock", 'R', byteColor.FromHex(0x45444f)), -1, (ulong)TileType.BuiltinTags.Wall));
 		m_tileTypeList.Add(new TileType("floor", new Sprite("floor", '-', byteColor.FromHex(0x80493A)), 1, (ulong)TileType.BuiltinTags.Floor));
 		m_tileTypeList.Add(new TileType("river", new Sprite("river", '`', byteColor.FromHex(0x4B80CA)), 5, (ulong)TileType.BuiltinTags.Water));
 		m_tileTypeList.Add(new TileType("deep_river", new Sprite("deep_river", '`', byteColor.FromHex(0x3a3858)), -1, (ulong)TileType.BuiltinTags.Water));
+		m_tileTypeList.Add(new TileType("gravel", new Sprite("gravel", '.', byteColor.FromHex(0x45444f)), 2.0f, (ulong)TileType.BuiltinTags.Ground));
+		m_tileTypeList.Add(new TileType("cropland", new Sprite("cropland", '+', byteColor.FromHex(0xa77b5b)), 2.0f, (ulong)TileType.BuiltinTags.Ground));
 	}
 
 	// 地形生成
@@ -86,16 +110,18 @@ public class GameLoop
 			var tile = m_mainWorld.rawGetTile(i);
 
 			var nosicCoord = new Vector2(tile.x, tile.y) * nosicScale + Vector2.One * nosicOffset;
-			var tr = noise.GetNoise2Dv(nosicCoord);
+			var tr = mathf.mapTo01(noise.GetNoise2Dv(nosicCoord), 0.5f, -0.5f);
 
-			if (tr < 0.005f)
+			if (tr < 0.15f)
 				tile.tile = m_tileTypeList[5];
-			else if (tr < 0.1f)
+			else if (tr < 0.3f)
 				tile.tile = m_tileTypeList[4];
-			else if (tr < 0.2f)
+			else if (tr < 0.4f)
 				tile.tile = m_tileTypeList[1];
-			else if (tr > 0.4f)
+			else if (tr > 0.9f)
 				tile.tile = m_tileTypeList[2];
+			else if (tr > 0.8f)
+				tile.tile = m_tileTypeList[6];
 			else
 				tile.tile = m_tileTypeList[0];
 		}
@@ -149,14 +175,13 @@ public class GameLoop
 		Instance = this;
 
 		this.createTileTypes();
-		this.createWorld(40, 40, 12345);
+		this.createWorld(80, 80, 12345);
 		this.initEntity();
 
 		m_entitySprite = new Sprite("entity", 'C', byteColor.white);
 		m_targetCellSprite = new Sprite("target_cell", 'x', new byteColor(0, 126, 0, 126));
 
 		m_treeSprite = new Sprite("tree", 'T', byteColor.FromHex(0x75A743));
-		m_treeSprite2 = new Sprite("tree", 't', byteColor.FromHex(0x75A743));
 	}
 
 	public void update(float delta)

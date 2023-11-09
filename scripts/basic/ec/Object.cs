@@ -7,6 +7,14 @@ namespace urd
 {
 	public abstract class Object
 	{
+		private struct Record
+		{
+			public IList<Object> instances;
+			public Dictionary<string, object> index;
+
+
+		}
+
 		private static Dictionary<System.Type, LinkedList<Object>> _InstanceRecord 
 			= new Dictionary<System.Type, LinkedList<Object>>();
 
