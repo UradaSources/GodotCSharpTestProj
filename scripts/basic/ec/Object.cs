@@ -7,20 +7,12 @@ namespace urd
 {
 	public abstract class Object
 	{
-		private struct Record
-		{
-			public IList<Object> instances;
-			public Dictionary<string, object> index;
-
-
-		}
-
 		private static Dictionary<System.Type, LinkedList<Object>> _InstanceRecord 
 			= new Dictionary<System.Type, LinkedList<Object>>();
 
 		private static int _IdAllot = 0;
 
-		public static IEnumerable<T> IterateInstances<T>()
+		public static IEnumerable<T> IterateRecord<T>()
 			where T : Object
 		{
 			var key = typeof(T);
@@ -30,6 +22,17 @@ namespace urd
 					yield return it.Value as T;
 			}
 		}
+		public static bool IsRecorded(Object obj)
+		{
+			return obj.__itor != null;
+		}
+		public static void Unrecord(Object obj)
+		{
+			Debug.Assert(obj.__itor != null, "try to unrecord an unrecorded object");
+			_InstanceRecord[obj.GetType()].Remove(obj.__itor);
+		}
+
+		private LinkedListNode<Object> __itor;
 
 		private readonly int m_instanceId;
 		private readonly string m_name;

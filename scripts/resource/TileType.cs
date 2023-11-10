@@ -6,14 +6,12 @@ namespace urd
 {
 	public class TileType : Object
 	{
-
-
 		public enum BuiltinTags
 		{ 
-			Ground = 1 >> 0,
-			Wall = 1 >> 1,
-			Floor = 1 >> 2,
-			Water = 1 >> 3,
+			Ground = 1 << 0,
+			Wall = 1 << 1,
+			Floor = 1 << 2,
+			Water = 1 << 3,
 		}
 
 		public readonly Sprite sprite;

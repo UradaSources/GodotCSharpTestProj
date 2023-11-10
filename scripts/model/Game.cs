@@ -6,29 +6,65 @@ using System.Linq;
 using Godot;
 using urd;
 
-public abstract class Job { };
+public abstract class Job : Object
+{
+	private Entity m_handler;
+
+	private bool _completed;
+	public bool completed 
+	{
+		protected set => _completed = value; 
+		get => _completed;
+	}
+
+	public abstract float progressPer { get; }
+
+	public Entity handler => m_handler;
+
+	public void enter(Entity handler)
+	{
+		Debug.Assert(m_handler == null);
+		m_handler = handler;
+	}
+	public void exit()
+	{
+		Debug.Assert(m_handler != null);
+		m_handler = null;
+	}
+
+	void update(float dt);
+};
 
 public class Cultivate : Job
 {
+	private float m_totalProgress;
 	private float m_progress;
+
+	private bool m_completed;
+	
+	private Entity m_handler;
+
 	private TileCell m_target;
 
-	public bool done;
+	public float progressPer => mathf.clamp01(m_progress / m_totalProgress);
+	public bool completed => m_completed;
 
-	public void init(TileCell target)
+	public Entity handler => m_handler;
+
+
+	public void update(float dt)
 	{
-		m_target = target;
-		m_progress = target.tile.cost;
+		m_progress += dt;
+		if (this.progressPer > 1.0f)
+			
 	}
 
-	public void update(Character c, float dt)
+	public Cultivate(TileCell target)
 	{
-		m_progress -= dt;
-		if (m_progress <= 0)
-		{
-			m_target.tile = 
-			done = true;
-		}
+		m_target = target;
+
+		m_totalProgress = target.tile.cost;
+		m_progress = 0;
 	}
 }
 
@@ -61,36 +97,6 @@ public class GameLoop
 		m_tileTypeList.Add(new TileType("cropland", new Sprite("cropland", '+', byteColor.FromHex(0xa77b5b)), 2.0f, (ulong)TileType.BuiltinTags.Ground));
 	}
 
-	// 地形生成
-	public void terrain()
-	{
-		// 生成河流
-		var riverStart = new vec2i(mathf.random(1, m_mainWorld.width / 2), 0);
-		var riverEnd = m_mainWorld.size - vec2i.one;
-
-		var riverPath = new List<TileCell>();
-		m_pathGenerator.generatePath(riverStart, riverEnd, ref riverPath, StandardPathfindCost.Default);
-
-		foreach (var cell in riverPath)
-			cell.tile = m_tileTypeList[3];
-
-		for (int i = 0; i < mathf.random(0, m_mainWorld.tileCount / 3); i++)
-		{
-			int x, y;
-			do
-			{
-				x = mathf.random(0, m_mainWorld.width - 1);
-				y = mathf.random(0, m_mainWorld.height - 1);
-			}
-			while (m_mainWorld.getTile(x, y).tile.tags != (ulong)TileType.BuiltinTags.Ground);
-
-			var tree = new Entity("tree");
-			tree.add(new WorldEntity(m_mainWorld, new vec2i(x, y)));
-
-			m_entityList.Add(tree);
-		}
-	}
-
 	public void createWorld(int w, int h, int seed)
 	{
 		mathf.randomSeed(seed);
@@ -104,6 +110,14 @@ public class GameLoop
 
 		float nosicScale = 3.0f;
 		float nosicOffset = 20.0f;
+
+		var treeNoise = new FastNoiseLite();
+		treeNoise.Seed = 11111;
+		treeNoise.NoiseType = FastNoiseLite.NoiseTypeEnum.Simplex;
+
+		var sampleNoise = new FastNoiseLite();
+		sampleNoise.Seed = 54321;
+		sampleNoise.NoiseType = FastNoiseLite.NoiseTypeEnum.Simplex;
 
 		for (int i = 0; i < m_mainWorld.tileCount; i++)
 		{
@@ -124,22 +138,21 @@ public class GameLoop
 				tile.tile = m_tileTypeList[6];
 			else
 				tile.tile = m_tileTypeList[0];
-		}
 
-		for (int i = 0; i < m_mainWorld.tileCount / 15; i++)
-		{
-			int x, y;
-			do
+			if ((tile.tile.tags & (ulong)TileType.BuiltinTags.Ground) > 0)
 			{
-				x = mathf.random(0, m_mainWorld.width - 1);
-				y = mathf.random(0, m_mainWorld.height - 1);
+				// 创建树
+				var sampleCoord = new Vector2(tile.x, tile.y) * 20.0f;
+				var sample = mathf.mapTo01(sampleNoise.GetNoise2Dv(sampleCoord), 1.0f, -1.0f);
+
+				if (mathf.mapTo01(treeNoise.GetNoise2D(tile.x * 3, tile.y * 3), 1, -1) * sample > 0.45f)
+				{
+					var tree = new Entity("tree");
+					tree.add(new WorldEntity(m_mainWorld, new vec2i(tile.x, tile.y)));
+
+					m_entityList.Add(tree);
+				}
 			}
-			while (m_mainWorld.getTile(x, y).tile.tags != (ulong)TileType.BuiltinTags.Ground);
-
-			var tree = new Entity("tree");
-			tree.add(new WorldEntity(m_mainWorld, new vec2i(x, y)));
-
-			m_entityList.Add(tree);
 		}
 	}
 
@@ -174,9 +187,22 @@ public class GameLoop
 	{
 		Instance = this;
 
+		Stopwatch sw = new Stopwatch();
+
+		sw.Start();
 		this.createTileTypes();
+		sw.Stop();
+		Debug.WriteLine("createTileTypes: " + sw.ElapsedMilliseconds);
+
+		sw.Restart();
 		this.createWorld(80, 80, 12345);
+		sw.Stop();
+		Debug.WriteLine("createWorld: " + sw.ElapsedMilliseconds);
+
+		sw.Restart();
 		this.initEntity();
+		sw.Stop();
+		Debug.WriteLine("initEntity: " + sw.ElapsedMilliseconds);
 
 		m_entitySprite = new Sprite("entity", 'C', byteColor.white);
 		m_targetCellSprite = new Sprite("target_cell", 'x', new byteColor(0, 126, 0, 126));
@@ -239,13 +265,13 @@ public class GameLoop
 			}
 		}
 
-		//for (int y = 0; y < m_noiseValue.GetLength(1); y++)
+		//for (int y = 0; y < sample.GetLength(1); y++)
 		//{
-		//	for (int x = 0; x < m_noiseValue.GetLength(0); x++)
+		//	for (int x = 0; x < sample.GetLength(0); x++)
 		//	{
-		//		var c = (byte)(m_noiseValue[x, y] * 255);
+		//		var c = (byte)(sample[x, y] * 255);
 		//		context.drawBox(new vec2i(x, y), new byteColor(c, c, c), true);
-		//		context.drawString(new vec2i(x, y), ((int)(m_noiseValue[x, y] *10)).ToString(), 12);
+		//		context.drawString(new vec2i(x, y), ((int)(sample[x, y] * 10)).ToString(), 12);
 		//	}
 		//}
 	}
