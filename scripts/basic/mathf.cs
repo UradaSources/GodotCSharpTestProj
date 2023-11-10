@@ -95,9 +95,9 @@
 			return _Random.Next(min, max);
 		}
 
-		public static float map01(float v, float rangeMax, float rangeMin)
+		public static float mapTo01(float v, float sourceRangeMax, float sourceRangeMin)
 		{
-			return (v - rangeMin) / (rangeMax - rangeMin);
+			return (v - sourceRangeMin) / (sourceRangeMax - sourceRangeMin);
 		}
 	}
 }
