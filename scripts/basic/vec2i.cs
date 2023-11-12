@@ -32,10 +32,9 @@
 
 		public int x, y;
 
-		public float sqrMagnitude() { return x * x + y * y; }
-
 		public void set(int x, int y) { this.x = x; this.y = y; }
 
+		public float sqrMagnitude() { return x * x + y * y; }
 		public float magnitude() { return mathf.sqrt(x * x + y * y); }
 
 		public vec2i(int x, int y)
@@ -63,6 +62,16 @@
 		public static vec2i operator *(vec2i a, vec2i b) { return new vec2i(a.x * b.x, a.y * b.y); }
 		public static vec2i operator /(vec2i a, vec2i b) { return new vec2i(a.x / b.x, a.y / b.y); }
 		public static vec2i operator %(vec2i a, vec2i b) { return new vec2i(a.x / b.x, a.y / b.y); }
+
+		public static vec2i operator *(vec2i a, int b) { return new vec2i(a.x * b, a.y * b); }
+		public static vec2i operator /(vec2i a, int b) { return new vec2i(a.x / b, a.y / b); }
+		public static vec2i operator %(vec2i a, int b) { return new vec2i(a.x / b, a.y / b); }
+
+		public static bool operator <(vec2i a, vec2i b) { return a.x < b.x && a.y < b.y; }
+		public static bool operator >(vec2i a, vec2i b) { return a.x > b.x && a.y > b.y; }
+
+		public static bool operator <=(vec2i a, vec2i b) { return a.x <= b.x && a.y <= b.y; }
+		public static bool operator >=(vec2i a, vec2i b) { return a.x >= b.x && a.y >= b.y; }
 
 		public static bool operator ==(vec2i a, vec2i b)
 		{

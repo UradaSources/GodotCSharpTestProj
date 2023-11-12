@@ -4,12 +4,13 @@
     <EnableDynamicLoading>true</EnableDynamicLoading>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Remove="scripts\tmp\**" />
+    <EmbeddedResource Remove="scripts\tmp\**" />
+  </ItemGroup>
+  <ItemGroup>
     <PackageReference Include="Autofac" Version="7.1.0" />
     <PackageReference Include="CsvHelper" Version="30.0.1" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="SimplexNoise" Version="2.0.0" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="scripts\tmp\" />
   </ItemGroup>
 </Project>

@@ -2,6 +2,7 @@
 
 namespace urd
 {
+	[RecordObject]
 	public class WorldEntity : Component
 	{
 		public struct ChangeWorldEventArgs

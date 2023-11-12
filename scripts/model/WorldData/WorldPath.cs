@@ -5,7 +5,7 @@ using Godot;
 
 namespace urd
 {
-	public class PathGenerator
+	public class WorldPath
 	{
 		private class Node
 		{
@@ -192,7 +192,7 @@ namespace urd
 			return 0;
 		}
 
-		public PathGenerator(WorldGrid grid)
+		public WorldPath(WorldGrid grid)
 		{
 			Debug.Assert(grid != null);
 

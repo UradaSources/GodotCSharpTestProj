@@ -13,7 +13,7 @@ namespace urd
 		public event CompletionEventHandler onCompletion;
 		public event InterruptEventHandler onInterrupt;
 
-		private PathGenerator m_pathfind;
+		private WorldPath m_pathfind;
 
 		[BindComponent] private WorldEntity m_worldEntity = null;
 		[BindComponent] private Movement m_movement = null;
@@ -107,7 +107,7 @@ namespace urd
 		}
 		public void _lateUpdate(float delta) { }
 
-		public Navigation(PathGenerator pathfind)
+		public Navigation(WorldPath pathfind)
 			: base("Navigation")
 		{
 			m_pathfind = pathfind;

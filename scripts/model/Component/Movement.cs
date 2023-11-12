@@ -25,8 +25,6 @@ namespace urd
 
 		public void _update(float delta)
 		{
-			DebugWatch.Main.watchObject(this, m_inWorld.GetHashCode().ToString());
-
 			// 若当前正在移动中, 则更新位置
 			if (this.processing)
 			{

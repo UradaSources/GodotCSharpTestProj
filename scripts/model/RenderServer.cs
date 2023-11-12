@@ -14,7 +14,7 @@ public partial class RenderServer : Node2D
 
 		return new Rect2I(new Vector2I(x * size, y * size), new Vector2I(size, size));
 	}
-	private static Color GdColor(byteColor c)
+	private static Color GdColor(rgba c)
 	{
 		return new Color((float)c.r / 255, (float)c.g / 255, (float)c.b / 255, (float)c.a / 255);
 	}
@@ -23,12 +23,12 @@ public partial class RenderServer : Node2D
 	[Export] private float m_tileSize = 20;
 	[Export] private Font m_font;
 
-	public void drawString(vec2i coord, string str, int size = 18, byteColor? color = null)
+	public void drawString(vec2i coord, string str, int size = 18, rgba? color = null)
 	{
-		var pos = (vec2)coord * m_tileSize;
+		var pos = new vec2(coord.x, coord.y + 1) * m_tileSize;
 
 		this.DrawString(m_font, pos, str, HorizontalAlignment.Center, -1, 
-			size, GdColor(color ?? byteColor.white));
+			size, GdColor(color ?? rgba.white));
 	}
 	public void drawCharSprite(vec2i coord, Sprite sprite)
 	{
@@ -38,12 +38,12 @@ public partial class RenderServer : Node2D
 		var source = GetCharSpriteRect(16, 8, sprite.graph);
 		this.DrawTextureRectRegion(m_charSheet, target, source, GdColor(sprite.color));
 	}
-	public void drawBox(vec2i coord, byteColor? color = null, bool fill = false)
+	public void drawBox(vec2i coord, rgba? color = null, bool fill = false)
 	{
 		var pos = (vec2)coord * m_tileSize;
 
 		var target = new Rect2(pos, Vector2.One * m_tileSize);
-		this.DrawRect(target, GdColor(color ?? byteColor.white), fill);
+		this.DrawRect(target, GdColor(color ?? rgba.white), fill);
 	}
 
 	public vec2i globalPositionMapToCoord(vec2 pos)

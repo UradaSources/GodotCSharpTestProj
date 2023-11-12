@@ -1,13 +1,14 @@
 ﻿namespace urd
 {
+	[RecordObject]
 	public class Sprite : Object
 	{
 		public readonly char graph;
-		public readonly byteColor color;
+		public readonly rgba color;
 
 		public Sprite(string name, char graph)
-			: this(name, graph, byteColor.white) { }
-		public Sprite(string name, char graph, byteColor color)
+			: this(name, graph, rgba.white) { }
+		public Sprite(string name, char graph, rgba color)
 			: base(name)
 		{
 			this.graph = graph;

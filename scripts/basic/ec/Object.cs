@@ -12,21 +12,16 @@ namespace urd
 
 		private static int _IdAllot = 0;
 
-		public static IEnumerable<T> IterateRecord<T>()
+		public static IEnumerable<T> Get<T>()
 			where T : Object
 		{
 			var key = typeof(T);
-			if (_InstanceRecord.TryGetValue(key, out var record))
-			{
-				for (var it = record.First; it != null; it = it.Next)
-					yield return it.Value as T;
-			}
+			Debug.Assert(_InstanceRecord.TryGetValue(key, out var record));
+
+			for (var it = record.First; it != null; it = it.Next)
+				yield return it.Value as T;
 		}
-		public static bool IsRecorded(Object obj)
-		{
-			return obj.__itor != null;
-		}
-		public static void Unrecord(Object obj)
+		public static void RemoveRecord(Object obj)
 		{
 			Debug.Assert(obj.__itor != null, "try to unrecord an unrecorded object");
 			_InstanceRecord[obj.GetType()].Remove(obj.__itor);

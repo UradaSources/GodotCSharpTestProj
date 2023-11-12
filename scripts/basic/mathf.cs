@@ -10,13 +10,13 @@
 		public const float PI = (float)System.Math.PI;
 
 		public static float abs(float x) { return System.Math.Abs(x); }
+		public static float sqrt(float t) { return (float)System.Math.Sqrt(t); }
+		public static float pow(float f, float p) { return (float)System.Math.Pow(f, p); }
 
 		public static float min(float a, float b) { return System.Math.Min(a, b); }
 		public static int min(int a, int b) { return System.Math.Min(a, b); }
 		public static float max(float a, float b) { return System.Math.Max(a, b); }
 		public static int max(int a, int b) { return System.Math.Max(a, b); }
-
-		public static float sqrt(float t) { return (float)System.Math.Sqrt(t); }
 
 		public static float sin(float t) { return (float)System.Math.Sin(t); }
 		public static float cos(float t) { return (float)System.Math.Cos(t); }

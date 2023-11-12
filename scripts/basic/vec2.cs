@@ -85,8 +85,6 @@
 
 		public float x, y;
 
-		public float sqrMagnitude() { return x * x + y * y; }
-
 		public void set(float x, float y) { this.x = x; this.y = y; }
 
 		public void normalize()
@@ -101,6 +99,7 @@
 			else return this;
 		}
 
+		public float sqrMagnitude() { return x * x + y * y; }
 		public float magnitude() { return mathf.sqrt(x * x + y * y); }
 
 		public vec2(float x, float y)
