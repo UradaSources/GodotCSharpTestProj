@@ -9,6 +9,11 @@ namespace urd
 		public readonly static vec2i[] NearOffset = new vec2i[] { 
 			vec2i.up, vec2i.down, vec2i.left, vec2i.right };
 
+		public static bool InCircle(vec2i target, vec2i start, float radius)
+		{
+			return (target - start).magnitude() - 1.0f <= radius;
+		}
+
 		private readonly WorldGrid m_world;
 
 		private HashSet<TileCell> m_close = new HashSet<TileCell>();
@@ -60,16 +65,6 @@ namespace urd
 			var condition = (TileCell cell)=> cell.coord <= max && cell.coord >= min;
 			foreach (var i in bfs(start, condition))
 				yield return i;
-		}
-
-		public static IEnumerable<WorldEntity> GetWorldEntity(IEnumerable<TileCell> cells)
-		{
-			foreach (var cell in cells)
-			{
-				foreach (var en in Object.Get<WorldEntity>()
-					.Where(t => t.currentTile == cell))
-					yield return en;
-			}
 		}
 
 		public WorldSeek(WorldGrid world)

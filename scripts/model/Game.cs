@@ -6,56 +6,56 @@ using System.Linq;
 using Godot;
 using urd;
 
-//public abstract class Job : Object
-//{
-//	private Entity m_handler;
+public abstract class Job : Object
+{
+	private Entity m_handler;
 
-//	public abstract float progressPer { get; }
+	public abstract float progressPer { get; }
 
-//	public Entity handler => m_handler;
+	public Entity handler => m_handler;
 
-//	public void enter(Entity handler)
-//	{
-//		Debug.Assert(m_handler == null);
-//		m_handler = handler;
-//	}
-//	public void exit()
-//	{
-//		Debug.Assert(m_handler != null);
-//		m_handler = null;
-//	}
+	public void enter(Entity handler)
+	{
+		Debug.Assert(m_handler == null);
+		m_handler = handler;
+	}
+	public void exit()
+	{
+		Debug.Assert(m_handler != null);
+		m_handler = null;
+	}
 
-//	void update(float dt);
-//};
+	void update(float dt);
+};
 
-//// 开垦农田
-//public class ChangeTile : Job
-//{
-//	private float m_totalProgress;
-//	private float m_progress;
+// 开垦农田
+public class ChangeTile : Job
+{
+	private float m_totalProgress;
+	private float m_progress;
 
-//	private bool m_completed;
+	private bool m_completed;
 
-//	private Entity m_handler;
+	private Entity m_handler;
 
-//	private TileCell m_target;
-//	private TileType m_type;
+	private TileCell m_target;
+	private TileType m_type;
 
-//	private float m_workToMake;
+	private float m_workToMake;
 
-//	public void update(float dt)
-//	{
+	public void update(float dt)
+	{
 
-//	}
+	}
 
-//	public ChangeTile(TileCell target, TileType type, float workToMake)
-//	{
-//		m_target = target;
+	public ChangeTile(TileCell target, TileType type, float workToMake)
+	{
+		m_target = target;
 
-//		m_totalProgress = target.tile.cost;
-//		m_progress = 0;
-//	}
-//}
+		m_totalProgress = target.tile.cost;
+		m_progress = 0;
+	}
+}
 
 public class GameLoop
 {
@@ -181,6 +181,8 @@ public class GameLoop
 		}
 	}
 
+	private Foo[] m_foo;
+
 	public void init()
 	{
 		Instance = this;
@@ -188,6 +190,8 @@ public class GameLoop
 		this.assets();
 		this.createWorld(12345);
 		this.initEntity();
+
+		m_foo = new Foo[m_mainWorld.tileCount];
 	}
 
 	public void update(float delta)
@@ -201,6 +205,17 @@ public class GameLoop
 			foreach (var en in Object.Get<Entity>()
 				.Where(e => e.active))
 				en.lateUpdate(delta);
+
+			for (int i = 0; i < m_foo.Length; i++)
+				m_foo[i].value = 1.0f;
+
+			foreach (var en in Object.Get<WorldEntity>().Where(t => t.entity.name == "player" || t.entity.name == "enemy"))
+			{
+				foreach (var cell in m_seek.bfsCircle(en.coord, 3))
+				{
+					m_foo[m_mainWorld.toIndex(cell.x, cell.y)].value -= 1f;
+				}
+			}
 		}
 	}
 
@@ -248,14 +263,11 @@ public class GameLoop
 			}
 		}
 
-		Foo[] foo = new Foo[m_mainWorld.tileCount];
-		for (int i = 0; i < foo.Length; i++)
-			foo[i].value = 1.0f;
-
-		foreach (var en in Object.Get<WorldEntity>())
+		for (int i = 0; i < m_mainWorld.tileCount; i++)
 		{
-			foreach (var cell in m_seek.bfsCircle(en.coord, 10))
-				foo[cell.x + cell.y * m_mainWorld.width].value -= 0.8f;
+			var cell = m_mainWorld.rawGetTile(i);
+			if (m_foo[i].value > 0)
+				context.drawBox(new vec2i(cell.x, cell.y), rgba.Float(0,0,0, 0.5f * m_foo[i].value), true);
 		}
 
 		//for (int i = 0; i < m_mainWorld.tileCount; i++)

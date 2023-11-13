@@ -9,7 +9,6 @@ namespace urd
 	{
 		[BindComponent] private Navigation m_navigation = null;
 
-		private WorldSeek m_seek;
 		private vec2i m_targetLastCoord;
 
 		public WorldEntity target { set; get; }
@@ -20,12 +19,18 @@ namespace urd
 
 			if (this.target != null && m_targetLastCoord != this.target.coord)
 			{
-				//var cells = m_seek.bfsCircle(m_navigation.worldEntity.coord, m_seekRange);
-				//var en = WorldSeek.GetWorldEntity(cells).FirstOrDefault(en => en.name == "player");
-				//if (en != null)
+				if (WorldSeek.InCircle(this.target.coord, m_navigation.worldEntity.coord, 3.0f))
 				{
 					m_navigation.setTarget(this.target.coord + vec2i.right);
 					m_targetLastCoord = this.target.coord;
+				}
+				else
+				{
+					int x = mathf.random(-4, 4);
+					int y = mathf.random(-4, 4);
+					m_navigation.setTarget(this.target.coord + new vec2i(x, y));
+
+					Debug.WriteLine("random target");
 				}
 			}
 		}
