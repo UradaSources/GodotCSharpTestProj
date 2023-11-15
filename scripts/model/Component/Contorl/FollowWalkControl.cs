@@ -7,7 +7,7 @@ namespace urd
 {
 	public class FollowWalkControl : BasicMotionControl
 	{
-		[BindComponent] private Navigation m_navigation = null;
+		[RequireComponent] private Navigation m_navigation = null;
 
 		private vec2i m_targetLastCoord;
 

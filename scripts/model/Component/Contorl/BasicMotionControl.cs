@@ -2,7 +2,7 @@
 {
 	public abstract class BasicMotionControl : Component, IComponentBehavior
 	{
-		[BindComponent] protected Movement m_motion;
+		[RequireComponent] protected Movement m_motion;
 
 		public bool enable { set; get; } = true;
 

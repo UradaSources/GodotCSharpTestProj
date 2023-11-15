@@ -6,54 +6,65 @@ using System.Linq;
 using Godot;
 using urd;
 
-public abstract class Job : Object
+[RecordObject]
+public abstract class Job : Component
 {
+	[RequireComponent]
+	private WorldEntity m_worldEntity = null;
+
 	private Entity m_handler;
 
-	public abstract float progressPer { get; }
+	protected float m_totalWork;
+	protected float m_work;
 
+	protected WorldEntity worldEntity => m_worldEntity;
+	public TileCell target => m_worldEntity.currentTile;
+
+	public float progress => m_work / m_totalWork;
 	public Entity handler => m_handler;
 
-	public void enter(Entity handler)
+	public virtual void _enter(Entity handler)
 	{
 		Debug.Assert(m_handler == null);
 		m_handler = handler;
 	}
-	public void exit()
+	public virtual void _exit()
 	{
 		Debug.Assert(m_handler != null);
 		m_handler = null;
 	}
 
-	void update(float dt);
-};
+	public abstract void _complete();
+	public abstract void _update(float dt);
 
-// 开垦农田
+	protected Job(string name) : base(name)
+	{
+	}
+}
+
 public class ChangeTile : Job
 {
-	private float m_totalProgress;
-	private float m_progress;
-
-	private bool m_completed;
-
-	private Entity m_handler;
-
-	private TileCell m_target;
 	private TileType m_type;
 
-	private float m_workToMake;
-
-	public void update(float dt)
+	public void start(vec2i coord, TileType type)
 	{
+		this.worldEntity.coord = coord;
+		m_type = type;
 
+		m_work = 0;
 	}
 
-	public ChangeTile(TileCell target, TileType type, float workToMake)
+	public override void _update(float dt)
 	{
-		m_target = target;
+		m_work += dt;
+	}
+	public override void _complete()
+	{
+		this.worldEntity.currentTile.tile = m_type;
+	}
 
-		m_totalProgress = target.tile.cost;
-		m_progress = 0;
+	public ChangeTile() : base("ChangeTile")
+	{
 	}
 }
 

@@ -3,7 +3,7 @@
 	[RecordObject]
 	public class DrawSprite : Component
 	{
-		[BindComponent]
+		[RequireComponent]
 		private WorldEntity m_worldEntity = null;
 
 		private Sprite _sprite;

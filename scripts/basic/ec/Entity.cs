@@ -26,10 +26,10 @@ namespace urd
 			// 遍历字段并查找具有CustomAttribute的字段
 			foreach (var field in fields)
 			{
-				var bindOptions = field.GetCustomAttribute<BindComponentAttribute>();
+				var bindOptions = field.GetCustomAttribute<RequireComponentAttribute>();
 				if (bindOptions != null)
 				{
-					if (!this.find(field.FieldType, out var dependent) && bindOptions.require)
+					if (!this.find(field.FieldType, out var dependent) && bindOptions.necessary)
 					{
 						Debug.Fail($"Unable to add component ({typeof(T).Name}) to the entity, " +
 							$"its dependent component ({field.FieldType.Name}) does not exist");

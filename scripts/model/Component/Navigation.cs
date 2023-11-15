@@ -15,8 +15,8 @@ namespace urd
 
 		private WorldPath m_pathfind;
 
-		[BindComponent] private WorldEntity m_worldEntity = null;
-		[BindComponent] private Movement m_movement = null;
+		[RequireComponent] private WorldEntity m_worldEntity = null;
+		[RequireComponent] private Movement m_movement = null;
 
 		private vec2i? m_target;
 		private List<TileCell> m_pathNodeList;
