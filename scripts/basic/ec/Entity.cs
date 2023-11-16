@@ -5,16 +5,17 @@ using System.Reflection;
 
 namespace urd
 {
-	[RecordObject]
 	public class Entity : Object, IEnumerable<Component>
 	{
 		private LinkedList<Component> m_components;
 		private Dictionary<System.Type, LinkedListNode<Component>> m_index;
 
+		private string m_name;
 		private bool m_active = true;
 		private ulong m_tags = 0;
 
-		public bool active { set => m_active = value; get => m_active; }
+		public string name { set => m_name = value; get => m_name; }
+		public bool active { set => m_active = value; get =>  m_active; }
 		public ulong tags { set => m_tags = value; get => m_tags; }
 
 		private void componentInjection<T>(T com)
@@ -62,15 +63,75 @@ namespace urd
 			}
 		}
 
+		private void destroyComponent<T>(T com) 
+			where T : Component
+		{
+			com._clear();
+
+			m_components.Remove(it);
+			com.destroy();
+		}
+		private void addComponent<T>(T com)
+			where T : Component
+		{
+			// 使用反射绑定需要的组件
+			this.componentInjection(com);
+			this.bindEvent(com);
+
+			var it = m_components.AddLast(com);
+			m_index.Add(typeof(T), it);
+		}
+
+		public bool hasTag(ulong tag)
+		{
+			if (this.destroyed) throw new DestroyedObjectException();
+			return (tags & tag) != 0;
+		}
+
 		public T get<T>() where T : Component
 		{
+			if (this.destroyed) throw new DestroyedObjectException();
+
 			if (m_index.TryGetValue(typeof(T), out var it))
 				return it.Value as T;
-			else
-				return null;
+			
+			return null;
 		}
+
+		public bool tryGet<T>(out T com) where T : Component
+		{
+			if (this.destroyed) throw new DestroyedObjectException();
+
+			if (m_index.TryGetValue(typeof(T), out var it))
+			{
+				com = it.Value as T;
+				return true;
+			}
+
+			com = default;
+			return false;
+		}
+		public void tryGet<T1, T2>(out T1 com1, out T2 com2)
+			where T1 : Component
+			where T2 : Component
+		{
+			this.tryGet(out com1);
+			this.tryGet(out com2);
+		}
+		public void tryGet<T1, T2, T3>(out T1 com1, out T2 com2, out T3 com3) 
+			where T1 : Component
+			where T2 : Component
+			where T3 : Component
+		{
+			this.tryGet(out com1);
+			this.tryGet(out com2);
+			this.tryGet(out com3);
+		}
+
 		public bool find(System.Type type, out Component com)
 		{
+			if (this.destroyed) throw new DestroyedObjectException();
+
 			LinkedListNode<Component> itor;
 			if (m_index.TryGetValue(type, out itor))
 			{
@@ -93,47 +154,48 @@ namespace urd
 
 		public bool has<T>() where T : Component
 		{
+			if (this.destroyed) throw new DestroyedObjectException();
 			return m_index.ContainsKey(typeof(T));
 		}
 
-		public T add<T>(T com, bool autoBind = true) where T : Component
+		public T emplace<T>() where T : Component
 		{
+			if (this.destroyed) throw new DestroyedObjectException();
+
 			if (this.has<T>())
-			{ 
+			{
 				Debug.Fail($"repeat adding component {typeof(T).Name}", $"{this.GetType().Name}.Fail");
 				return null;
 			}
-
-			// 使用反射绑定需要的组件
-			if (autoBind)
+			else
 			{
-				this.componentInjection(com);
-				this.bindEvent(com);
+				T com = new T(this);
+				this.addComponent(com);
+
+				return com;
 			}
-
-			var it = m_components.AddLast(com);
-			m_index.Add(typeof(T), it);
-			
-			com._init(this);
-
-			return com;
 		}
-		public T remove<T>() where T : Component
+		public bool remove<T>() where T : Component
 		{
+			if (this.destroyed) throw new DestroyedObjectException();
+
 			if (m_index.TryGetValue(typeof(T), out var it))
 			{
 				var com = it.Value as T;
 				com._clear();
 
 				m_components.Remove(it);
+				com.destroy();
 
-				return com;
+				return true;
 			}
-			return null;
+			return false;
 		}
 
 		public void update(float delta)
 		{
+			if (this.destroyed) throw new DestroyedObjectException();
+
 			for (var it = m_components.First; it != null; it = it.Next)
 			{
 				var com = it.Value;
@@ -141,38 +203,45 @@ namespace urd
 					behavior._update(delta);
 			}
 		}
-		public void lateUpdate(float delta)
+		public void render()
 		{
 			for (var it = m_components.First; it != null; it = it.Next)
 			{
 				var com = it.Value;
-				if (com is IComponentBehavior behavior && behavior.enable)
-					behavior._lateUpdate(delta);
+				if (com is IRenderComponent renderer && renderer.rendering)
+					renderer._draw();
 			}
 		}
-
-		//public void render()
-		//{
-		//	for (var it = m_components.First; it != null; it = it.Next)
-		//	{
-		//		var com = it.Value;
-		//		if (com is IRenderComponent renderer && renderer.rendering)
-		//			renderer._draw();
-		//	}
-		//}
 
 		public IEnumerator<Component> GetEnumerator() { return m_components.GetEnumerator(); }
 		IEnumerator IEnumerable.GetEnumerator() { return this.GetEnumerator(); }
 
-		public Entity(string name) : base(name)
-		{
-			m_components = new LinkedList<Component>();
-			m_index = new Dictionary<System.Type, LinkedListNode<Component>>();
-		}
-
 		public override string ToString()
 		{
 			return $"Entity {this.name} ({m_components.Count})";
+		}
+
+		public override Object copy()
+		{
+			var en = new Entity(this.name + " (copy)");
+			for (var it = m_components.First; it != null; it = it.Next)
+				en.add();
+
+			return en;
+		}
+
+		protected override void _onDestroy()
+		{
+			for (var it = m_components.First; it != null; it = it.Next)
+				it.Value.destroy();
+		}
+
+		public Entity(string name) : base()
+		{
+			m_name = name;
+
+			m_components = new LinkedList<Component>();
+			m_index = new Dictionary<System.Type, LinkedListNode<Component>>();
 		}
 	}
 }

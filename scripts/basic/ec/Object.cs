@@ -5,15 +5,13 @@ using System.Reflection;
 
 namespace urd
 {
-	public abstract class Object
+	public abstract class Resource : Object
 	{
-		private static Dictionary<System.Type, LinkedList<Object>> _InstanceRecord 
-			= new Dictionary<System.Type, LinkedList<Object>>();
-
-		private static int _IdAllot = 0;
+		private static Dictionary<System.Type, LinkedList<Resource>> _InstanceRecord
+			= new Dictionary<System.Type, LinkedList<Resource>>();
 
 		public static IEnumerable<T> Get<T>()
-			where T : Object
+			where T : Resource
 		{
 			var key = typeof(T);
 			Debug.Assert(_InstanceRecord.TryGetValue(key, out var record));
@@ -21,30 +19,26 @@ namespace urd
 			for (var it = record.First; it != null; it = it.Next)
 				yield return it.Value as T;
 		}
-		public static void RemoveRecord(Object obj)
+		public static void Remove(Resource obj)
 		{
 			Debug.Assert(obj.__itor != null, "try to unrecord an unrecorded object");
 			_InstanceRecord[obj.GetType()].Remove(obj.__itor);
 		}
 
-		private LinkedListNode<Object> __itor;
+		private LinkedListNode<Resource> __itor;
 
-		private readonly int m_instanceId;
-		private readonly string m_name;
+		private string m_name;
 
-		public int instanceId => m_instanceId;
-		public string name => m_name;
+		public string name { set => m_name = value; get => m_name; }
 
-		protected Object(string name)
+		public Resource(string name) : base()
 		{
-			m_instanceId = ++Object._IdAllot;
 			m_name = name;
 
-			// 添加记录
 			var type = this.GetType();
 			var recordOption = type.GetCustomAttribute<RecordObjectAttribute>();
-            if (recordOption != null)
-            {
+			if (recordOption != null)
+			{
 				var recordKey = recordOption.overrideRecordKey ?? type;
 				Debug.Assert(recordKey.IsInstanceOfType(this));
 
@@ -56,7 +50,43 @@ namespace urd
 				}
 
 				record.AddLast(this);
-            }
-        }
+			}
+		}
+	}
+
+	public class DestroyedObjectException : System.Exception { }
+
+	public abstract class Object
+	{
+		private bool m_destroyed;
+
+		public readonly string mid;
+
+		public bool destroyed => m_destroyed;
+
+		public abstract Object copy();
+		protected abstract void _onDestroy();
+
+		public void destroy()
+		{
+			if (m_destroyed) throw new DestroyedObjectException();
+
+			m_destroyed = true;
+			this._onDestroy();
+		}
+
+		public override bool Equals(object obj)
+		{
+			return obj is Object o && mid == o.mid;
+		}
+		public override int GetHashCode()
+		{
+			return System.HashCode.Combine(mid);
+		}
+
+		protected Object()
+		{
+			mid = System.Convert.ToBase64String(System.Guid.NewGuid().ToByteArray());
+		}
 	}
 }

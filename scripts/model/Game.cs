@@ -35,7 +35,7 @@ public abstract class Job : Component
 	}
 
 	public abstract void _complete();
-	public abstract void _update(float dt);
+	public abstract void work(float dt);
 
 	protected Job(string name) : base(name)
 	{
@@ -54,7 +54,7 @@ public class ChangeTile : Job
 		m_work = 0;
 	}
 
-	public override void _update(float dt)
+	public override void work(float dt)
 	{
 		m_work += dt;
 	}
@@ -65,6 +65,14 @@ public class ChangeTile : Job
 
 	public ChangeTile() : base("ChangeTile")
 	{
+	}
+}
+
+public class DoWork : Component
+{
+	public void setJob(Job job)
+	{
+		job._enter();
 	}
 }
 

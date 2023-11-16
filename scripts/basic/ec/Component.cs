@@ -33,7 +33,6 @@ namespace urd
 	{
 		public bool enable { get; }
 		void _update(float delta);
-		void _lateUpdate(float delta);
 	}
 
 	public interface IRenderComponent
